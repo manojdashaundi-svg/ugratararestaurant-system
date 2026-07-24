@@ -43,6 +43,23 @@
 
     </div>
 
+    <!-- 5. सपिङ कार्ट (Shopping Cart Section) -->
+        <div class="cart-section" style="background:#fff; padding:20px; border-radius:12px; margin-top:30px; box-shadow:0 3px 10px rgba(0,0,0,0.05);">
+            <h2>🛒 Your Cart</h2>
+            <div id="cart" style="margin:15px 0;">Cart is empty.</div>
+            <h3>Total: RM <span id="total">0</span></h3>
+
+            <!-- 🎯 ग्राहकको विवरण र अर्डर गर्ने फर्म -->
+            <div style="margin-top:20px; border-top:1px dashed #ddd; padding-top:15px;">
+                <h3>Customer Information</h3>
+                <input id="customerName" type="text" placeholder="Customer Name" style="width:100%; padding:10px; margin:8px 0; border:1px solid #ddd; border-radius:6px;">
+                <input id="customerPhone" type="tel" placeholder="Phone Number" style="width:100%; padding:10px; margin:8px 0; border:1px solid #ddd; border-radius:6px;">
+                <textarea id="customerAddress" placeholder="Delivery Address" style="width:100%; padding:10px; margin:8px 0; border:1px solid #ddd; border-radius:6px;"></textarea>
+                
+                <button onclick="window.placeOrder()" style="width:100%; padding:14px; background:#4CAF50; color:#fff; border:none; border-radius:8px; font-size:18px; font-weight:bold; cursor:pointer; margin-top:10px;">🚀 Place Order</button>
+            </div>
+        </div>
+
     <!-- Supabase र जाभास्क्रिप्ट फाइलहरू -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="supabase.js"></script>
