@@ -2,61 +2,137 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ugratara Restaurant</title>
-    <link rel="stylesheet" href="css/style.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>UGRATARA RESTAURANT</title>
+<style>
+*{ margin:0; padding:0; box-sizing:border-box; font-family:Arial,sans-serif; }
+body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflow-x: hidden; }
+
+.header{ background:#e91e63; color:#fff; padding:30px 15px; text-align:center; border-radius:0 0 25px 25px; box-shadow:0 5px 15px rgba(0,0,0,.15); width: 100%; }
+.header h1{ font-size:36px; margin-bottom:8px; }
+.header p{ font-size:16px; opacity:.9; }
+
+.container{ width:100%; max-width:600px; padding: 0 12px; margin: auto; }
+.search-box{ margin:15px auto; padding: 0 2px; width: 100%; }
+.search-box input{ width:100%; padding:14px 20px; border-radius:35px; border:1px solid #ddd; font-size:16px; outline:none; }
+.search-box input:focus{ border-color:#e91e63; box-shadow:0 0 8px rgba(233,30,99,.2); }
+
+.category-tabs{ display:flex; gap:8px; overflow-x:auto; padding:10px 2px; margin-bottom:15px; position:sticky; top:0; background:#f5f5f5; z-index:100; scrollbar-width: none; width: 100%; }
+.category-tabs::-webkit-scrollbar { display: none; }
+.category-tabs button{ background:#fff; border:none; padding:10px 20px; border-radius:30px; cursor:pointer; font-size:14px; font-weight:bold; box-shadow:0 2px 6px rgba(0,0,0,0.06); transition:.25s; white-space:nowrap; }
+.category-tabs button:hover, .category-tabs button.active{ background:#e91e63; color:#fff; }
+
+#menu{ display:grid; grid-template-columns:1fr; gap:16px; padding: 0 2px; width: 100%; }
+.food-card{ background:#fff; border-radius:16px; overflow:hidden; box-shadow:0 3px 12px rgba(0,0,0,0.06); position:relative; width: 100%; margin: 0; }
+.food-card img{ width:100%; height:250px; object-fit:cover; display:block; background:#eee; }
+
+.food-info{ padding:15px; text-align: left; width: 100%; }
+.food-info h3{ font-size:22px; font-weight:700; margin-bottom:6px; color: #111; }
+.rating{ color:#ff9800; font-size:14px; margin-bottom:6px; }
+.food-desc{ color:#666; font-size:15px; margin-bottom:12px; line-height: 1.4; }
+
+.food-bottom{ display:flex; justify-content:space-between; align-items:center; width: 100%; }
+.food-price{ font-size:26px; font-weight:bold; color:#e91e63; }
+
+.food-card button, .qty-btn { background:#e91e63; color:#fff; border:none; border-radius:10px; padding:10px 22px; font-size:16px; font-weight:bold; cursor:pointer; }
+
+.customer{ background:#fff; padding:20px 15px; border-radius:16px; margin-top:20px; box-shadow:0 3px 12px rgba(0,0,0,0.06); width: 100%; }
+.customer input, .customer textarea, .customer select{ width:100%; padding:14px; margin:8px 0; border:1px solid #ddd; border-radius:8px; font-size:17px; outline: none; background: #fafafa; }
+#total{ color:#e91e63; font-size:30px; font-weight:bold; }
+.place-btn{ margin-top:15px; width:100%; padding:16px; background:#4CAF50; color:#fff; border:none; border-radius:10px; font-size:20px; font-weight:bold; cursor:pointer; display: block; text-align: center; }
+
+.floating-cart{ position:fixed; right:20px; bottom:20px; width:70px; height:70px; background:#e91e63; color:#fff; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:28px; cursor:pointer; box-shadow:0 6px 15px rgba(233,30,99,0.3); z-index:9999; }
+.cart-count{ position:absolute; top:-2px; right:-2px; width:24px; height:24px; background:#333; color:#fff; border-radius:50%; display:flex; justify-content:center; align-items:center; font-size:11px; font-weight:bold; border: 2px solid #e91e63; }
+
+.qr-section { background:#fff3f5; border:2px dashed #e91e63; border-radius:16px; padding:20px 15px; text-align:center; margin-bottom:15px; width: 100%; }
+.qr-img { width:200px; height:200px; object-fit:contain; margin:12px auto; display:block; border:2px solid #e91e63; padding:6px; background:#fff; border-radius:10px; }
+.file-upload-box { background:#fff; border: 1px solid #ddd; padding: 12px; border-radius: 8px; width: 100%; margin: 12px 0; font-size: 15px; font-weight: bold; cursor: pointer; display: block; background-color: #f9f9f9; text-align: center; }
+</style>
 </head>
 <body>
 
-    <!-- 1. रेस्टुरेन्टको शीर्षक (Header) -->
-    <div class="header" style="background:#e91e63; color:#fff; padding:20px; text-align:center;">
-        <h1>🍽️ Ugrtara Restaurant</h1>
-        <p>Fresh Food • Fast Delivery</p>
+<div class="header">
+    <h1>🍽 UGRATARA RESTAURANT</h1>
+    <p>Fresh Food • Fast Delivery</p>
+</div>
+
+<div class="container">
+    <div class="search-box">
+        <input id="searchFood" type="text" placeholder="🔍 Search food..." onkeyup="window.searchFood()">
     </div>
 
-    <div class="container" style="max-width:800px; margin:20px auto; padding:0 15px;">
+    <div class="category-tabs">
+        <button class="active" onclick="window.filterCategory('All', this)">🍽 All</button>
+        <button onclick="window.filterCategory('Momo', this)">🥟 Momo</button>
+        <button onclick="window.filterCategory('Chowmein', this)">🍜 Chowmein</button>
+        <button onclick="window.filterCategory('Thakali', this)">🍱 Thakali</button>
+        <button onclick="window.filterCategory('Drinks', this)">🥤 Drinks</button>
+        <button onclick="window.filterCategory('Rice Set', this)">🍛 Rice Set</button>
+    </div>
+
+    <div id="menu" style="text-align:center; font-size:18px; padding:20px; color:#666;">Loading Menu Items...</div>
+
+    <!-- 🛒 Shopping Cart & Checkout Section -->
+    <div class="customer cart-section">
+        <h2>Shopping Cart</h2>
+        <div id="cart" style="margin:15px 0; font-size:18px; line-height:2;">Your cart is empty.</div>
         
-        <!-- 2. सर्च बार (Search Bar) -->
-        <div class="search-box" style="margin-bottom:15px;">
-            <input id="searchFood" type="text" placeholder="🔍 Search food..." onkeyup="window.searchFood()" style="width:100%; padding:12px; border-radius:25px; border:1px solid #ddd; font-size:16px; outline:none;">
+        <div id="cartSummaryPriceBox" style="font-size: 16px; margin: 10px 0; text-align: left; line-height: 1.6;">
+          <div>Items Subtotal: RM <span id="subtotalPrice">0.00</span></div>
+          <div style="color: #555;">Delivery Charge: RM <span id="deliveryPriceLabel">0.00</span></div>
         </div>
+        <h2>Total : RM <span id="total">0</span></h2>
+        
+        <br><hr style="border: 0; border-top: 1px dashed #ddd; margin: 15px 0;"><br>
 
-        <!-- 3. क्याटेगोरी ट्याब्स (Category Tabs) -->
-        <div class="category-tabs" style="display:flex; gap:8px; overflow-x:auto; margin-bottom:20px;">
-            <button onclick="window.filterCategory('All', this)" style="padding:8px 16px; border-radius:20px; border:none; background:#e91e63; color:#fff; font-weight:bold; cursor:pointer;">All</button>
-            <button onclick="window.filterCategory('Momo', this)" style="padding:8px 16px; border-radius:20px; border:none; background:#fff; font-weight:bold; cursor:pointer;">Momo</button>
-            <button onclick="window.filterCategory('Chowmein', this)" style="padding:8px 16px; border-radius:20px; border:none; background:#fff; font-weight:bold; cursor:pointer;">Chowmein</button>
-            <button onclick="window.filterCategory('Drinks', this)" style="padding:8px 16px; border-radius:20px; border:none; background:#fff; font-weight:bold; cursor:pointer;">Drinks</button>
-        </div>
+        <h2>Customer Information</h2>
+        <input id="customerName" type="text" placeholder="Customer Name">
+        
+        <label style="font-weight: bold; font-size: 14px; color: #555; display: block; margin-top: 8px;">Select Delivery / Dining Zone:</label>
+        <select id="deliveryZoneSelect" onchange="window.showCart()">
+          <option value="0" data-name="Dining In">🏢 Dine In / होटलमै बसेर खाने (RM 0)</option>
+          <option value="0" data-name="Takeaway">🛍️ Takeaway / आफैँ लिन आउने (RM 0)</option>
+          <option value="3" data-name="Zone A">📍 Zone A - Within 3 KM (RM 3)</option>
+          <option value="5" data-name="Zone B">📍 Zone B - 3 KM to 6 KM (RM 5)</option>
+          <option value="8" data-name="Zone C">📍 Zone C - 6 KM to 10 KM (RM 8)</option>
+        </select>
+        
+        <input id="customerPhone" type="tel" placeholder="Phone Number">
+        <textarea id="customerAddress" placeholder="Delivery Address / Special Notes"></textarea>
 
-        <!-- 4. मेनु परिकारहरू देखाउने ठाउँ -->
-        <div id="menu" style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-            <p style="text-align:center;">Loading Menu...</p>
-        </div>
+        <br><hr style="border: 0; border-top: 1px dashed #ddd; margin: 15px 0;"><br>
 
-        <!-- 5. सपिङ कार्ट र ग्राहक विवरण सेक्सन (एकल रूपमा मिलाइएको) -->
-        <div class="cart-section" style="background:#fff; padding:20px; border-radius:12px; margin-top:30px; box-shadow:0 3px 10px rgba(0,0,0,0.05);">
-            <h2>🛒 Your Cart</h2>
-            <div id="cart" style="margin:15px 0;">Cart is empty.</div>
-            <h3>Total: RM <span id="total">0</span></h3>
-
-            <!-- 🎯 ग्राहकको विवरण र अर्डर गर्ने फर्म -->
-            <div style="margin-top:20px; border-top:1px dashed #ddd; padding-top:15px;">
-                <h3>Customer Information</h3>
-                <input id="customerName" type="text" placeholder="Customer Name" style="width:100%; padding:10px; margin:8px 0; border:1px solid #ddd; border-radius:6px;">
-                <input id="customerPhone" type="tel" placeholder="Phone Number" style="width:100%; padding:10px; margin:8px 0; border:1px solid #ddd; border-radius:6px;">
-                <textarea id="customerAddress" placeholder="Delivery Address" style="width:100%; padding:10px; margin:8px 0; border:1px solid #ddd; border-radius:6px;"></textarea>
-                
-                <button onclick="window.placeOrder()" style="width:100%; padding:14px; background:#4CAF50; color:#fff; border:none; border-radius:8px; font-size:18px; font-weight:bold; cursor:pointer; margin-top:10px;">🚀 Place Order</button>
+        <!-- 💳 Scan to Pay (DuitNow QR) -->
+        <div class="qr-section">
+            <h2 style="color:#e91e63; font-size: 21px;">💳 Scan to Pay (DuitNow QR)</h2>
+            <img src="https://i.postimg.cc/wMgC6W6m/gdfgffghgf.png" class="qr-img" alt="Ugratara Restaurant QR">
+            <p style="font-size:14px; color:#444; font-weight:bold; margin-bottom: 5px;">रकम हेरेर क्युआर स्क्यान गर्नुहोस् र ठिक तल स्लिप फोटो अपलोड गर्नुहोला।</p>
+            
+            <div class="file-upload-box">
+               <span style="color:#e91e63;">📁 Upload Payment Slip *</span>
+               <input id="paymentSlipFile" type="file" accept="image/*" onchange="window.previewFile()" style="margin-top: 5px;">
             </div>
+            <div id="fileStatus" style="font-size:13px; color:green; margin-top:5px; font-weight:bold;"></div>
         </div>
 
+        <button class="place-btn" id="submitOrderBtn" onclick="window.placeOrder()">🚀 Place Order</button>
     </div>
 
-    <!-- Supabase र जाभास्क्रिप्ट फाइलहरू -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="supabase.js"></script>
-    <script src="script.js"></script>
+    <!-- 📦 Track Your Order -->
+    <hr style="margin:25px 0; border:0; border-top:1px solid #ddd; width: 100%;">
+    <div style="padding: 0 4px; text-align: left;">
+        <h2>📦 Track Your Order</h2>
+        <input id="trackOrderNo" type="text" placeholder="Enter Order No (Example: ORD0001)" style="width:100%; padding:14px; margin:10px 0; border-radius:8px; border:1px solid #ddd; font-size:18px;">
+        <button class="place-btn" style="background:#e91e63;" onclick="window.trackMyOrder()">Track Order</button>
+        <div id="trackResult" style="margin-top:20px;"></div>
+    </div>
+</div>
 
+<div class="floating-cart" onclick="window.openCart()">🛒<div class="cart-count" id="cartCount">0</div></div>
+
+<!-- Supabase र मुख्य जाभास्क्रिप्ट पुस्तकालयहरू -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
