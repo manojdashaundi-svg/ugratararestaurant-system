@@ -236,7 +236,7 @@ window.trackMyOrder = async function() {
     let s = data.status || "Order Received";
     
     let steps = ["Order Received", "Preparing", "Ready", "Out for Delivery", "Delivered"];
-    let currentIndex = indexOfStatus(s); // यहाँ सच्याइएको छ
+    let currentIndex = indexOfStatus(s);
 
     let html = `
         <div style="background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.08); text-align:left;">
@@ -280,21 +280,3 @@ function indexOfStatus(st) {
     if (st.includes("Delivered")) return 4;
     return 0;
 }
-    let s = data.status || "Pending";
-    let progress = 25, color = "#FF9800";
-    if(s === "Preparing"){ progress = 50; color = "#2196F3"; }
-    else if(s === "Ready"){ progress = 75; color = "#9C27B0"; }
-    else if(s === "Out for Delivery"){ progress = 90; color = "#00BCD4"; }
-    else if(s === "Delivered"){ progress = 100; color = "#4CAF50"; }
-
-    document.getElementById("trackResult").innerHTML = `
-        <div style="background:#fff; padding:22px; border-radius:18px; box-shadow:0 5px 18px rgba(0,0,0,.08); line-height:1.8; margin-top:15px; text-align:left; color:#333;">
-            <center><h3 style="color:#e91e63; margin-bottom:15px;">📦 Order Tracking</h3></center>
-            <p><b>Order No :</b> ${data.order_no}</p>
-            <p><b>Status :</b> <span style="background:${color}; color:white; padding:4px 12px; border-radius:20px; font-weight:bold; font-size:14px;">${s}</span></p>
-            <div style="width:100%; height:18px; background:#eee; border-radius:10px; overflow:hidden; margin:12px 0;"><div style="width:${progress}%; height:100%; background:${color}; text-align:center; color:white; font-size:12px; font-weight:bold; line-height:18px;">${progress}%</div></div>
-            <p><b>Items:</b><br><pre style="font-family:Arial; white-space:pre-wrap;">${data.items}</pre></p>
-            <p><b>Total Amount:</b> RM ${data.total}</p>
-        </div>
-    `;
-};
