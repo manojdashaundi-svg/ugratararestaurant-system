@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
 async function loadMenu() {
     console.log("Loading menu...");
 
-    const { data, error } = await supabase
+    const { data, error } = await window.supabaseClient
         .from("menu_items")
         .select("*");
 
@@ -172,10 +172,9 @@ window.placeOrder = async function() {
     const subtotal = window.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
     const grandTotal = subtotal + deliveryCharge;
     
-    // अर्डर नम्बर जेनेरेट गर्ने (अथवा Supabase ले स्वतः आफैँ बनाउन सक्छ)
     const orderNo = "ORD" + Math.floor(1000 + Math.random() * 9000);
 
-    const { data, error } = await supabase
+    const { data, error } = await window.supabaseClient
         .from("orders")
         .insert([
             {
@@ -201,11 +200,9 @@ window.placeOrder = async function() {
 
     alert("✅ Order Placed Successfully! Order No: " + orderNo);
     
-    // ह्वाट्सएपमा पठाउने
     const whatsappMsg = `🛒 NEW ORDER (QR PAID)\n\nOrder No: ${orderNo}\n\n👤 ${name}\n📞 ${phone}\n🚚 Zone: ${zoneName}\n🏠 Address: ${address}\n\n🍽 Items:\n${itemsText}\n\n------------------\nSubtotal: RM ${subtotal.toFixed(2)}\nDelivery: RM ${deliveryCharge.toFixed(2)}\n💰 Total: RM ${grandTotal.toFixed(2)}`;
     window.open("https://wa.me/601165531782?text=" + encodeURIComponent(whatsappMsg), "_blank");
 
-    // फर्म रिसेट गर्ने
     window.cart = []; 
     window.showCart(); 
     document.getElementById("customerName").value = ""; 
@@ -224,7 +221,7 @@ window.trackMyOrder = async function() {
     
     document.getElementById("trackResult").innerHTML = "Searching..."; 
 
-    const { data, error } = await supabase
+    const { data, error } = await window.supabaseClient
         .from("orders")
         .select("*")
         .eq("order_no", orderNo)
