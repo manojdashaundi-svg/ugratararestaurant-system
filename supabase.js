@@ -2,7 +2,7 @@
 
 const SUPABASE_URL = "https://lorhrfdqzagulicwcctx.supabase.co";
 
-const SUPABASE_ANON_KEY = "यहाँ Supabase को Publishable key पूरा Paste गर्नुहोस्";
+const SUPABASE_ANON_KEY = "sb_publishable_YxubnsG5x3QD_OaPzEEy_w_wzLVLSlW";
 
 const supabase = window.supabase.createClient(
   SUPABASE_URL,
