@@ -179,6 +179,7 @@ window.placeOrder = async function() {
         .insert([
             {
                 order_no: orderNo,
+                time: new Date().toLocaleString(),
                 customer_name: name,
                 phone: phone,
                 address: `[${zoneName}] ${address}`,
