@@ -234,18 +234,26 @@ window.trackMyOrder = async function() {
     }
 
     let s = data.status || "Order Received";
-    
-    let steps = ["Order Received", "Preparing", "Ready", "Out for Delivery", "Delivered"];
+    let progress = 25, color = "#FF9800";
+    if (s === "Preparing") { progress = 50; color = "#2196F3"; }
+    else if (s === "Ready") { progress = 75; color = "#9C27B0"; }
+    else if (s === "Out for Delivery") { progress = 90; color = "#00BCD4"; }
+    else if (s === "Delivered" || s === "Delivered Successfully") { progress = 100; color = "#4CAF50"; }
+
+    let steps = ["Order Received", "Preparing", "Ready", "Out for Delivery", "Delivered Successfully"];
     let currentIndex = indexOfStatus(s);
 
     let html = `
-        <div style="background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.08); text-align:left;">
-            <h3 style="margin-top:0; color:#e91e63; text-align:center;">📦 Order Tracking</h3>
+        <div style="background:#fff; padding:22px; border-radius:18px; box-shadow:0 5px 18px rgba(0,0,0,.08); text-align:left; color:#333; margin-top:15px;">
+            <center><h3 style="color:#e91e63; margin-bottom:15px;">📦 Order Tracking</h3></center>
             <p><b>Order No :</b> ${data.order_no}</p>
             <p><b>Customer :</b> ${data.customer_name} (${data.phone})</p>
             <p><b>Address :</b> ${data.address}</p>
+            <p><b>Status :</b> <span style="background:${color}; color:white; padding:4px 12px; border-radius:20px; font-weight:bold; font-size:14px;">${s}</span></p>
+            <div style="width:100%; height:18px; background:#eee; border-radius:10px; overflow:hidden; margin:12px 0;"><div style="width:${progress}%; height:100%; background:${color}; text-align:center; color:white; font-size:12px; font-weight:bold; line-height:18px;">${progress}%</div></div>
             <p><b>Items :</b> ${data.items}</p>
             <p><b>Total Amount :</b> RM ${data.total}</p>
+            
             <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
             <h4 style="color:#333; margin-bottom:10px;">🚚 Order Journey</h4>
     `;
@@ -253,18 +261,19 @@ window.trackMyOrder = async function() {
     steps.forEach((step, index) => {
         let isDone = index <= currentIndex;
         let icon = isDone ? "✅" : "⚪";
-        let color = isDone ? "#2e7d32" : "#999";
+        let c = isDone ? "#2e7d32" : "#999";
         let weight = isDone ? "bold" : "normal";
-        html += `<div style="padding:6px 0; color:${color}; font-weight:${weight}; font-size:15px;">${icon} ${step}</div>`;
+        html += `<div style="padding:6px 0; color:${c}; font-weight:${weight}; font-size:15px;">${icon} ${step}</div>`;
     });
 
     html += `
             <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
             <div style="text-align:center; margin-top:10px;">
-                <p style="margin:5px 0; font-weight:bold; color:#555;">🙏 Your Rating & Feedback:</p>
-                <input type="text" id="userFeedback" placeholder="Write your feedback..." style="width:80%; padding:8px; border:1px solid #ddd; border-radius:5px; margin-bottom:8px;">
+                <p style="margin:5px 0; font-weight:bold; color:#e91e63; font-size:16px;">❤️ Rate Our Food & Service</p>
+                <div style="font-size:24px; cursor:pointer; margin:5px 0; color:#ffc107;">⭐⭐⭐⭐⭐</div>
+                <input type="text" id="userFeedback" placeholder="Write your review here..." style="width:90%; padding:10px; border:1px solid #ddd; border-radius:6px; margin-bottom:10px;">
                 <br>
-                <button onclick="alert('Thank you for your feedback!')" style="background:#e91e63; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">Submit Feedback</button>
+                <button onclick="alert('Thank you for your valuable feedback!')" style="background:#4CAF50; color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:15px;">Submit Feedback</button>
             </div>
         </div>
     `;
