@@ -215,12 +215,12 @@ window.placeOrder = async function() {
     if(zoneSelect) zoneSelect.value = "0";
 };
 
-// अर्डर ट्र्याक गर्ने फंक्सन
+// अर्डर ट्र्याक गर्ने फंक्शन (सुन्दर Order Journey र Feedback सहित)
 window.trackMyOrder = async function() {
-    const orderNo = document.getElementById("trackOrderNo").value.trim().toUpperCase(); 
-    if (orderNo === "") return; 
-    
-    document.getElementById("trackResult").innerHTML = "Searching..."; 
+    const orderNo = document.getElementById("trackOrderNo").value.trim().toUpperCase();
+    if (orderNo === "") return;
+
+    document.getElementById("trackResult").innerHTML = "Searching...";
 
     const { data, error } = await window.supabaseClient
         .from("orders")
@@ -229,10 +229,58 @@ window.trackMyOrder = async function() {
         .single();
 
     if (error || !data) {
-        document.getElementById("trackResult").innerHTML = `<div style="color:red;padding:15px;background:#fff;border-radius:8px;font-weight:bold;margin-top:10px;">❌ Order Not Found</div>`;
+        document.getElementById("trackResult").innerHTML = `<div style="color:red; padding:15px; background:#fff; border-radius:8px; text-align:center; font-weight:bold;">Order not found! Please check your Order No.</div>`;
         return;
     }
 
+    let s = data.status || "Order Received";
+    
+    // स्टेभ अनुसार प्रोग्रेस र रङ मिलाउने
+    let steps = ["Order Received", "Preparing", "Ready", "Out for Delivery", "Delivered"];
+    let currentIndex = stepsindexOfStatus(s);
+
+    let html = `
+        <div style="background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.08); text-align:left;">
+            <h3 style="margin-top:0; color:#e91e63; text-align:center;">📦 Order Tracking</h3>
+            <p><b>Order No :</b> ${data.order_no}</p>
+            <p><b>Customer :</b> ${data.customer_name} (${data.phone})</p>
+            <p><b>Address :</b> ${data.address}</p>
+            <p><b>Items :</b> ${data.items}</p>
+            <p><b>Total Amount :</b> RM ${data.total}</p>
+            <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+            <h4 style="color:#333; margin-bottom:10px;">🚚 Order Journey</h4>
+    `;
+
+    steps.forEach((step, index) => {
+        let isDone = index <= currentIndex;
+        let icon = isDone ? "✅" : "⚪";
+        let color = isDone ? "#2e7d32" : "#999";
+        let weight = isDone ? "bold" : "normal";
+        html += `<div style="padding:6px 0; color:${color}; font-weight:${weight}; font-size:15px;">${icon} ${step}</div>`;
+    });
+
+    html += `
+            <hr style="border:0; border-top:1px solid #eee; margin:15px 0;">
+            <div style="text-align:center; margin-top:10px;">
+                <p style="margin:5px 0; font-weight:bold; color:#555;">🙏 Your Rating & Feedback:</p>
+                <input type="text" id="userFeedback" placeholder="Write your feedback..." style="width:80%; padding:8px; border:1px solid #ddd; border-radius:5px; margin-bottom:8px;">
+                <br>
+                <button onclick="alert('Thank you for your feedback!')" style="background:#e91e63; color:white; border:none; padding:8px 15px; border-radius:5px; cursor:pointer; font-weight:bold;">Submit Feedback</button>
+            </div>
+        </div>
+    `;
+
+    document.getElementById("trackResult").innerHTML = html;
+};
+
+function indexOfStatus(st) {
+    if (st.includes("Received")) return 0;
+    if (st.includes("Preparing")) return 1;
+    if (st.includes("Ready")) return 2;
+    if (st.includes("Delivery")) return 3;
+    if (st.includes("Delivered")) return 4;
+    return 0;
+}
     let s = data.status || "Pending";
     let progress = 25, color = "#FF9800";
     if(s === "Preparing"){ progress = 50; color = "#2196F3"; }
