@@ -3,25 +3,50 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Ugratara Restaurant</title>
-
     <link rel="stylesheet" href="css/style.css">
 </head>
-
 <body>
 
-<h1>🍽️ Ugratara Restaurant</h1>
+    <!-- 1. रेस्टुरेन्टको शीर्षक (Header) -->
+    <div class="header" style="background:#e91e63; color:#fff; padding:20px; text-align:center;">
+        <h1>🍽️ Ugrtara Restaurant</h1>
+        <p>Fresh Food • Fast Delivery</p>
+    </div>
 
-<p>Restaurant Management System</p>
+    <div class="container" style="max-width:800px; margin:20px auto; padding:0 15px;">
+        
+        <!-- 2. सर्च बार (Search Bar) -->
+        <div class="search-box" style="margin-bottom:15px;">
+            <input id="searchFood" type="text" placeholder="🔍 Search food..." onkeyup="window.searchFood()" style="width:100%; padding:12px; border-radius:25px; border:1px solid #ddd; font-size:16px; outline:none;">
+        </div>
 
-<button id="loadMenu">Load Menu</button>
+        <!-- 3. क्याटेगोरी ट्याब्स (Category Tabs) -->
+        <div class="category-tabs" style="display:flex; gap:8px; overflow-x:auto; margin-bottom:20px;">
+            <button onclick="window.filterCategory('All', this)" style="padding:8px 16px; border-radius:20px; border:none; background:#e91e63; color:#fff; font-weight:bold; cursor:pointer;">All</button>
+            <button onclick="window.filterCategory('Momo', this)" style="padding:8px 16px; border-radius:20px; border:none; background:#fff; font-weight:bold; cursor:pointer;">Momo</button>
+            <button onclick="window.filterCategory('Chowmein', this)" style="padding:8px 16px; border-radius:20px; border:none; background:#fff; font-weight:bold; cursor:pointer;">Chowmein</button>
+            <button onclick="window.filterCategory('Drinks', this)" style="padding:8px 16px; border-radius:20px; border:none; background:#fff; font-weight:bold; cursor:pointer;">Drinks</button>
+        </div>
 
-<div id="menu"></div>
+        <!-- 4. मेनु परिकारहरू देखाउने ठाउँ -->
+        <div id="menu" style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
+            <p style="text-align:center;">Loading Menu...</p>
+        </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="supabase.js"></script>
-<script src="script.js"></script>
+        <!-- 5. सपिङ कार्ट (Shopping Cart Section) -->
+        <div class="cart-section" style="background:#fff; padding:20px; border-radius:12px; margin-top:30px; box-shadow:0 3px 10px rgba(0,0,0,0.05);">
+            <h2>🛒 Your Cart</h2>
+            <div id="cart" style="margin:15px 0;">Cart is empty.</div>
+            <h3>Total: RM <span id="total">0</span></h3>
+        </div>
+
+    </div>
+
+    <!-- Supabase र जाभास्क्रिप्ट फाइलहरू -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase.js"></script>
+    <script src="script.js"></script>
 
 </body>
 </html>
