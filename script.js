@@ -135,3 +135,51 @@ window.showCart = function() {
     document.getElementById("cart").innerHTML = html;
     document.getElementById("total").innerText = subtotal.toFixed(2);
 };
+
+// अर्डर प्लेस गर्ने फंक्सन
+window.placeOrder = async function() {
+    const name = document.getElementById("customerName").value.trim();
+    const phone = document.getElementById("customerPhone").value.trim();
+    const address = document.getElementById("customerAddress").value.trim();
+
+    if (name === "" || phone === "" || window.cart.length === 0) {
+        alert("Please fill in your name, phone number, and add items to the cart.");
+        return;
+    }
+
+    const itemsText = window.cart.map(item => `${item.food} x ${item.qty} (RM ${item.price * item.qty})`).join("\n");
+    const subtotal = window.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
+
+    // Supabase को orders टेबलमा डेटा सेभ गर्ने
+    const { data, error } = await supabase
+        .from("orders")
+        .insert([
+            {
+                customer_name: name,
+                phone: phone,
+                address: address,
+                items: itemsText,
+                total: subtotal,
+                status: "Pending"
+            }
+        ]);
+
+    if (error) {
+        alert("Error placing order: " + error.message);
+        console.error(error);
+        return;
+    }
+
+    alert("✅ Order Placed Successfully!");
+
+    // ह्वाट्सएपमा म्यासेज पठाउने अप्सन (तपाईको रेस्टुरेन्टको ह्वाट्सएप नम्बर यहाँ राख्न सक्नुहुन्छ)
+    const whatsappMessage = `🛒 NEW ORDER\n\n👤 Name: ${name}\n📞 Phone: ${phone}\n🏠 Address: ${address}\n\n🍽 Items:\n${itemsText}\n\n💰 Total: RM ${subtotal.toFixed(2)}`;
+    window.open("https://wa.me/601165531782?text=" + encodeURIComponent(whatsappMessage), "_blank");
+
+    // कार्ट खाली गर्ने र फर्म रिसेट गर्ने
+    window.cart = [];
+    window.showCart();
+    document.getElementById("customerName").value = "";
+    document.getElementById("customerPhone").value = "";
+    document.getElementById("customerAddress").value = "";
+};
