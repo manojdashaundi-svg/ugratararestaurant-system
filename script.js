@@ -235,9 +235,8 @@ window.trackMyOrder = async function() {
 
     let s = data.status || "Order Received";
     
-    // स्टेभ अनुसार प्रोग्रेस र रङ मिलाउने
     let steps = ["Order Received", "Preparing", "Ready", "Out for Delivery", "Delivered"];
-    let currentIndex = stepsindexOfStatus(s);
+    let currentIndex = indexOfStatus(s); // यहाँ सच्याइएको छ
 
     let html = `
         <div style="background:#fff; padding:20px; border-radius:12px; box-shadow:0 4px 15px rgba(0,0,0,0.08); text-align:left;">
