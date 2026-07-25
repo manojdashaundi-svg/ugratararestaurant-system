@@ -350,25 +350,30 @@
     }
   };
   
-  // नयाँ उत्पादन थप्ने
+  // नयाँ उत्पादन सुरक्षित रूपमा थप्ने
   window.createNewProduct = async function() {
-    var id = document.getElementById("prodId").value.trim();
     var name = document.getElementById("prodName").value.trim();
     var price = parseFloat(document.getElementById("prodPrice").value) || 0;
     var img = document.getElementById("prodImg").value.trim();
     var desc = document.getElementById("prodDesc").value.trim();
     var cat = document.getElementById("prodCat").value.trim();
 
-    if(!id || !name || !price) { alert("Please fill required fields!"); return; }
+    if(!name || !price) { alert("Please fill Product Name and Price!"); return; }
 
     let { error } = await supabaseClient.from('menu_items').insert([
-      { item_id: id, name: name, price: price, image: img, description: desc, category: cat }
+      { name: name, price: price, image: img, description: desc, category: cat, status: "In Stock" }
     ]);
 
     if(error) {
-      alert("Error adding product!");
+      alert("Error adding product: " + error.message);
     } else {
-      alert("✅ Product Added Successfully!");
+      alert("✅ Product Added & Saved to Supabase!");
+      document.getElementById("prodId").value = "";
+      document.getElementById("prodName").value = "";
+      document.getElementById("prodPrice").value = "";
+      document.getElementById("prodImg").value = "";
+      document.getElementById("prodDesc").value = "";
+      document.getElementById("prodCat").value = "";
       window.loadMenuList();
     }
   };
