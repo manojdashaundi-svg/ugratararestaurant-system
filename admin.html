@@ -81,7 +81,7 @@
     </div>
   </div>
 
-  <!-- 🛒 मुख्य अर्डर तालिका -->
+  <!-- 🛒 मुख्य अर्डर तालिका (Google Apps Script जस्तै ९ वटा सहि स्तम्भहरू) -->
   <div id="mainOrdersTableSection">
     <h3>🛒 Active Orders</h3>
     <div style="overflow-x: auto; width:100%;">
@@ -93,17 +93,18 @@
             <th>Customer</th>
             <th>Total</th>
             <th>Payment Slip</th>
+            <th>Delivery Date & Time</th>
+            <th>Delivery Proof</th>
             <th>Status / Change</th>
             <th>Instant Action</th>
           </tr>
         </thead>
         <tbody id="ordersTable">
-          <tr><td colspan="7" style="padding:20px; font-weight:bold;">⏳ Loading Orders from Supabase...</td></tr>
+          <tr><td colspan="9" style="padding:20px; font-weight:bold;">⏳ Loading Active Orders...</td></tr>
         </tbody>
       </table>
     </div>
   </div>
-
   <!-- 🍔 मेनु म्यानेजमेन्ट -->
   <div id="menuManagementBox" class="menu-section">
     <h3>🍔 Menu & Product Management</h3>
