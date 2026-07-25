@@ -267,9 +267,8 @@
     tableBody.innerHTML = html;
   };
 
-// २. KOT वा Bill प्रिन्ट गर्ने र ५८मिमी प्रिन्टरको लागि सुन्दर डिजाइन बनाउने फंक्सन
+  // २. KOT वा Bill प्रिन्ट गर्ने र ५८मिमी प्रिन्टरको लागि सुन्दर डिजाइन बनाउने फंक्सन
   window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
-    // Supabase मा status अपडेट गर्ने
     let res = await supabaseClient.from('orders').update({ status: nextStatus }).eq('order_no', orderNo);
     if (res.error) {
       await supabaseClient.from('orders').update({ status: nextStatus }).eq('id', orderNo);
@@ -284,18 +283,15 @@
 
     var isKot = (printType === "kot");
     
-    // 🎨 ५८मिमी प्रिन्टरको लागि KOT र Bill को छुट्टाछुट्टै र आकर्षक डिजाइन
     var invoiceHtml = `
     <div style="font-family: 'Courier New', Courier, monospace; width: 58mm; max-width: 58mm; padding: 5px; margin: 0 auto; color: #000; background: #fff; box-sizing: border-box;">
       
-      <!-- 🏪 रेस्टुरेन्टको नाम (दुवैमा साझा) -->
       <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 6px; margin-bottom: 6px;">
         <h2 style="margin: 0; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">UGRATARA RESTAURANT</h2>
         <p style="margin: 2px 0 0 0; font-size: 10px;">Fresh Food • Fast Delivery</p>
       </div>
 
       ${isKot ? `
-        <!-- 🎫 KOT (Kitchen Order Ticket) डिजाइन - भान्साको लागि स्पष्ट र बोल्ड -->
         <div style="text-align: center; margin-bottom: 6px;">
           <span style="font-size: 12px; font-weight: bold; background: #000; color: #fff; padding: 2px 10px; display: inline-block; border-radius: 3px;">KITCHEN TICKET (KOT)</span>
         </div>
@@ -308,7 +304,6 @@
           <div style="white-space: pre-wrap; font-weight: bold; font-size: 12.5px;">${o.items || 'Food Items'}</div>
         </div>
       ` : `
-        <!-- 🧾 Customer Bill / Invoice डिजाइन - ग्राहकको लागि व्यावसायिक बिल -->
         <div style="text-align: center; margin-bottom: 6px;">
           <span style="font-size: 12px; font-weight: bold; border: 1px solid #000; padding: 2px 8px; display: inline-block;">TAX INVOICE / BILL</span>
         </div>
@@ -343,7 +338,7 @@
     }
   };
 
-  // 🖨️ ५८मिमी प्रिन्टरको पेपर साइज फिक्स गर्ने र अतिरिक्त हेडर/फुटर (URL, मिति आदि) हटाउने प्रिन्ट फंक्सन
+  // 🖨️ ५८मिमी प्रिन्टरको पेपर साइज फिक्स गर्ने र अतिरिक्त हेडर/फुटर हटाउने प्रिन्ट फंक्सन
   window.executeSystemPrint = function() {
     var printArea = document.getElementById("printableInvoiceArea");
     if (!printArea) return;
@@ -355,7 +350,7 @@
           <title>Print Receipt</title>
           <style>
             @page {
-              size: 58mm auto; /* ५८मिमी थर्मल पेपर साइज फिक्स */
+              size: 58mm auto;
               margin: 0mm;
             }
             body {
@@ -380,7 +375,32 @@
     }, 400);
   };
 
-  // 📸 डेलिभरी प्रुफ अपलोड गर्ने र Supabase मा 'Delivered' स्टेटस, फोटो र समय सेभ गर्ने अचूक फंक्सन
+  // ❌ प्रिन्ट मोडल बक्स बन्द गर्ने सही फंक्सन
+  window.closePrintModal = function() {
+    var modalBox = document.getElementById("printModalBox");
+    if(modalBox) {
+      modalBox.style.display = "none";
+    }
+  };
+
+  window.updateOrderStatus = async function(orderNo, newStatus) {
+    let updatePayload = { status: newStatus };
+    if(newStatus === "Delivered") {
+        updatePayload.delivery_time = new Date().toLocaleString();
+    }
+
+    let res = await supabaseClient.from('orders').update(updatePayload).eq('order_no', orderNo);
+    if (res.error) {
+      await supabaseClient.from('orders').update(updatePayload).eq('id', orderNo);
+    }
+    window.loadOrders();
+  };
+
+  window.manualUpdate = async function(orderNo) {
+    var s = document.getElementById("status_" + orderNo).value;
+    await window.updateOrderStatus(orderNo, s);
+  };
+
   window.uploadDeliveryProof = function(orderNo, fileInput) {
     const file = fileInput.files[0];
     if(!file) return;
@@ -390,15 +410,12 @@
         const base64Img = reader.result;
         let currentTime = new Date().toLocaleString();
         
-        console.log("Uploading delivery proof for order:", orderNo);
-
         let updatePayload = { 
           status: "Delivered", 
           proof_img: base64Img, 
           delivery_time: currentTime 
         };
 
-        // Supabase मा 'order_no' र 'id' दुवैबाट अपडेट गर्ने प्रयास गर्ने
         let res = await supabaseClient.from('orders').update(updatePayload).eq('order_no', orderNo);
         if (res.error) {
           let res2 = await supabaseClient.from('orders').update(updatePayload).eq('id', orderNo);
