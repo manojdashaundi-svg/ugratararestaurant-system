@@ -269,28 +269,28 @@
     tableBody.innerHTML = html;
   };
 
-  // २. KOT वा Bill प्रिन्ट गर्ने र Supabase मा 'order_no' वा 'id' बाट डेटा अपडेट गर्ने
+  // २. KOT वा Bill प्रिन्ट गर्ने र Supabase मा सबै सम्भावित Column Name बाट स्टेटस अपडेट गर्ने
   window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
-    let { error } = await supabaseClient
-      .from('orders')
-      .update({ status: nextStatus })
-      .eq('order_no', orderNo);
+    // 🛠️ 'order_no', 'orderno', र 'id' तीनवटै सम्भावित स्तम्भको नामबाट अपडेट ट्राइ गर्ने
+    let updated = false;
 
-    if (error) {
-      let res = await supabaseClient
-        .from('orders')
-        .update({ status: nextStatus })
-        .eq('id', orderNo);
-      if(res.error) {
-        alert("Error updating status: " + res.error.message);
-        return;
-      }
+    let res1 = await supabaseClient.from('orders').update({ status: nextStatus }).eq('order_no', orderNo).select();
+    if(res1.data && res1.data.length > 0) updated = true;
+
+    if(!updated) {
+      let res2 = await supabaseClient.from('orders').update({ status: nextStatus }).eq('orderno', orderNo).select();
+      if(res2.data && res2.data.length > 0) updated = true;
     }
 
-    // तुरुन्तै प्यानलको डेटा रिफ्रेस गर्ने
+    if(!updated) {
+      let res3 = await supabaseClient.from('orders').update({ status: nextStatus }).eq('id', orderNo).select();
+      if(res3.data && res3.data.length > 0) updated = true;
+    }
+
+    // तुरुन्तै प्यानलको टेबल डेटा रिफ्रेस गर्ने
     await window.loadOrders();
 
-    var o = activeOrdersCache.find(item => item.order_no == orderNo || item.id == orderNo);
+    var o = activeOrdersCache.find(item => item.order_no == orderNo || item.orderno == orderNo || item.id == orderNo);
     if(!o) {
       o = { order_no: orderNo, customer_name: "Valued Customer", phone: "", time: "Now", total: "0", items: "Food Items" };
     }
@@ -302,7 +302,7 @@
     </div>
     <hr style="border-top: 1px dashed #000; margin: 6px 0;">
     <div style="font-family: monospace; font-size: 11.5px; line-height: 1.3;">
-      <div><b>Order No:</b> ${o.order_no || orderNo}</div>
+      <div><b>Order No:</b> ${o.order_no || o.orderno || orderNo}</div>
       <div><b>Customer:</b> ${o.customer_name || 'Guest'} (${o.phone || '-'})</div>
       <div><b>Date:</b> ${o.time || 'N/A'}</div>
     </div>
@@ -316,7 +316,6 @@
         document.getElementById("printModalBox").style.display = "flex";
     }
   };
-
   window.updateOrderStatus = async function(orderNo, newStatus) {
     let updatePayload = { status: newStatus };
     if(newStatus === "Delivered") {
