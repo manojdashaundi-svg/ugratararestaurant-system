@@ -346,6 +346,7 @@
     setTimeout(() => w.print(), 500);
   };
 
+  // 📸 डेलिभरी प्रुफ अपलोड गर्ने र Supabase मा 'Delivered' स्टेटस, फोटो र समय सेभ गर्ने अचूक फंक्सन
   window.uploadDeliveryProof = function(orderNo, fileInput) {
     const file = fileInput.files[0];
     if(!file) return;
@@ -355,14 +356,26 @@
         const base64Img = reader.result;
         let currentTime = new Date().toLocaleString();
         
-        let updatePayload = { status: "Delivered", proof_img: base64Img, delivery_time: currentTime };
+        console.log("Uploading delivery proof for order:", orderNo);
+
+        let updatePayload = { 
+          status: "Delivered", 
+          proof_img: base64Img, 
+          delivery_time: currentTime 
+        };
+
+        // Supabase मा 'order_no' र 'id' दुवैबाट अपडेट गर्ने प्रयास गर्ने
         let res = await supabaseClient.from('orders').update(updatePayload).eq('order_no', orderNo);
         if (res.error) {
-          await supabaseClient.from('orders').update(updatePayload).eq('id', orderNo);
+          let res2 = await supabaseClient.from('orders').update(updatePayload).eq('id', orderNo);
+          if (res2.error) {
+            alert("❌ Failed to save proof: " + res2.error.message);
+            return;
+          }
         }
 
         alert("✅ Delivery Proof Uploaded & Order Delivered Successfully!");
-        window.loadOrders();
+        await window.loadOrders();
     };
     reader.readAsDataURL(file);
   };
