@@ -223,12 +223,12 @@
     if(document.getElementById("dashTotalRevenue")) document.getElementById("dashTotalRevenue").innerText = "RM " + totalRevenue.toFixed(2);
   };
 
-  // मेनु लोड गर्ने (Row हरू सधैँ ID अनुसार स्थिर रहने गरी)
+ // मेनु लोड गर्ने (सिरियल नम्बर मिलाएर देखाउने)
   window.loadMenuList = async function() {
     let { data, error } = await supabaseClient
       .from('menu_items')
       .select('*')
-      .order('id', { ascending: true }); // 👈 यो थपिएको छ जसले Row परिवर्तन हुन दिँदैन
+      .order('id', { ascending: true });
 
     if(error) { console.log("Menu error:", error); return; }
 
@@ -236,24 +236,25 @@
     if(!menuList) return;
     let html = "";
     
-    (data || []).forEach((r) => {
-      let rowId = r.id; 
+    (data || []).forEach((r, index) => {
+      let rowRealId = r.id; // Supabase को वास्तविक ID (डिलिट/एडिट गर्न प्रयोग हुने)
+      let displaySerial = index + 1; // 👈 प्यानलमा देखाउने सिरियल नम्बर (१, २, ३...)
       let imgTag = r.image ? `<img src="${r.image}" class="menu-thumb">` : `No Image`;
       let stockStatus = r.status || "In Stock";
       let stockBtnClass = stockStatus === "In Stock" ? "inStockBtn" : "outStockBtn";
       let stockText = stockStatus === "In Stock" ? "🟢 In Stock" : "🔴 Out of Stock";
 
       html += `<tr>
-        <td><b>${rowId}</b></td>
+        <td><b>${displaySerial}</b></td>
         <td><b>${r.name || ''}</b></td>
         <td style="color:#e91e63; font-weight:bold;">RM ${r.price || 0}</td>
         <td>${imgTag}</td>
         <td>${r.description || ''}</td>
         <td><b>${r.category || ''}</b></td>
         <td>
-          <button class="${stockBtnClass}" onclick="window.toggleStock(${rowId}, '${stockStatus}')">${stockText}</button>
-          <button class="editBtn" onclick="window.editProduct(${rowId}, '${r.name}', ${r.price}, '${r.description || ''}', '${r.category || ''}')">✏️ Edit</button>
-          <button class="removeBtn" onclick="window.deleteProduct(${rowId})">❌ Delete</button>
+          <button class="${stockBtnClass}" onclick="window.toggleStock(${rowRealId}, '${stockStatus}')">${stockText}</button>
+          <button class="editBtn" onclick="window.editProduct(${rowRealId}, '${r.name}', ${r.price}, '${r.description || ''}', '${r.category || ''}')">✏️ Edit</button>
+          <button class="removeBtn" onclick="window.deleteProduct(${rowRealId})">❌ Delete</button>
         </td>
       </tr>`;
     });
