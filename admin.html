@@ -170,12 +170,16 @@
     }
   };
 
- window.loadOrders = async function() {
-    let { data, error } = await supabaseClient.from('orders').select('*');
-    
+window.loadOrders = async function() {
+    let { data, error } = await supabaseClient
+      .from('orders')
+      .select('*')
+      .order('time', { ascending: false });
+
     if (error) {
-      console.log("Orders error:", error);
-      document.getElementById("ordersTable").innerHTML = `<tr><td colspan="7" style="color:red;">Error loading orders: ${error.message}</td></tr>`;
+      console.log("Error loading orders: ", error);
+      var tableBody = document.getElementById("ordersTable");
+      if(tableBody) tableBody.innerHTML = `<tr><td colspan="9" style="color:red; padding:20px;">Error loading orders: ${error.message}</td></tr>`;
       return;
     }
 
@@ -185,32 +189,64 @@
     
     let html = "";
     if(activeOrdersCache.length === 0) {
-      html = `<tr><td colspan="7" style="padding:20px;">No Active Orders Found.</td></tr>`;
+      html = `<tr><td colspan="9" style="padding:20px;">No Active Orders Found.</td></tr>`;
     } else {
       activeOrdersCache.forEach(function(o){
         let status = o.status || "Pending";
-        let slipHtml = o.payment_slip ? `<img src="${o.payment_slip}" class="proof-thumb">` : `None`;
         
-        let statusSelect = `<select id="status_${o.order_no}" onchange="window.updateOrderStatus('${o.order_no}', this.value)">
+        // Payment Slip र Delivery Proof को थम्बनेल देखाउने
+        let slipHtml = (o.payment_slip && o.payment_slip !== "None" && o.payment_slip !== "") ? 
+          `<img src="${o.payment_slip}" class="proof-thumb" onclick="window.openImageViewer('${o.payment_slip}')">` : `None`;
+        
+        let delivHtml = (o.proof_img && o.proof_img !== "None" && o.proof_img !== "") ? 
+          `<img src="${o.proof_img}" class="proof-thumb" onclick="window.openImageViewer('${o.proof_img}')">` : `None`;
+        
+        // Status परिवर्तन गर्ने ड्रपडाउन र 'Go' बटन (Google Apps Script जस्तै)
+        let statusSelect = `<select id="status_${o.order_no}">
           <option value="Pending" ${status=="Pending"?"selected":""}>Pending</option>
+          <option value="Order Received" ${status=="Order Received"?"selected":""}>Order Received</option>
           <option value="Preparing" ${status=="Preparing"?"selected":""}>Preparing</option>
           <option value="Ready" ${status=="Ready"?"selected":""}>Ready</option>
+          <option value="Out for Delivery" ${status=="Out for Delivery"?"selected":""}>Out for Delivery</option>
           <option value="Delivered" ${status=="Delivered"?"selected":""}>Delivered</option>
-        </select>`;
+        </select> 
+        <button class="updateBtn" onclick="window.manualUpdate('${o.order_no}')">Go</button>`;
+
+        // Instant Action बटनहरू
+        let actionButtons = "";
+        if (status === "Pending" || status === "Order Received") {
+            actionButtons += `<button class="rcvBtn" onclick="window.updateOrderStatus('${o.order_no}', 'Preparing')">🎫 Receive & KOT</button> `;
+        } else if (status === "Preparing") {
+            actionButtons += `<button class="rdyBtn" onclick="window.updateOrderStatus('${o.order_no}', 'Ready')">🍳 Ready & Bill</button> `;
+        } else if (status === "Ready") {
+            actionButtons += `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no}', 'Out for Delivery')">🚚 Dispatch</button> `;
+        } else if (status === "Delivered") {
+            actionButtons = `<span style="color:green; font-weight:bold;">✅ Delivered</span>`;
+        }
 
         html += `<tr>
-          <td>${o.time || '-'}</td>
+          <td style="font-size:12px; color:#555;">${o.time || '-'}</td>
           <td><b>${o.order_no}</b></td>
-          <td>${o.customer_name || '-'}<br><small>${o.phone || ''}</small></td>
+          <td>${o.customer_name || '-'}<br><small style="color:#666;">${o.phone || ''}</small></td>
           <td style="color:#e91e63; font-weight:bold;">RM ${o.total || '0'}</td>
           <td>${slipHtml}</td>
+          <td style="font-size:12px; color:#555; font-weight:bold;">${status === "Delivered" ? (o.time || '-') : (o.delivery_time || 'N/A')}</td>
+          <td>${delivHtml}</td>
           <td>${statusSelect}</td>
-          <td><button class="rcvBtn" onclick="window.updateOrderStatus('${o.order_no}', 'Delivered')">✅ Complete</button></td>
+          <td>${actionButtons}</td>
         </tr>`;
       });
     }
     tableBody.innerHTML = html;
-    window.calculateDashboardStats(activeOrdersCache);
+    if(typeof window.calculateDashboardStats === "function") {
+        window.calculateDashboardStats(activeOrdersCache);
+    }
+  };
+
+  // 'Go' बटन थिच्दा स्टेट्स अपडेट गर्ने फंक्सन
+  window.manualUpdate = async function(orderNo) {
+    var s = document.getElementById("status_" + orderNo).value;
+    await window.updateOrderStatus(orderNo, s);
   };
 
   window.updateOrderStatus = async function(orderNo, newStatus) {
