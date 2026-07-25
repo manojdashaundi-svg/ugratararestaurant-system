@@ -143,11 +143,11 @@
     document.getElementById("loginBtn").innerText = "Verifying...";
     
     let { data, error } = await supabaseClient
-      .from('staff')
-      .select('*')
-      .eq('username', u)
-      .eq('password', p)
-      .single();
+  .from('admins')
+  .select('*')
+  .eq('email', u)
+  .eq('password', p)
+  .single();
 
     document.getElementById("loginBtn").innerText = "Login";
 
