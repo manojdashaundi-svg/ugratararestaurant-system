@@ -104,6 +104,12 @@
     <h3 style="color: #e91e63; margin-bottom: 10px; font-size: 16px;">Monthly Sales Insights & Growth (RM)</h3>
     <div id="monthlySalesChart" style="width: 100%; height: 250px;"></div>
   </div>
+  
+<!-- 📈 Today's Hourly Sales Trend Chart Section -->
+  <div class="chart-container" id="hourlySalesChartDiv" style="display: block; width: 100%; height: 320px; background: #fff; padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+    <h3 style="color: #e91e63; margin-bottom: 10px; font-size: 16px;">Today's Hourly Sales Trend (RM)</h3>
+    <div id="hourlySalesChart" style="width: 100%; height: 250px;"></div>
+  </div>
 
   <!-- 🛒 मुख्य अर्डर तालिका -->
   <div id="mainOrdersTableSection">
@@ -526,6 +532,8 @@
       document.getElementById("dashAvgOrder").innerText = "RM " + avgOrderValue.toFixed(2);
     
     window.drawMonthlySalesChart(orders);
+    
+    window.drawHourlySalesChart(orders);
   };
 
   window.loadMenuList = async function() {
@@ -708,6 +716,65 @@
     let chart = new google.visualization.ColumnChart(document.getElementById('monthlySalesChart'));
     chart.draw(data, options);
   };
+// 📊 आजको प्रतिघण्टा बिक्रीको ट्रेन्ड (Today's Hourly Sales Trend) देखाउने फंक्सन
+  window.drawHourlySalesChart = function(orders) {
+    if (typeof google === 'undefined' || !google.visualization) return;
+
+    let hourlyMap = {};
+    for (let i = 0; i < 24; i++) {
+      let hourKey = i < 10 ? `0${i}:00` : `${i}:00`;
+      hourlyMap[hourKey] = 0;
+    }
+
+    let now = new Date();
+    let currentDay = now.getDate();
+    let currentMonth = now.getMonth();
+    let currentYear = now.getFullYear();
+
+    orders.forEach(o => {
+      let amount = parseFloat(o.total) || 0;
+      if (o.time) {
+        let orderDate = new Date(o.time);
+        if (isNaN(orderDate.getTime())) {
+          let cleanTime = o.time.replace(/at/gi, "").trim();
+          orderDate = new Date(cleanTime);
+        }
+
+        if (!isNaN(orderDate.getTime())) {
+          // केवल आजको अर्डरहरू मात्र फिल्टर गर्ने
+          if (
+            orderDate.getDate() === currentDay &&
+            orderDate.getMonth() === currentMonth &&
+            orderDate.getFullYear() === currentYear
+          ) {
+            let hour = orderDate.getHours();
+            let hourKey = hour < 10 ? `0${hour}:00` : `${hour}:00`;
+            hourlyMap[hourKey] += amount;
+          }
+        }
+      }
+    });
+
+    let chartArray = [['Time (Hours)', 'Revenue (RM)']];
+    Object.keys(hourlyMap).sort().forEach(hour => {
+      chartArray.push([hour, hourlyMap[hour]]);
+    });
+
+    let data = google.visualization.arrayToDataTable(chartArray);
+
+    let options = {
+      legend: { position: 'none' },
+      colors: ['#E91E63'], // गुलाबी/रातो रङ्ग (Pink/Red)
+      hAxis: { title: 'Time (Hours)', slantedText: true },
+      vAxis: { title: 'Revenue (RM)', minValue: 0 },
+      curveType: 'function', // गोलो घुमेको चिल्लो लाइन देखाउन
+      animation: { startup: true, duration: 1000, easing: 'out' }
+    };
+
+    let chart = new google.visualization.LineChart(document.getElementById('hourlySalesChart'));
+    chart.draw(data, options);
+  };
+  
 </script>
 </body>
 </html>
