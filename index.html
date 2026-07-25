@@ -123,7 +123,7 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
     <hr style="margin:25px 0; border:0; border-top:1px solid #ddd; width: 100%;">
     <div style="padding: 0 4px; text-align: left;">
         <h2>📦 Track Your Order</h2>
-        <input id="trackOrderNo" type="text" placeholder="Enter Order No (Example: ORD0001)" style="width:100%; padding:14px; margin:10px 0; border-radius:8px; border:1px solid #ddd; font-size:18px;">
+        <input id="trackOrderNo" type="text" placeholder="Enter Order No (Example: ORD1001)" style="width:100%; padding:14px; margin:10px 0; border-radius:8px; border:1px solid #ddd; font-size:18px;">
         <button class="place-btn" style="background:#e91e63;" onclick="window.trackMyOrder()">Track Order</button>
         <div id="trackResult" style="margin-top:20px;"></div>
     </div>
@@ -134,6 +134,24 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
 <!-- Supabase र मुख्य जाभास्क्रिप्ट पुस्तकालयहरू -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
+<script>
+  // डेटाबेसबाट हालसम्मका अर्डरहरू तानेर सही सिरियल नम्बर निकाल्ने
+  async function generateNextOrderNo() {
+    let { data: existingOrders } = await supabaseClient.from('orders').select('order_no');
+    let nextSerialNo = 1001; // यदि एउटा पनि अर्डर छैन भने ORD1001 बाट सुरु हुने
+
+    if (existingOrders && existingOrders.length > 0) {
+      let serials = existingOrders.map(o => {
+        let num = parseInt(String(o.order_no).replace(/[^0-9]/g, ''));
+        return isNaN(num) ? 1000 : num;
+      });
+      let maxNum = Math.max(...serials);
+      nextSerialNo = (maxNum >= 1001) ? (maxNum + 1) : (1001 + existingOrders.length);
+    }
+
+    return "ORD" + nextSerialNo; // परिणाम: ORD1001, ORD1002, ORD1003...
+  }
+</script>
 <script src="script.js"></script>
 </body>
 </html>
