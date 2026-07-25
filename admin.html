@@ -199,9 +199,9 @@
     }
   };
 
- // १. अर्डर लोड गर्ने र सुरक्षित रूपमा क्रम मिलाएर देखाउने फंक्सन
+  // १. अर्डर लोड गर्ने र सुरक्षित रूपमा क्रम मिलाएर देखाउने फंक्सन
   window.loadOrders = async function() {
-    let { data, error } = await supabaseClient
+    let { data: existingOrders, error } = await supabaseClient
       .from('orders')
       .select('*');
 
@@ -225,17 +225,19 @@
     if(!tableBody) return;
     
     let html = "";
-    if(activeOrdersCache.length === 0) {
+    let totalOrdersCount = activeOrdersCache.length;
+
+    if(totalOrdersCount === 0) {
       html = `<tr><td colspan="9" style="padding:20px;">No Active Orders Found.</td></tr>`;
     } else {
-      activeOrdersCache.forEach(function(o){
+      activeOrdersCache.forEach(function(o, index){
         let rawStatus = o.status ? String(o.status).trim() : "Pending";
         let status = rawStatus.toLowerCase();
         
-        let slipHtml = (o.payment_slip && o.payment_slip !== "None" && o.payment_slip !== "") ? 
+        let slipHtml = (o.payment_slip && o.payment_slip !== "None" && o.payment_slip !== "") ?  
           `<img src="${o.payment_slip}" class="proof-thumb" onclick="window.openImageViewer('${o.payment_slip}')">` : `None`;
         
-        let delivHtml = (o.proof_img && o.proof_img !== "None" && o.proof_img !== "") ? 
+        let delivHtml = (o.proof_img && o.proof_img !== "None" && o.proof_img !== "") ?  
           `<img src="${o.proof_img}" class="proof-thumb" onclick="window.openImageViewer('${o.proof_img}')">` : `None`;
         
         let statusSelect = `<select id="status_${o.order_no || o.id}">
@@ -255,15 +257,18 @@
         } else if (status === "ready") {
             actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no || o.id}', 'Out for Delivery')">🚚 Dispatch</button>`;
         } else if (status === "out for delivery") {
-            actionButton = `Upload Proof:<br><input type="file" accept="image/*" capture="environment" onchange="window.uploadDeliveryProof('${o.order_no || o.id}', this)" style="width:110px;">`;
+            let actionButton = `Upload Proof:<br><input type="file" accept="image/*" capture="environment" onchange="window.uploadDeliveryProof('${o.order_no || o.id}', this)" style="width:110px;">`;
             actionButtons = actionButton;
         } else if (status === "delivered") {
             actionButtons = `<span style="color:green; font-weight:bold;">✅ Delivered</span>`;
         }
 
+        // 🔢 यहाँ अर्डर नम्बरलाई सधैँ ORD1001, ORD1002... क्रममा देखाउने व्यवस्था मिलाइएको छ
+        let displayOrderNo = o.order_no && String(o.order_no).startsWith("ORD") ? o.order_no : ("ORD" + (1001 + (totalOrdersCount - 1 - index)));
+
         html += `<tr>
           <td style="font-size:12px; color:#555;">${o.time || '-'}</td>
-          <td><b>${o.order_no || o.id}</b></td>
+          <td><b>${displayOrderNo}</b></td>
           <td>${o.customer_name || '-'}<br><small style="color:#666;">${o.phone || ''}</small></td>
           <td style="color:#e91e63; font-weight:bold;">RM ${o.total || '0'}</td>
           <td>${slipHtml}</td>
