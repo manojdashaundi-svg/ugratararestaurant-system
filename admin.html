@@ -199,9 +199,9 @@
     }
   };
 
-  // १. अर्डर लोड गर्ने र सुरक्षित रूपमा क्रम मिलाएर देखाउने फंक्सन
+  // १. अर्डर लोड गर्ने र सिरियल वाइज क्रम मिलाएर देखाउने सही फंक्सन
   window.loadOrders = async function() {
-    let { data: existingOrders, error } = await supabaseClient
+    let { data, error } = await supabaseClient
       .from('orders')
       .select('*');
 
@@ -214,11 +214,11 @@
 
     activeOrdersCache = data || [];
     
-    // 🛠️ नयाँ अर्डरलाई सधैँ माथि (Descending) देखाउने सही सर्टिङ
+    // नयाँ अर्डरलाई सधैँ माथि देखाउने सर्टिङ
     activeOrdersCache.sort((a, b) => {
       let timeA = new Date(a.time).getTime() || 0;
       let timeB = new Date(b.time).getTime() || 0;
-      return timeB - timeA; // नयाँ समय भएको माथि आउँछ
+      return timeB - timeA;
     });
 
     var tableBody = document.getElementById("ordersTable");
@@ -263,7 +263,7 @@
             actionButtons = `<span style="color:green; font-weight:bold;">✅ Delivered</span>`;
         }
 
-        // 🔢 यहाँ अर्डर नम्बरलाई सधैँ ORD1001, ORD1002... क्रममा देखाउने व्यवस्था मिलाइएको छ
+        // अर्डर नम्बरलाई क्रमबद्ध देखाउने व्यवस्था
         let displayOrderNo = o.order_no && String(o.order_no).startsWith("ORD") ? o.order_no : ("ORD" + (1001 + (totalOrdersCount - 1 - index)));
 
         html += `<tr>
@@ -281,7 +281,6 @@
     }
     tableBody.innerHTML = html;
   };
-  
   // २. KOT वा Bill प्रिन्ट गर्ने र ५८मिमी प्रिन्टरको लागि सुन्दर डिजाइन बनाउने फंक्सन
   window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
     let res = await supabaseClient.from('orders').update({ status: nextStatus }).eq('order_no', orderNo);
