@@ -111,6 +111,25 @@
     <div id="hourlySalesChart" style="width: 100%; height: 250px;"></div>
   </div>
 
+  <!-- 📊 Sales Report Generator & Export Section -->
+  <div style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+    <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">📊 Sales Report Generator & Export</h3>
+    <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
+      <div>
+        <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Start Date:</label>
+        <input type="date" id="reportStartDate" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px;">
+      </div>
+      <div>
+        <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">End Date:</label>
+        <input type="date" id="reportEndDate" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px;">
+      </div>
+      <div style="display: flex; gap: 10px; margin-top: 5px;">
+        <button class="excelBtn" onclick="window.exportExcelReport()" style="background: #1F7246; color: white; border: none; padding: 11px 18px; border-radius: 8px; font-weight: bold; cursor: pointer;">📥 Export Excel (.CSV)</button>
+        <button class="pdfBtn" onclick="window.printPdfReport()" style="background: #E01A22; color: white; border: none; padding: 11px 18px; border-radius: 8px; font-weight: bold; cursor: pointer;">🖨️ Print / Download PDF</button>
+      </div>
+    </div>
+  </div>
+
   <!-- 🛒 मुख्य अर्डर तालिका -->
   <div id="mainOrdersTableSection">
     <h3>🛒 Active Orders</h3>
@@ -773,6 +792,142 @@
 
     let chart = new google.visualization.LineChart(document.getElementById('hourlySalesChart'));
     chart.draw(data, options);
+  };
+
+  // 📥 Excel (.CSV) मा रिपोर्ट एक्सपोर्ट गर्ने फंक्सन
+  window.exportExcelReport = function() {
+    let startDate = document.getElementById("reportStartDate").value;
+    let endDate = document.getElementById("reportEndDate").value;
+
+    let filteredOrders = activeOrdersCache;
+    if (startDate && endDate) {
+      let start = new Date(startDate);
+      let end = new Date(endDate);
+      end.setHours(23, 59, 59);
+
+      filteredOrders = activeOrdersCache.filter(o => {
+        let oDate = new Date(o.time);
+        return oDate >= start && oDate <= end;
+      });
+    }
+
+    if (filteredOrders.length === 0) {
+      alert("⚠️ No orders found for the selected date range!");
+      return;
+    }
+
+    let csvContent = "data:text/csv;charset=utf-8,Order Date,Order No,Customer Name,Phone,Address,Items,Total (RM),Status\r\n";
+
+    filteredOrders.forEach(o => {
+      let row = [
+        `"${o.time || ''}"`,
+        `"${o.order_no || ''}"`,
+        `"${o.customer_name || ''}"`,
+        `"${o.phone || ''}"`,
+        `"${(o.address || '').replace(/"/g, '""')}"`,
+        `"${(o.items || '').replace(/\n/g, ' ').replace(/"/g, '""')}"`,
+        `"${o.total || '0'}"`,
+        `"${o.status || ''}"`
+      ];
+      csvContent += row.join(",") + "\r\n";
+    });
+
+    let encodedUri = encodeURI(csvContent);
+    let link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `Sales_Report_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // 🖨️ PDF वा प्रिन्ट रिपोर्ट तयार पार्ने फंक्सन
+  window.printPdfReport = function() {
+    let startDate = document.getElementById("reportStartDate").value;
+    let endDate = document.getElementById("reportEndDate").value;
+
+    let filteredOrders = activeOrdersCache;
+    if (startDate && endDate) {
+      let start = new Date(startDate);
+      let end = new Date(endDate);
+      end.setHours(23, 59, 59);
+
+      filteredOrders = activeOrdersCache.filter(o => {
+        let oDate = new Date(o.time);
+        return oDate >= start && oDate <= end;
+      });
+    }
+
+    if (filteredOrders.length === 0) {
+      alert("⚠️ No orders found for the selected date range!");
+      return;
+    }
+
+    let totalRev = 0;
+    filteredOrders.forEach(o => { totalRev += parseFloat(o.total) || 0; });
+
+    let printWindow = window.open('', '_blank', 'height=700,width=900');
+    let htmlContent = `
+      <html>
+        <head>
+          <title>Ugratara Sales Report</title>
+          <style>
+            body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+            h2 { color: #e91e63; text-align: center; margin-bottom: 5px; }
+            p { text-align: center; color: #666; font-size: 14px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th, td { border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 13px; }
+            th { background: #e91e63; color: white; }
+            .summary { margin-top: 20px; font-size: 16px; font-weight: bold; text-align: right; }
+          </style>
+        </head>
+        <body>
+          <h2>🍽 UGRATARA RESTAURANT - SALES REPORT</h2>
+          <p>Report Period: ${startDate || 'All Time'} To ${endDate || 'Present'}</p>
+          <table>
+            <thead>
+              <tr>
+                <th>Date & Time</th>
+                <th>Order No</th>
+                <th>Customer</th>
+                <th>Phone</th>
+                <th>Items</th>
+                <th>Total (RM)</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+    `;
+
+    filteredOrders.forEach(o => {
+      htmlContent += `
+        <tr>
+          <td>${o.time || ''}</td>
+          <td><b>${o.order_no || ''}</b></td>
+          <td>${o.customer_name || ''}</td>
+          <td>${o.phone || ''}</td>
+          <td style="text-align: left; white-space: pre-wrap; font-size: 11px;">${o.items || ''}</td>
+          <td><b>RM ${o.total || '0'}</b></td>
+          <td>${o.status || ''}</td>
+        </tr>
+      `;
+    });
+
+    htmlContent += `
+            </tbody>
+          </table>
+          <div class="summary">
+            Total Orders: ${filteredOrders.length} | Grand Revenue: RM ${totalRev.toFixed(2)}
+          </div>
+          <script>
+            window.onload = function() { window.print(); window.close(); }
+          <\/script>
+        </body>
+      </html>
+    `;
+
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
   };
   
 </script>
