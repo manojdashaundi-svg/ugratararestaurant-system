@@ -33,7 +33,6 @@
     .removeBtn { background:#f44336; color:white; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
 
     .staff-section, .menu-section { background:#fff; padding:20px; border-radius:10px; margin-top:40px; border:1px solid #ddd; display:none; }
-    .report-section { background:#fff; padding:20px; border-radius:10px; margin-top:20px; border:1px solid #ddd; display:none; }
     .login-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f5f5f5; display:flex; justify-content:center; align-items:center; z-index:99999; }
     .login-card { background:#fff; padding:30px; border-radius:12px; box-shadow:0 5px 15px rgba(0,0,0,0.1); width:100%; max-width:360px; text-align:center; }
     .login-card input { width:100%; padding:12px; margin:10px 0; border:1px solid #ddd; border-radius:8px; font-size:16px; }
@@ -47,7 +46,7 @@
 <div id="loginScreen" class="login-overlay">
   <div class="login-card">
     <h2>🔐 STAFF LOGIN</h2>
-    <input id="username" type="text" placeholder="Username / Email" autocomplete="off">
+    <input id="username" type="text" placeholder="Username" autocomplete="off">
     <input id="password" type="password" placeholder="Password" autocomplete="off">
     <button id="loginBtn" onclick="handleLogin()">Login</button>
   </div>
@@ -101,7 +100,7 @@
     </div>
   </div>
 
-  <!-- 🍔 मेनु म्यानेजमेन्ट (फोटो, विवरण र हुबहु बटनसहित) -->
+  <!-- 🍔 मेनु म्यानेजमेन्ट (Google Apps Script जस्तै दुरुस्तै) -->
   <div id="menuManagementBox" class="menu-section">
     <h3>🍔 Menu & Product Management</h3>
     <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #ddd;">
@@ -135,7 +134,7 @@
 </div>
 
 <script>
-  // 🔑 Supabase कन्फिगरेसन
+  // 🔑 Supabase कन्फिगरेसन (स्पेस हटाइएको सहि लिङ्क)
   const SUPABASE_URL = 'https://lorhrfdqzagulicwcctx.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_YxubnsG5x3QD_OApZEEy_w_wzLVLSlW';
   
@@ -174,7 +173,7 @@
     }
   };
 
-  // अर्डरहरू लोड गर्ने (Supabase बाट)
+  // अर्डरहरू लोड गर्ने
   window.loadOrders = async function() {
     let { data, error } = await supabaseClient
       .from('orders')
@@ -220,7 +219,6 @@
     window.calculateDashboardStats(activeOrdersCache);
   };
 
-  // अर्डरको स्टटस अपडेट गर्ने
   window.updateOrderStatus = async function(orderNo, newStatus) {
     let { error } = await supabaseClient
       .from('orders')
@@ -234,7 +232,6 @@
     }
   };
 
-  // ड्यासबोर्ड तथ्याङ्क हिसाब गर्ने
   window.calculateDashboardStats = function(orders) {
     let totalOrders = orders.length;
     let totalRevenue = 0;
@@ -279,14 +276,12 @@
     menuList.innerHTML = html;
   };
 
-  // स्टक स्टाटस फेरेर Supabase मा स्वतः सेभ गर्ने
   window.toggleStock = async function(id, currentStatus) {
     let newStatus = currentStatus === "In Stock" ? "Out of Stock" : "In Stock";
     await supabaseClient.from('menu_items').update({ status: newStatus }).eq('item_id', id);
     window.loadMenuList();
   };
 
-  // नयाँ उत्पादन थप्ने
   window.createNewProduct = async function() {
     var id = document.getElementById("prodId").value.trim();
     var name = document.getElementById("prodName").value.trim();
@@ -315,7 +310,6 @@
     }
   };
 
-  // उत्पादन एडिट गरेर Supabase मा स्वतः सेभ गर्ने
   window.editProduct = async function(id, oldName, oldPrice, oldDesc, oldCat) {
     var newName = prompt("Edit Product Name:", oldName); if(newName === null) return;
     var newPrice = parseFloat(prompt("Edit Price (RM):", oldPrice)) || oldPrice;
@@ -361,7 +355,6 @@
 
   window.testBellSound = function() { alert("🔔 घण्टी बज्यो!"); };
 
-  // पेज लोड हुँदा लगइन चेक गर्ने
   if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
     myRole = sessionStorage.getItem("USER_ROLE") || "admin";
     currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
