@@ -127,14 +127,26 @@
   };
 
   // मेनु लोड गर्ने र हुबहु डिजाइन देखाउने
+  // मेनु लोड गर्ने सुरक्षित तरिका
   window.loadMenuList = async function() {
-    let { data } = await supabaseClient.from('menu_items').select('*');
+    let { data, error } = await supabaseClient.from('menu_items').select('*');
+    if(error) { 
+      console.log("Menu load error:", error); 
+      alert("Error loading menu: " + error.message);
+      return; 
+    }
+
     var menuList = document.getElementById("menuTableList");
     if(!menuList) return;
-    let html = "";
     
-    (data || []).forEach((r) => {
-      let itemId = r.item_id || r.id || '';
+    if(!data || data.length === 0) {
+      menuList.innerHTML = `<tr><td colspan="7">No Food Items Found in Supabase. Please add a product above.</td></tr>`;
+      return;
+    }
+
+    let html = "";
+    data.forEach((r) => {
+      let itemId = r.item_id || r.id || r.Item_ID || '';
       let imgTag = r.image ? `<img src="${r.image}" class="menu-thumb">` : `No Image`;
       let stockStatus = r.status || "In Stock";
       let stockBtnClass = stockStatus === "In Stock" ? "inStockBtn" : "outStockBtn";
@@ -142,14 +154,14 @@
 
       html += `<tr>
         <td><b>${itemId}</b></td>
-        <td><b>${r.name || ''}</b></td>
-        <td style="color:#e91e63; font-weight:bold;">RM ${r.price || 0}</td>
+        <td><b>${r.name || r.Food_Name || ''}</b></td>
+        <td style="color:#e91e63; font-weight:bold;">RM ${r.price || r.Price || 0}</td>
         <td>${imgTag}</td>
-        <td>${r.description || ''}</td>
-        <td><b>${r.category || ''}</b></td>
+        <td>${r.description || r.Description || ''}</td>
+        <td><b>${r.category || r.Category || ''}</b></td>
         <td>
           <button class="${stockBtnClass}" onclick="window.toggleStock('${itemId}', '${stockStatus}')">${stockText}</button>
-          <button class="editBtn" onclick="window.editProduct('${itemId}', '${r.name}', ${r.price}, '${r.description}', '${r.category}')">✏️ Edit</button>
+          <button class="editBtn" onclick="window.editProduct('${itemId}', '${r.name || r.Food_Name}', ${r.price || r.Price}, '${r.description || r.Description || ''}', '${r.category || r.Category || ''}')">✏️ Edit</button>
           <button class="removeBtn" onclick="window.deleteProduct('${itemId}')">❌ Delete</button>
         </td>
       </tr>`;
