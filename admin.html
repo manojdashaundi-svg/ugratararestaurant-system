@@ -453,13 +453,60 @@
     reader.readAsDataURL(file);
   };
 
+  // 📊 सबै ड्यासबोर्ड तथ्याङ्कहरू स्वचालित रूपमा गणना गरी देखाउने फंक्सन
   window.calculateDashboardStats = function(orders) {
     let totalOrders = orders.length;
     let totalRevenue = 0;
-    orders.forEach(o => { totalRevenue += parseFloat(o.total) || 0; });
+    let todaySales = 0;
+    let monthSales = 0;
 
-    if(document.getElementById("dashTotalOrders")) document.getElementById("dashTotalOrders").innerText = totalOrders;
-    if(document.getElementById("dashTotalRevenue")) document.getElementById("dashTotalRevenue").innerText = "RM " + totalRevenue.toFixed(2);
+    let now = new Date();
+    let currentDay = now.getDate();
+    let currentMonth = now.getMonth();
+    let currentYear = now.getFullYear();
+
+    orders.forEach(o => {
+      let amount = parseFloat(o.total) || 0;
+      totalRevenue += amount;
+
+      if (o.time) {
+        let orderDate = new Date(o.time);
+        if (!isNaN(orderDate.getTime())) {
+          // आजको बिक्री हिसाब गर्ने
+          if (
+            orderDate.getDate() === currentDay &&
+            orderDate.getMonth() === currentMonth &&
+            orderDate.getFullYear() === currentYear
+          ) {
+            todaySales += amount;
+          }
+          // यो महिनाको बिक्री हिसाब गर्ने
+          if (
+            orderDate.getMonth() === currentMonth &&
+            orderDate.getFullYear() === currentYear
+          ) {
+            monthSales += amount;
+          }
+        }
+      }
+    });
+
+    let avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders) : 0;
+
+    if(document.getElementById("dashTotalOrders")) 
+      document.getElementById("dashTotalOrders").innerText = totalOrders;
+    
+    if(document.getElementById("dashTotalRevenue")) 
+      document.getElementById("dashTotalRevenue").innerText = "RM " + totalRevenue.toFixed(2);
+    
+    if(document.getElementById("dashTodaySales")) 
+      document.getElementById("dashTodaySales").innerText = "RM " + todaySales.toFixed(2);
+
+    if(document.getElementById("dashMonthSales")) 
+      document.getElementById("dashMonthSales").innerText = "RM " + monthSales.toFixed(2);
+
+    if(document.getElementById("dashAvgOrder")) 
+      document.getElementById("dashAvgOrder").innerText = "RM " + avgOrderValue.toFixed(2);
   };
 
   window.loadMenuList = async function() {
