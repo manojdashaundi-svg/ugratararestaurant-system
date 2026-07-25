@@ -37,7 +37,11 @@
     .login-card { background:#fff; padding:30px; border-radius:12px; box-shadow:0 5px 15px rgba(0,0,0,0.1); width:100%; max-width:360px; text-align:center; }
     .login-card input { width:100%; padding:12px; margin:10px 0; border:1px solid #ddd; border-radius:8px; font-size:16px; }
     .login-card button { width:100%; padding:12px; background:#e91e63; color:white; border:none; border-radius:8px; font-size:16px; font-weight:bold; cursor:pointer; }
-    .proof-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 1px solid #ccc; }
+    .proof-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 1px solid #ccc; display: inline-block; }
+    .image-viewer-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:999999; }
+    .image-viewer-box { background:#fff; padding:20px; border-radius:12px; max-width:90%; max-height:90%; text-align:center; position:relative; }
+    .image-viewer-box img { max-width:100%; max-height:70vh; object-fit:contain; border-radius:8px; display:block; margin-bottom:15px; }
+    .close-viewer-btn { background:#f44336; color:white; border:none; padding:8px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
     .chart-container { background:#fff; padding:15px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin:20px 0; border:1px solid #ddd; width:100%; height: 280px; display:none; }
     .inStockBtn { background:#4CAF50; color:white; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; display: inline-flex; align-items: center; gap: 5px; }
     .outStockBtn { background:#ff9800; color:white; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
@@ -137,7 +141,14 @@
       </table>
     </div>
   </div>
-
+  
+<div id="imageViewerModal" class="image-viewer-modal" onclick="window.closeImageViewer()">
+  <div class="image-viewer-box" onclick="event.stopPropagation()">
+    <img id="viewerTargetImage" src="" alt="Proof View">
+    <button class="close-viewer-btn" onclick="window.closeImageViewer()">Close Window ✕</button>
+  </div>
+</div>
+  
 <script>
   const SUPABASE_URL = 'https://lorhrfdqzagulicwcctx.supabase.co  ';
   const SUPABASE_ANON_KEY = 'sb_publishable_YxubnsG5x3QD_OaPzEEy_w_wzLVLSlW';
@@ -394,27 +405,152 @@ window.loadOrders = async function() {
     if(modal) modal.style.display = "none";
   };
 
-  // २. 'Go' बटन वा 'Instant Action' बटन थिच्दा अर्डरको स्टेटस अपडेट गर्ने
-  window.manualUpdate = async function(orderNo) {
-    var statusSelect = document.getElementById("status_" + orderNo);
-    if(!statusSelect) return;
-    var newStatus = statusSelect.value;
-    await window.updateOrderStatus(orderNo, newStatus);
+  // २. अर्डरहरू लोड गर्ने (Google Apps Script को नियम अनुसार)
+  window.loadOrders = async function() {
+    let { data, error } = await supabaseClient
+      .from('orders')
+      .select('*')
+      .order('time', { ascending: false });
+
+    if (error) {
+      console.log("Error loading orders: ", error);
+      return;
+    }
+
+    activeOrdersCache = data || [];
+    var tableBody = document.getElementById("ordersTable");
+    if(!tableBody) return;
+    
+    let html = "";
+    if(activeOrdersCache.length === 0) {
+      html = `<tr><td colspan="9" style="padding:20px;">No Active Orders Found.</td></tr>`;
+    } else {
+      activeOrdersCache.forEach(function(o){
+        let status = o.status || "Pending";
+        
+        // Payment Slip थम्बनेल
+        let slipHtml = (o.payment_slip && o.payment_slip !== "None" && o.payment_slip !== "") ? 
+          `<img src="${o.payment_slip}" class="proof-thumb" onclick="window.openImageViewer('${o.payment_slip}')">` : `None`;
+        
+        // Delivery Proof थम्बनेल
+        let delivHtml = (o.proof_img && o.proof_img !== "None" && o.proof_img !== "") ? 
+          `<img src="${o.proof_img}" class="proof-thumb" onclick="window.openImageViewer('${o.proof_img}')">` : `None`;
+        
+        // Status ड्रपडाउन र Go बटन
+        let statusSelect = `<select id="status_${o.order_no}">
+          <option value="Pending" ${status=="Pending"?"selected":""}>Pending</option>
+          <option value="Preparing" ${status=="Preparing"?"selected":""}>Preparing</option>
+          <option value="Ready" ${status=="Ready"?"selected":""}>Ready</option>
+          <option value="Out for Delivery" ${status=="Out for Delivery"?"selected":""}>Out for Delivery</option>
+          <option value="Delivered" ${status=="Delivered"?"selected":""}>Delivered</option>
+        </select> 
+        <button class="updateBtn" onclick="window.manualUpdate('${o.order_no}')">Go</button>`;
+
+        // Instant Action बटनहरू (तपाईंको नियम अनुसार)
+        let actionButtons = "";
+        if (status === "Pending" || status === "Order Received") {
+            actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
+        } else if (status === "Preparing") {
+            actionButtons = `<button class="rdyBtn" onclick="window.triggerInstantAction('${o.order_no}', 'Ready', 'bill')">🍳 Ready & Bill</button>`;
+        } else if (status === "Ready") {
+            actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no}', 'Out for Delivery')">🚚 Dispatch</button>`;
+        } else if (status === "Out for Delivery") {
+            actionButtons = `Upload Proof:<br><input type="file" accept="image/*,camera/*" onchange="window.uploadDeliveryProof('${o.order_no}', this)" style="width:110px;">`;
+        } else if (status === "Delivered") {
+            actionButtons = `<span style="color:green; font-weight:bold;">✅ Delivered</span>`;
+        }
+
+        html += `<tr>
+          <td style="font-size:12px; color:#555;">${o.time || '-'}</td>
+          <td><b>${o.order_no}</b></td>
+          <td>${o.customer_name || '-'}<br><small style="color:#666;">${o.phone || ''}</small></td>
+          <td style="color:#e91e63; font-weight:bold;">RM ${o.total || '0'}</td>
+          <td>${slipHtml}</td>
+          <td style="font-size:12px; color:#555; font-weight:bold;">${o.delivery_time || 'N/A'}</td>
+          <td>${delivHtml}</td>
+          <td>${statusSelect}</td>
+          <td>${actionButtons}</td>
+        </tr>`;
+      });
+    }
+    tableBody.innerHTML = html;
+    window.calculateDashboardStats(activeOrdersCache);
   };
 
-  // ३. Supabase मा अर्डरको स्टेटस सेभ गर्ने मुख्य फंक्सन
-  window.updateOrderStatus = async function(orderNo, newStatus) {
+  // ३. Status परिवर्तन गर्ने मुख्य फंक्सन
+  window.updateOrderStatus = async function(orderNo, newStatus, extraData = {}) {
+    let updatePayload = { status: newStatus, ...extraData };
+    if(newStatus === "Delivered") {
+        updatePayload.delivery_time = new Date().toLocaleString();
+    }
+
     let { error } = await supabaseClient
       .from('orders')
-      .update({ status: newStatus })
+      .update(updatePayload)
       .eq('order_no', orderNo);
 
     if (error) {
       alert("Failed to update status: " + error.message);
     } else {
-      alert("✅ Order status updated to " + newStatus);
       window.loadOrders();
     }
+  };
+
+  window.manualUpdate = async function(orderNo) {
+    var s = document.getElementById("status_" + orderNo).value;
+    await window.updateOrderStatus(orderNo, s);
+  };
+
+  // ४. KOT र Bill प्रिन्ट देखाउने फंक्सन
+  window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
+    await window.updateOrderStatus(orderNo, nextStatus);
+    var o = activeOrdersCache.find(item => item.order_no === orderNo);
+    if(!o) return;
+
+    var isKot = (printType === "kot");
+    var invoiceHtml = `<div style="text-align:center;"><h3>UGRATARA RESTAURANT</h3><p>${isKot ? "🎫 KOT (KITCHEN ORDER)" : "🧾 INVOICE / BILL"}</p></div>
+      <hr>
+      <div><b>Order No:</b> ${o.order_no}</div>
+      <div><b>Customer:</b> ${o.customer_name} (${o.phone})</div>
+      <div><b>Total:</b> RM ${o.total}</div>
+      <hr>
+      <div style="font-weight:bold;">Thank you!</div>`;
+    
+    // प्रिन्ट मोडल देखाउने
+    if(document.getElementById("printableInvoiceArea")) {
+        document.getElementById("printableInvoiceArea").innerHTML = invoiceHtml;
+        document.getElementById("printModalBox").style.display = "flex";
+    }
+  };
+
+  // ५. डेलिभरी प्रुफ फोटो अपलोड गर्ने (Choose File / Camera)
+  window.uploadDeliveryProof = function(orderNo, fileInput) {
+    const file = fileInput.files[0];
+    if(!file) return;
+
+    const reader = new FileReader();
+    reader.onload = async function() {
+        const base64Img = reader.result;
+        let currentTime = new Date().toLocaleString();
+        
+        // Supabase मा Delivered, Proof Image र Delivery Time एकसाथ सेभ गर्ने
+        let { error } = await supabaseClient
+          .from('orders')
+          .update({ 
+            status: "Delivered", 
+            proof_img: base64Img, 
+            delivery_time: currentTime 
+          })
+          .eq('order_no', orderNo);
+
+        if(error) {
+            alert("Error saving proof: " + error.message);
+        } else {
+            alert("✅ Delivery Proof Uploaded & Order Delivered!");
+            window.loadOrders();
+        }
+    };
+    reader.readAsDataURL(file);
   };
   
 </script>
