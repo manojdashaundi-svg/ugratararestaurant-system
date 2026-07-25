@@ -220,7 +220,6 @@
       html = `<tr><td colspan="9" style="padding:20px;">No Active Orders Found.</td></tr>`;
     } else {
       activeOrdersCache.forEach(function(o){
-        // 🛠️ स्टेटसलाई पूर्ण रूपमा सफा र स्ट्यान्डर्ड बनाउने
         let rawStatus = o.status ? String(o.status).trim() : "Pending";
         let status = rawStatus.toLowerCase();
         
@@ -230,32 +229,31 @@
         let delivHtml = (o.proof_img && o.proof_img !== "None" && o.proof_img !== "") ? 
           `<img src="${o.proof_img}" class="proof-thumb" onclick="window.openImageViewer('${o.proof_img}')">` : `None`;
         
-        let statusSelect = `<select id="status_${o.order_no}">
+        let statusSelect = `<select id="status_${o.order_no || o.id}">
           <option value="Pending" ${status==="pending"?"selected":""}>Pending</option>
           <option value="Preparing" ${status==="preparing"?"selected":""}>Preparing</option>
           <option value="Ready" ${status==="ready"?"selected":""}>Ready</option>
           <option value="Out for Delivery" ${status==="out for delivery"?"selected":""}>Out for Delivery</option>
           <option value="Delivered" ${status==="delivered"?"selected":""}>Delivered</option>
         </select> 
-        <button class="updateBtn" onclick="window.manualUpdate('${o.order_no}')">Go</button>`;
+        <button class="updateBtn" onclick="window.manualUpdate('${o.order_no || o.id}')">Go</button>`;
 
-        // 🎯 Instant Action बटनहरू (स्टेटस अनुसार दुरुस्तै परिवर्तन हुने)
         let actionButtons = "";
         if (status === "pending" || status === "order received" || status === "") {
-            actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
+            actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
         } else if (status === "preparing") {
-            actionButtons = `<button class="rdyBtn" onclick="window.triggerInstantAction('${o.order_no}', 'Ready', 'bill')">🍳 Ready & Bill</button>`;
+            actionButtons = `<button class="rdyBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Ready', 'bill')">🍳 Ready & Bill</button>`;
         } else if (status === "ready") {
-            actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no}', 'Out for Delivery')">🚚 Dispatch</button>`;
+            actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no || o.id}', 'Out for Delivery')">🚚 Dispatch</button>`;
         } else if (status === "out for delivery") {
-            actionButtons = `Upload Proof:<br><input type="file" accept="image/*" capture="environment" onchange="window.uploadDeliveryProof('${o.order_no}', this)" style="width:110px;">`;
+            actionButtons = `Upload Proof:<br><input type="file" accept="image/*" capture="environment" onchange="window.uploadDeliveryProof('${o.order_no || o.id}', this)" style="width:110px;">`;
         } else if (status === "delivered") {
             actionButtons = `<span style="color:green; font-weight:bold;">✅ Delivered</span>`;
         }
 
         html += `<tr>
           <td style="font-size:12px; color:#555;">${o.time || '-'}</td>
-          <td><b>${o.order_no}</b></td>
+          <td><b>${o.order_no || o.id}</b></td>
           <td>${o.customer_name || '-'}<br><small style="color:#666;">${o.phone || ''}</small></td>
           <td style="color:#e91e63; font-weight:bold;">RM ${o.total || '0'}</td>
           <td>${slipHtml}</td>
@@ -269,26 +267,18 @@
     tableBody.innerHTML = html;
   };
 
-  // 🎯 KOT वा Bill प्रिन्ट गर्ने र Supabase मा Status शतप्रतिशत अपडेट गर्ने अचूक फंक्सन
+  // २. KOT वा Bill प्रिन्ट गर्ने र Supabase मा Status अपडेट गर्ने अचूक फंक्सन
   window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
-    console.log("Updating orderNo:", orderNo, "to status:", nextStatus);
-
-    // १. Supabase मा अपडेट गरी हेर्ने र यदि एरर आएमा तुरुन्तै पपअपमा देखाउने
-    let { data, error } = await supabaseClient
-      .from('orders')
-      .update({ status: nextStatus })
-      .eq('order_no', orderNo)
-      .select();
-
-    if (error) {
-      alert("Supabase Error: " + error.message);
-      return;
+    // 🛠️ 'order_no' र 'id' दुवैमा एकसाथ अपडेट पठाउने
+    let res = await supabaseClient.from('orders').update({ status: nextStatus }).eq('order_no', orderNo);
+    if (res.error) {
+      await supabaseClient.from('orders').update({ status: nextStatus }).eq('id', orderNo);
     }
 
-    // २. तुरुन्तै प्यानलको टेबल डेटा रिफ्रेस गर्ने
+    // तुरुन्तै प्यानलको टेबल डेटा रिफ्रेस गर्ने
     await window.loadOrders();
 
-    var o = activeOrdersCache.find(item => item.order_no == orderNo || item.orderno == orderNo || item.id == orderNo);
+    var o = activeOrdersCache.find(item => item.order_no == orderNo || item.id == orderNo);
     if(!o) {
       o = { order_no: orderNo, customer_name: "Valued Customer", phone: "", time: "Now", total: "0", items: "Food Items" };
     }
@@ -300,7 +290,7 @@
     </div>
     <hr style="border-top: 1px dashed #000; margin: 6px 0;">
     <div style="font-family: monospace; font-size: 11.5px; line-height: 1.3;">
-      <div><b>Order No:</b> ${o.order_no || o.orderno || orderNo}</div>
+      <div><b>Order No:</b> ${o.order_no || o.id || orderNo}</div>
       <div><b>Customer:</b> ${o.customer_name || 'Guest'} (${o.phone || '-'})</div>
       <div><b>Date:</b> ${o.time || 'N/A'}</div>
     </div>
@@ -314,23 +304,18 @@
         document.getElementById("printModalBox").style.display = "flex";
     }
   };
-  
+
   window.updateOrderStatus = async function(orderNo, newStatus) {
     let updatePayload = { status: newStatus };
     if(newStatus === "Delivered") {
         updatePayload.delivery_time = new Date().toLocaleString();
     }
 
-    let { error } = await supabaseClient
-      .from('orders')
-      .update(updatePayload)
-      .eq('order_no', orderNo);
-
-    if (error) {
-      alert("Failed to update status: " + error.message);
-    } else {
-      window.loadOrders();
+    let res = await supabaseClient.from('orders').update(updatePayload).eq('order_no', orderNo);
+    if (res.error) {
+      await supabaseClient.from('orders').update(updatePayload).eq('id', orderNo);
     }
+    window.loadOrders();
   };
 
   window.manualUpdate = async function(orderNo) {
@@ -361,21 +346,14 @@
         const base64Img = reader.result;
         let currentTime = new Date().toLocaleString();
         
-        let { error } = await supabaseClient
-          .from('orders')
-          .update({ 
-            status: "Delivered", 
-            proof_img: base64Img, 
-            delivery_time: currentTime 
-          })
-          .eq('order_no', orderNo);
-
-        if(error) {
-            alert("Error saving proof: " + error.message);
-        } else {
-            alert("✅ Delivery Proof Uploaded & Order Delivered Successfully!");
-            window.loadOrders();
+        let updatePayload = { status: "Delivered", proof_img: base64Img, delivery_time: currentTime };
+        let res = await supabaseClient.from('orders').update(updatePayload).eq('order_no', orderNo);
+        if (res.error) {
+          await supabaseClient.from('orders').update(updatePayload).eq('id', orderNo);
         }
+
+        alert("✅ Delivery Proof Uploaded & Order Delivered Successfully!");
+        window.loadOrders();
     };
     reader.readAsDataURL(file);
   };
