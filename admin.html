@@ -175,50 +175,80 @@
     }
   };
 
-  // अर्डरहरू लोड गर्ने (Supabase बाट)
-  window.loadOrders = async function() {
-    let { data, error } = await supabaseClient
-      .from('orders')
-      .select('*')
-      .order('time', { ascending: false });
+  // १. मेनु लोड गर्ने सही तरिका (id प्रयोग गरेर)
+  window.loadMenuList = async function() {
+    let { data, error } = await supabaseClient.from('menu_items').select('*');
+    if(error) { console.log("Menu load error:", error); return; }
 
-    if (error) {
-      console.log("Error loading orders: ", error);
-      return;
-    }
-
-    activeOrdersCache = data || [];
-    var tableBody = document.getElementById("ordersTable");
-    if(!tableBody) return;
-    
+    var menuList = document.getElementById("menuTableList");
+    if(!menuList) return;
     let html = "";
-    if(activeOrdersCache.length === 0) {
-      html = `<tr><td colspan="7" style="padding:20px;">No Active Orders Found.</td></tr>`;
-    } else {
-      activeOrdersCache.forEach(function(o){
-        let status = o.status || "Pending";
-        let slipHtml = o.payment_slip ? `<img src="${o.payment_slip}" class="proof-thumb">` : `None`;
-        
-        let statusSelect = `<select id="status_${o.order_no}" onchange="window.updateOrderStatus('${o.order_no}', this.value)">
-          <option value="Pending" ${status=="Pending"?"selected":""}>Pending</option>
-          <option value="Preparing" ${status=="Preparing"?"selected":""}>Preparing</option>
-          <option value="Ready" ${status=="Ready"?"selected":""}>Ready</option>
-          <option value="Delivered" ${status=="Delivered"?"selected":""}>Delivered</option>
-        </select>`;
+    
+    (data || []).forEach((r) => {
+      let rowId = r.id; // Supabase को वास्तविक id प्रयोग गरिएको
+      let imgTag = r.image ? `<img src="${r.image}" class="menu-thumb">` : `No Image`;
+      let stockStatus = r.status || "In Stock";
+      let stockBtnClass = stockStatus === "In Stock" ? "inStockBtn" : "outStockBtn";
+      let stockText = stockStatus === "In Stock" ? "🟢 In Stock" : "🔴 Out of Stock";
 
-        html += `<tr>
-          <td>${o.time || '-'}</td>
-          <td><b>${o.order_no}</b></td>
-          <td>${o.customer_name || '-'}<br><small>${o.phone || ''}</small></td>
-          <td style="color:#e91e63; font-weight:bold;">RM ${o.total || '0'}</td>
-          <td>${slipHtml}</td>
-          <td>${statusSelect}</td>
-          <td><button class="rcvBtn" onclick="window.updateOrderStatus('${o.order_no}', 'Delivered')">✅ Complete</button></td>
-        </tr>`;
-      });
+      html += `<tr>
+        <td><b>${rowId}</b></td>
+        <td><b>${r.name || ''}</b></td>
+        <td style="color:#e91e63; font-weight:bold;">RM ${r.price || 0}</td>
+        <td>${imgTag}</td>
+        <td>${r.description || ''}</td>
+        <td><b>${r.category || ''}</b></td>
+        <td>
+          <button class="${stockBtnClass}" onclick="window.toggleStock(${rowId}, '${stockStatus}')">${stockText}</button>
+          <button class="editBtn" onclick="window.editProduct(${rowId}, '${r.name}', ${r.price}, '${r.description || ''}', '${r.category || ''}')">✏️ Edit</button>
+          <button class="removeBtn" onclick="window.deleteProduct(${rowId})">❌ Delete</button>
+        </td>
+      </tr>`;
+    });
+    menuList.innerHTML = html;
+  };
+
+  // २. स्टक (In Stock / Out of Stock) परिवर्तन गर्ने सही तरिका
+  window.toggleStock = async function(rowId, currentStatus) {
+    let newStatus = currentStatus === "In Stock" ? "Out of Stock" : "In Stock";
+    let { error } = await supabaseClient.from('menu_items').update({ status: newStatus }).eq('id', rowId);
+    if(error) {
+      alert("Failed to update stock: " + error.message);
+    } else {
+      window.loadMenuList();
     }
-    tableBody.innerHTML = html;
-    window.calculateDashboardStats(activeOrdersCache);
+  };
+
+  // ३. एडिट गरेर सेभ गर्ने सही तरिका
+  window.editProduct = async function(rowId, oldName, oldPrice, oldDesc, oldCat) {
+    var newName = prompt("Edit Product Name:", oldName); if(newName === null) return;
+    var newPrice = parseFloat(prompt("Edit Price (RM):", oldPrice)) || oldPrice;
+    var newDesc = prompt("Edit Description:", oldDesc); if(newDesc === null) return;
+    var newCat = prompt("Edit Category:", oldCat); if(newCat === null) return;
+
+    let { error } = await supabaseClient.from('menu_items')
+      .update({ name: newName, price: newPrice, description: newDesc, category: newCat })
+      .eq('id', rowId);
+
+    if(error) {
+      alert("Failed to update: " + error.message);
+    } else {
+      alert("✅ Successfully Updated & Saved to Supabase!");
+      window.loadMenuList();
+    }
+  };
+
+  // ४. आइटम डिलिट गर्ने सही तरिका
+  window.deleteProduct = async function(rowId) {
+    if(confirm("Delete this item?")) {
+      let { error } = await supabaseClient.from('menu_items').delete().eq('id', rowId);
+      if(error) {
+        alert("Failed to delete: " + error.message);
+      } else {
+        alert("✅ Item deleted successfully!");
+        window.loadMenuList();
+      }
+    }
   };
 
   // अर्डरको स्टटस अपडेट गर्ने
