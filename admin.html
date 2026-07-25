@@ -1,9 +1,318 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin Panel</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>UGRATARA Admin Panel - Supabase Powered</title>
+  <!-- Google Charts Loader -->
+  <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <!-- Supabase JS Client Library -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    try {
+      google.charts.load('current', {'packages':['corechart']});
+    } catch(e) { console.log("Google Charts load error: " + e); }
+  </script>
+  <style>
+    body{ font-family:Arial,sans-serif; background:#f5f5f5; margin:0; padding:20px; }
+    h2{ color:#e91e63; }
+    .logout{ position:fixed; top:15px; right:15px; background:#f44336; color:#fff; border:none; padding:10px 18px; border-radius:8px; cursor:pointer; font-weight: bold; z-index: 1000; }
+    .bell-btn { position:fixed; top:12px; right:125px; background:#fff; border:2px solid #e91e63; font-size:22px; padding:6px 10px; border-radius:50%; cursor:pointer; z-index: 1000; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+    .automation-badge { display: inline-block; background: #fff; border: 1px solid #4CAF50; color: #4CAF50; font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 20px; margin-left: 12px; vertical-align: middle; }
+    table { width:100%; border-collapse:collapse; background:#fff; margin-top:20px; box-shadow:0 2px 5px rgba(0,0,0,0.05); }
+    th{ background:#e91e63; color:#fff; padding:12px; font-size:14px; }
+    td{ padding:10px; border:1px solid #ddd; text-align:center; font-size:14px; }
+    select, input{ padding:8px; border-radius:6px; border:1px solid #ccc; margin:3px; box-sizing: border-box; }
+    .rcvBtn { background:#4CAF50; color:white; border:none; padding:8px 12px; border-radius:6px; font-weight:bold; cursor:pointer; }
+    .rdyBtn { background:#9C27B0; color:white; border:none; padding:8px 12px; border-radius:6px; font-weight:bold; cursor:pointer; }
+    .updateBtn { background:#2196F3; color:white; border:none; padding:8px 12px; border-radius:6px; font-weight:bold; cursor:pointer; }
+    .addBtn { background:#e91e63; color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; }
+    .editBtn { background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
+    .removeBtn { background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
+    .staff-section, .menu-section { background:#fff; padding:20px; border-radius:10px; margin-top:40px; border:1px solid #ddd; display:none; }
+    .report-section { background:#fff; padding:20px; border-radius:10px; margin-top:20px; border:1px solid #ddd; display:none; }
+    .excelBtn { background:#1F7246; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
+    .pdfBtn { background:#E01A22; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
+    .login-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f5f5f5; display:flex; justify-content:center; align-items:center; z-index:99999; }
+    .login-card { background:#fff; padding:30px; border-radius:12px; box-shadow:0 5px 15px rgba(0,0,0,0.1); width:100%; max-width:360px; text-align:center; }
+    .login-card input { width:100%; padding:12px; margin:10px 0; border:1px solid #ddd; border-radius:8px; font-size:16px; }
+    .login-card button { width:100%; padding:12px; background:#e91e63; color:white; border:none; border-radius:8px; font-size:16px; font-weight:bold; cursor:pointer; }
+    .proof-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 1px solid #ccc; }
+    .chart-container { background:#fff; padding:15px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin:20px 0; border:1px solid #ddd; width:100%; height: 280px; display:none; }
+  </style>
 </head>
 <body>
-    <h1>Admin Panel</h1>
+
+<div id="loginScreen" class="login-overlay">
+  <div class="login-card">
+    <h2>🔐 STAFF LOGIN</h2>
+    <input id="username" type="text" placeholder="Username" autocomplete="off">
+    <input id="password" type="password" placeholder="Password" autocomplete="off">
+    <button id="loginBtn" onclick="handleLogin()">Login</button>
+  </div>
+</div>
+
+<div id="adminContent" style="display:none;">
+  <button id="systemBellAlertBtn" class="bell-btn" onclick="window.testBellSound()" title="Test Sound">🔔</button>
+  <button id="globalLogoutBtn" class="logout" onclick="window.logout()">Logout</button>
+  
+  <h2>
+    🍴 UGRATARA Admin Panel (<span id="userRoleBadge" style="color:#e91e63;">...</span>)
+    <span id="emailAutomationStatusBadge" class="automation-badge" style="display: none;">Supabase: 🟢 Active</span>
+  </h2>
+
+  <!-- 📊 ड्यासबोर्ड कार्डहरू -->
+  <div id="salesDashboardBox" style="display: none; gap: 15px; margin: 20px 0; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 150px; background: #fff; padding: 15px; border-radius: 10px; border-left: 5px solid #2196F3; text-align: center;">
+      <span style="font-size: 14px; color: #777; font-weight: bold;">Total Orders</span>
+      <h2 id="dashTotalOrders" style="margin: 5px 0 0 0; color: #2196F3; font-size: 28px;">0</h2>
+    </div>
+    <div style="flex: 1; min-width: 150px; background: #fff; padding: 15px; border-radius: 10px; border-left: 5px solid #4CAF50; text-align: center;">
+      <span style="font-size: 14px; color: #777; font-weight: bold;">Total Revenue</span>
+      <h2 id="dashTotalRevenue" style="margin: 5px 0 0 0; color: #4CAF50; font-size: 28px;">RM 0</h2>
+    </div>
+    <div style="flex: 1; min-width: 150px; background: #fff; padding: 15px; border-radius: 10px; border-left: 5px solid #FF9800; text-align: center;">
+      <span style="font-size: 14px; color: #777; font-weight: bold;">Today's Sales</span>
+      <h2 id="dashTodaySales" style="margin: 5px 0 0 0; color: #FF9800; font-size: 28px;">RM 0</h2>
+    </div>
+  </div>
+
+  <!-- 🛒 मुख्य अर्डर तालिका -->
+  <div id="mainOrdersTableSection">
+    <h3>🛒 Active Orders</h3>
+    <div style="overflow-x: auto; width:100%;">
+      <table>
+        <thead>
+          <tr>
+            <th>Order Date & Time</th>
+            <th>Order No.</th>
+            <th>Customer</th>
+            <th>Total</th>
+            <th>Payment Slip</th>
+            <th>Status / Change</th>
+            <th>Instant Action</th>
+          </tr>
+        </thead>
+        <tbody id="ordersTable">
+          <tr><td colspan="7" style="padding:20px; font-weight:bold;">⏳ Loading Orders from Supabase...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 🍔 मेनु म्यानेजमेन्ट -->
+  <div id="menuManagementBox" class="menu-section">
+    <h3>🍔 Menu & Product Management</h3>
+    <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #ddd;">
+      <h4>+ Add New Product</h4>
+      <input id="prodId" type="text" placeholder="Item ID">
+      <input id="prodName" type="text" placeholder="Product Name">
+      <input id="prodPrice" type="number" placeholder="Price">
+      <input id="prodImg" type="text" placeholder="Image URL">
+      <input id="prodDesc" type="text" placeholder="Description">
+      <input id="prodCat" type="text" placeholder="Category">
+      <button id="addProductBtn" class="addBtn" onclick="window.createNewProduct()">+ Add Product</button>
+    </div>
+    <h4>Current Food Items</h4>
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Food Name</th><th>Price</th><th>Category</th><th>Action</th></tr>
+      </thead>
+      <tbody id="menuTableList"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  // 🔑 आफ्नो Supabase Project को URL र Anon Key यहाँ राख्नुहोस्
+  const SUPABASE_URL = 'YOUR_SUPABASE_URL';
+  const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+  
+  const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  var myRole = "admin";
+  var currentLoggedInUser = "";
+  var activeOrdersCache = [];
+
+  // लगइन जाँच
+  window.handleLogin = async function() {
+    var u = document.getElementById("username").value.trim();
+    var p = document.getElementById("password").value.trim();
+    if(u === "" || p === "") { alert("Enter credentials."); return; }
+    
+    document.getElementById("loginBtn").innerText = "Verifying...";
+    
+    let { data, error } = await supabaseClient
+      .from('staff')
+      .select('*')
+      .eq('username', u)
+      .eq('password', p)
+      .single();
+
+    document.getElementById("loginBtn").innerText = "Login";
+
+    if (data) {
+      sessionStorage.setItem("ADMIN_LOGIN", "true");
+      sessionStorage.setItem("USER_ROLE", data.role.toLowerCase());
+      sessionStorage.setItem("LOGGED_USER", u.toLowerCase());
+      myRole = data.role.toLowerCase();
+      currentLoggedInUser = u.toLowerCase();
+      window.showAdminPanel();
+    } else {
+      alert("Wrong Username or Password.");
+    }
+  };
+
+  // अर्डरहरू लोड गर्ने (Supabase बाट)
+  window.loadOrders = async function() {
+    let { data, error } = await supabaseClient
+      .from('orders')
+      .select('*')
+      .order('time', { ascending: false });
+
+    if (error) {
+      console.log("Error loading orders: ", error);
+      return;
+    }
+
+    activeOrdersCache = data || [];
+    var tableBody = document.getElementById("ordersTable");
+    if(!tableBody) return;
+    
+    let html = "";
+    if(activeOrdersCache.length === 0) {
+      html = `<tr><td colspan="7" style="padding:20px;">No Active Orders Found.</td></tr>`;
+    } else {
+      activeOrdersCache.forEach(function(o){
+        let status = o.status || "Pending";
+        let slipHtml = o.payment_slip ? `<img src="${o.payment_slip}" class="proof-thumb">` : `None`;
+        
+        let statusSelect = `<select id="status_${o.order_no}" onchange="window.updateOrderStatus('${o.order_no}', this.value)">
+          <option value="Pending" ${status=="Pending"?"selected":""}>Pending</option>
+          <option value="Preparing" ${status=="Preparing"?"selected":""}>Preparing</option>
+          <option value="Ready" ${status=="Ready"?"selected":""}>Ready</option>
+          <option value="Delivered" ${status=="Delivered"?"selected":""}>Delivered</option>
+        </select>`;
+
+        html += `<tr>
+          <td>${o.time || '-'}</td>
+          <td><b>${o.order_no}</b></td>
+          <td>${o.customer_name || '-'}<br><small>${o.phone || ''}</small></td>
+          <td style="color:#e91e63; font-weight:bold;">RM ${o.total || '0'}</td>
+          <td>${slipHtml}</td>
+          <td>${statusSelect}</td>
+          <td><button class="rcvBtn" onclick="window.updateOrderStatus('${o.order_no}', 'Delivered')">✅ Complete</button></td>
+        </tr>`;
+      });
+    }
+    tableBody.innerHTML = html;
+    window.calculateDashboardStats(activeOrdersCache);
+  };
+
+  // अर्डरको स्टटस अपडेट गर्ने
+  window.updateOrderStatus = async function(orderNo, newStatus) {
+    let { error } = await supabaseClient
+      .from('orders')
+      .update({ status: newStatus })
+      .eq('order_no', orderNo);
+
+    if (error) {
+      alert("Failed to update status!");
+    } else {
+      window.loadOrders();
+    }
+  };
+
+  // ड्यासबोर्ड तथ्याङ्क हिसाब गर्ने
+  window.calculateDashboardStats = function(orders) {
+    let totalOrders = orders.length;
+    let totalRevenue = 0;
+    orders.forEach(o => {
+      totalRevenue += parseFloat(o.total) || 0;
+    });
+
+    if(document.getElementById("dashTotalOrders")) document.getElementById("dashTotalOrders").innerText = totalOrders;
+    if(document.getElementById("dashTotalRevenue")) document.getElementById("dashTotalRevenue").innerText = "RM " + totalRevenue.toFixed(2);
+  };
+
+  // मेनु लोड गर्ने
+  window.loadMenuList = async function() {
+    let { data, error } = await supabaseClient.from('menu_items').select('*');
+    if(error) return;
+
+    var menuList = document.getElementById("menuTableList");
+    if(!menuList) return;
+    let html = "";
+    (data || []).forEach((r) => {
+      html += `<tr>
+        <td><b>${r.item_id}</b></td>
+        <td>${r.name}</td>
+        <td style="color:#e91e63; font-weight:bold;">RM ${r.price}</td>
+        <td><b>${r.category}</b></td>
+        <td><button class="removeBtn" onclick="window.deleteProduct('${r.item_id}')">❌ Delete</button></td>
+      </tr>`;
+    });
+    menuList.innerHTML = html;
+  };
+
+  // नयाँ उत्पादन थप्ने
+  window.createNewProduct = async function() {
+    var id = document.getElementById("prodId").value.trim();
+    var name = document.getElementById("prodName").value.trim();
+    var price = parseFloat(document.getElementById("prodPrice").value) || 0;
+    var img = document.getElementById("prodImg").value.trim();
+    var desc = document.getElementById("prodDesc").value.trim();
+    var cat = document.getElementById("prodCat").value.trim();
+
+    if(!id || !name || !price) { alert("Please fill required fields!"); return; }
+
+    let { error } = await supabaseClient.from('menu_items').insert([
+      { item_id: id, name: name, price: price, image: img, description: desc, category: cat }
+    ]);
+
+    if(error) {
+      alert("Error adding product!");
+    } else {
+      alert("✅ Product Added Successfully!");
+      window.loadMenuList();
+    }
+  };
+
+  window.deleteProduct = async function(id) {
+    if(confirm("Delete item?")) {
+      await supabaseClient.from('menu_items').delete().eq('item_id', id);
+      window.loadMenuList();
+    }
+  };
+
+  window.showAdminPanel = function() {
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("adminContent").style.display = "block";
+    document.getElementById("userRoleBadge").innerText = myRole.toUpperCase();
+    
+    if (myRole === "admin" || myRole === "manager") {
+      document.getElementById("salesDashboardBox").style.display = "flex";
+      document.getElementById("menuManagementBox").style.display = "block";
+      window.loadMenuList();
+    }
+    window.loadOrders();
+  };
+
+  window.logout = function() {
+    sessionStorage.clear();
+    window.location.reload();
+  };
+
+  window.testBellSound = function() { alert("🔔 घण्टी बज्यो!"); };
+
+  // पगे लोड हुँदा लगइन चेक गर्ने
+  if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
+    myRole = sessionStorage.getItem("USER_ROLE") || "admin";
+    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
+    window.showAdminPanel();
+  } else {
+    document.getElementById("loginScreen").style.display = "flex";
+  }
+</script>
 </body>
 </html>
