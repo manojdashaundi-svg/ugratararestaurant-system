@@ -378,6 +378,45 @@ window.loadOrders = async function() {
   } else {
     document.getElementById("loginScreen").style.display = "flex";
   }
+  
+// १. पेमेन्ट स्लिप वा डेलिभरी प्रुफ क्लिक गर्दा ठूलो देखाउने
+  window.openImageViewer = function(imgUrl) {
+    var modalImg = document.getElementById("viewerTargetImage");
+    var modal = document.getElementById("imageViewerModal");
+    if(modalImg && modal) {
+      modalImg.src = imgUrl;
+      modal.style.display = "flex";
+    }
+  };
+
+  window.closeImageViewer = function() {
+    var modal = document.getElementById("imageViewerModal");
+    if(modal) modal.style.display = "none";
+  };
+
+  // २. 'Go' बटन वा 'Instant Action' बटन थिच्दा अर्डरको स्टेटस अपडेट गर्ने
+  window.manualUpdate = async function(orderNo) {
+    var statusSelect = document.getElementById("status_" + orderNo);
+    if(!statusSelect) return;
+    var newStatus = statusSelect.value;
+    await window.updateOrderStatus(orderNo, newStatus);
+  };
+
+  // ३. Supabase मा अर्डरको स्टेटस सेभ गर्ने मुख्य फंक्सन
+  window.updateOrderStatus = async function(orderNo, newStatus) {
+    let { error } = await supabaseClient
+      .from('orders')
+      .update({ status: newStatus })
+      .eq('order_no', orderNo);
+
+    if (error) {
+      alert("Failed to update status: " + error.message);
+    } else {
+      alert("✅ Order status updated to " + newStatus);
+      window.loadOrders();
+    }
+  };
+  
 </script>
 </body>
 </html>
