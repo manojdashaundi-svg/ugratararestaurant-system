@@ -199,19 +199,28 @@
     }
   };
 
-  // १. अर्डर लोड गर्ने र सिरियल वाइज वा समयको क्रममा देखाउने फंक्सन
+ // १. अर्डर लोड गर्ने र सुरक्षित रूपमा क्रम मिलाएर देखाउने फंक्सन
   window.loadOrders = async function() {
     let { data, error } = await supabaseClient
       .from('orders')
-      .select('*')
-      .order('id', { ascending: true }); // 🛠️ 'id' वा 'order_no' को आधारमा सिरियल वाइज (क्रमबद्ध) देखाउन
+      .select('*');
 
     if (error) {
       console.log("Error loading orders: ", error);
+      var tableBody = document.getElementById("ordersTable");
+      if(tableBody) tableBody.innerHTML = `<tr><td colspan="9" style="padding:20px; color:red;">Error loading orders: ${error.message}</td></tr>`;
       return;
     }
 
     activeOrdersCache = data || [];
+    
+    // यदि समय वा आईडी अनुसार मिलाउन चाहनुहुन्छ भने यहाँ सर्टिङ गर्न सकिन्छ
+    activeOrdersCache.sort((a, b) => {
+      let idA = a.id || 0;
+      let idB = b.id || 0;
+      return idA > idB ? 1 : -1;
+    });
+
     var tableBody = document.getElementById("ordersTable");
     if(!tableBody) return;
     
@@ -219,7 +228,7 @@
     if(activeOrdersCache.length === 0) {
       html = `<tr><td colspan="9" style="padding:20px;">No Active Orders Found.</td></tr>`;
     } else {
-      activeOrdersCache.forEach(function(o, index){
+      activeOrdersCache.forEach(function(o){
         let rawStatus = o.status ? String(o.status).trim() : "Pending";
         let status = rawStatus.toLowerCase();
         
@@ -246,7 +255,8 @@
         } else if (status === "ready") {
             actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no || o.id}', 'Out for Delivery')">🚚 Dispatch</button>`;
         } else if (status === "out for delivery") {
-            actionButtons = `Upload Proof:<br><input type="file" accept="image/*" capture="environment" onchange="window.uploadDeliveryProof('${o.order_no || o.id}', this)" style="width:110px;">`;
+            actionButton = `Upload Proof:<br><input type="file" accept="image/*" capture="environment" onchange="window.uploadDeliveryProof('${o.order_no || o.id}', this)" style="width:110px;">`;
+            actionButtons = actionButton;
         } else if (status === "delivered") {
             actionButtons = `<span style="color:green; font-weight:bold;">✅ Delivered</span>`;
         }
@@ -266,6 +276,7 @@
     }
     tableBody.innerHTML = html;
   };
+  
   // २. KOT वा Bill प्रिन्ट गर्ने र ५८मिमी प्रिन्टरको लागि सुन्दर डिजाइन बनाउने फंक्सन
   window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
     let res = await supabaseClient.from('orders').update({ status: nextStatus }).eq('order_no', orderNo);
