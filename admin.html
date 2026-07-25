@@ -199,7 +199,7 @@
     }
   };
 
-  // १. अर्डर लोड गर्ने
+  // १. अर्डर लोड गर्ने (सबै प्रकारका केस र स्पेसहरू मिलाएर सही बटन देखाउने)
   window.loadOrders = async function() {
     let { data, error } = await supabaseClient
       .from('orders')
@@ -220,7 +220,9 @@
       html = `<tr><td colspan="9" style="padding:20px;">No Active Orders Found.</td></tr>`;
     } else {
       activeOrdersCache.forEach(function(o){
-        let status = o.status ? o.status.trim() : "Pending";
+        // 🛠️ स्टेटसलाई पूर्ण रूपमा सफा र स्ट्यान्डर्ड बनाउने
+        let rawStatus = o.status ? String(o.status).trim() : "Pending";
+        let status = rawStatus.toLowerCase();
         
         let slipHtml = (o.payment_slip && o.payment_slip !== "None" && o.payment_slip !== "") ? 
           `<img src="${o.payment_slip}" class="proof-thumb" onclick="window.openImageViewer('${o.payment_slip}')">` : `None`;
@@ -229,24 +231,25 @@
           `<img src="${o.proof_img}" class="proof-thumb" onclick="window.openImageViewer('${o.proof_img}')">` : `None`;
         
         let statusSelect = `<select id="status_${o.order_no}">
-          <option value="Pending" ${status=="Pending"?"selected":""}>Pending</option>
-          <option value="Preparing" ${status=="Preparing"?"selected":""}>Preparing</option>
-          <option value="Ready" ${status=="Ready"?"selected":""}>Ready</option>
-          <option value="Out for Delivery" ${status=="Out for Delivery"?"selected":""}>Out for Delivery</option>
-          <option value="Delivered" ${status=="Delivered"?"selected":""}>Delivered</option>
+          <option value="Pending" ${status==="pending"?"selected":""}>Pending</option>
+          <option value="Preparing" ${status==="preparing"?"selected":""}>Preparing</option>
+          <option value="Ready" ${status==="ready"?"selected":""}>Ready</option>
+          <option value="Out for Delivery" ${status==="out for delivery"?"selected":""}>Out for Delivery</option>
+          <option value="Delivered" ${status==="delivered"?"selected":""}>Delivered</option>
         </select> 
         <button class="updateBtn" onclick="window.manualUpdate('${o.order_no}')">Go</button>`;
 
+        // 🎯 Instant Action बटनहरू (स्टेटस अनुसार दुरुस्तै परिवर्तन हुने)
         let actionButtons = "";
-        if (status === "Pending" || status === "Order Received") {
+        if (status === "pending" || status === "order received" || status === "") {
             actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
-        } else if (status === "Preparing") {
+        } else if (status === "preparing") {
             actionButtons = `<button class="rdyBtn" onclick="window.triggerInstantAction('${o.order_no}', 'Ready', 'bill')">🍳 Ready & Bill</button>`;
-        } else if (status === "Ready") {
+        } else if (status === "ready") {
             actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no}', 'Out for Delivery')">🚚 Dispatch</button>`;
-        } else if (status === "Out for Delivery") {
+        } else if (status === "out for delivery") {
             actionButtons = `Upload Proof:<br><input type="file" accept="image/*" capture="environment" onchange="window.uploadDeliveryProof('${o.order_no}', this)" style="width:110px;">`;
-        } else if (status === "Delivered") {
+        } else if (status === "delivered") {
             actionButtons = `<span style="color:green; font-weight:bold;">✅ Delivered</span>`;
         }
 
@@ -266,7 +269,7 @@
     tableBody.innerHTML = html;
   };
 
-  // २. KOT/Bill प्रिन्ट र Supabase मा अपडेट गर्ने
+  // २. KOT वा Bill प्रिन्ट गर्ने र Supabase मा 'order_no' वा 'id' बाट डेटा अपडेट गर्ने
   window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
     let { error } = await supabaseClient
       .from('orders')
@@ -284,6 +287,7 @@
       }
     }
 
+    // तुरुन्तै प्यानलको डेटा रिफ्रेस गर्ने
     await window.loadOrders();
 
     var o = activeOrdersCache.find(item => item.order_no == orderNo || item.id == orderNo);
