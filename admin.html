@@ -38,10 +38,17 @@
     .login-card input { width:100%; padding:12px; margin:10px 0; border:1px solid #ddd; border-radius:8px; font-size:16px; }
     .login-card button { width:100%; padding:12px; background:#e91e63; color:white; border:none; border-radius:8px; font-size:16px; font-weight:bold; cursor:pointer; }
     .proof-thumb { width: 50px; height: 50px; object-fit: cover; border-radius: 6px; cursor: pointer; border: 1px solid #ccc; display: inline-block; }
+    
     .image-viewer-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); display:none; justify-content:center; align-items:center; z-index:999999; }
     .image-viewer-box { background:#fff; padding:20px; border-radius:12px; max-width:90%; max-height:90%; text-align:center; position:relative; }
     .image-viewer-box img { max-width:100%; max-height:70vh; object-fit:contain; border-radius:8px; display:block; margin-bottom:15px; }
     .close-viewer-btn { background:#f44336; color:white; border:none; padding:8px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
+
+    /* 🎯 प्रिन्ट मोडल स्टाइल थपियो */
+    .print-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:none; justify-content:center; align-items:center; z-index:999999; }
+    .print-box { background:#fff; padding:25px; border-radius:12px; width:320px; max-height:85vh; overflow-y:auto; box-shadow:0 5px 20px rgba(0,0,0,0.3); }
+    .print-area { font-family: 'Courier New', Courier, monospace; font-size:14px; color:#000; line-height:1.4; }
+
     .chart-container { background:#fff; padding:15px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin:20px 0; border:1px solid #ddd; width:100%; height: 280px; display:none; }
     .inStockBtn { background:#4CAF50; color:white; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; display: inline-flex; align-items: center; gap: 5px; }
     .outStockBtn { background:#ff9800; color:white; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
@@ -110,7 +117,7 @@
     </div>
   </div>
 
-  <!-- 🍔 मेनु म्यानेजमेन्ट सेक्सन (यसको ठ्याक्कै तल रहनेछ) -->
+  <!-- 🍔 मेनु म्यानेजमेन्ट सेक्सन -->
   <div id="menuManagementBox" class="menu-section">
     <h3>🍔 Menu & Product Management</h3>
     <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #ddd;">
@@ -141,16 +148,29 @@
       </table>
     </div>
   </div>
-  
+</div>
+
+<!-- 🎯 इमेज भ्यूअर मोडल -->
 <div id="imageViewerModal" class="image-viewer-modal" onclick="window.closeImageViewer()">
   <div class="image-viewer-box" onclick="event.stopPropagation()">
     <img id="viewerTargetImage" src="" alt="Proof View">
     <button class="close-viewer-btn" onclick="window.closeImageViewer()">Close Window ✕</button>
   </div>
 </div>
-  
+
+<!-- 🎯 KOT र Bill प्रिन्ट मोडल बक्स थपियो -->
+<div id="printModalBox" class="print-modal">
+  <div class="print-box">
+    <div id="printableInvoiceArea" class="print-area"></div>
+    <div style="margin-top:20px; text-align:center;">
+       <button class="rcvBtn" onclick="window.executeSystemPrint()" style="padding:10px 20px;">🖨 Print Now</button>
+       <button class="close-viewer-btn" onclick="window.closePrintModal()" style="padding:10px 20px; margin-left:10px;">Close ✕</button>
+    </div>
+  </div>
+</div>
+
 <script>
-  const SUPABASE_URL = 'https://lorhrfdqzagulicwcctx.supabase.co  ';
+  const SUPABASE_URL = 'https://lorhrfdqzagulicwcctx.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_YxubnsG5x3QD_OaPzEEy_w_wzLVLSlW';
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -180,7 +200,8 @@
     }
   };
 
-window.loadOrders = async function() {
+  // 🛒 अर्डरहरू लोड गर्ने (वर्कफ्लो अनुसार सही बटन र स्टेटस देखाउने)
+  window.loadOrders = async function() {
     let { data, error } = await supabaseClient
       .from('orders')
       .select('*')
@@ -204,237 +225,12 @@ window.loadOrders = async function() {
       activeOrdersCache.forEach(function(o){
         let status = o.status || "Pending";
         
-        // Payment Slip र Delivery Proof को थम्बनेल देखाउने
         let slipHtml = (o.payment_slip && o.payment_slip !== "None" && o.payment_slip !== "") ? 
           `<img src="${o.payment_slip}" class="proof-thumb" onclick="window.openImageViewer('${o.payment_slip}')">` : `None`;
         
         let delivHtml = (o.proof_img && o.proof_img !== "None" && o.proof_img !== "") ? 
           `<img src="${o.proof_img}" class="proof-thumb" onclick="window.openImageViewer('${o.proof_img}')">` : `None`;
         
-        // Status परिवर्तन गर्ने ड्रपडाउन र 'Go' बटन (Google Apps Script जस्तै)
-        let statusSelect = `<select id="status_${o.order_no}">
-          <option value="Pending" ${status=="Pending"?"selected":""}>Pending</option>
-          <option value="Order Received" ${status=="Order Received"?"selected":""}>Order Received</option>
-          <option value="Preparing" ${status=="Preparing"?"selected":""}>Preparing</option>
-          <option value="Ready" ${status=="Ready"?"selected":""}>Ready</option>
-          <option value="Out for Delivery" ${status=="Out for Delivery"?"selected":""}>Out for Delivery</option>
-          <option value="Delivered" ${status=="Delivered"?"selected":""}>Delivered</option>
-        </select> 
-        <button class="updateBtn" onclick="window.manualUpdate('${o.order_no}')">Go</button>`;
-
-        // Instant Action बटनहरू
-        let actionButtons = "";
-        if (status === "Pending" || status === "Order Received") {
-            actionButtons += `<button class="rcvBtn" onclick="window.updateOrderStatus('${o.order_no}', 'Preparing')">🎫 Receive & KOT</button> `;
-        } else if (status === "Preparing") {
-            actionButtons += `<button class="rdyBtn" onclick="window.updateOrderStatus('${o.order_no}', 'Ready')">🍳 Ready & Bill</button> `;
-        } else if (status === "Ready") {
-            actionButtons += `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no}', 'Out for Delivery')">🚚 Dispatch</button> `;
-        } else if (status === "Delivered") {
-            actionButtons = `<span style="color:green; font-weight:bold;">✅ Delivered</span>`;
-        }
-
-        html += `<tr>
-          <td style="font-size:12px; color:#555;">${o.time || '-'}</td>
-          <td><b>${o.order_no}</b></td>
-          <td>${o.customer_name || '-'}<br><small style="color:#666;">${o.phone || ''}</small></td>
-          <td style="color:#e91e63; font-weight:bold;">RM ${o.total || '0'}</td>
-          <td>${slipHtml}</td>
-          <td style="font-size:12px; color:#555; font-weight:bold;">${status === "Delivered" ? (o.time || '-') : (o.delivery_time || 'N/A')}</td>
-          <td>${delivHtml}</td>
-          <td>${statusSelect}</td>
-          <td>${actionButtons}</td>
-        </tr>`;
-      });
-    }
-    tableBody.innerHTML = html;
-    if(typeof window.calculateDashboardStats === "function") {
-        window.calculateDashboardStats(activeOrdersCache);
-    }
-  };
-
-  // 'Go' बटन थिच्दा स्टेट्स अपडेट गर्ने फंक्सन
-  window.manualUpdate = async function(orderNo) {
-    var s = document.getElementById("status_" + orderNo).value;
-    await window.updateOrderStatus(orderNo, s);
-  };
-
-  window.updateOrderStatus = async function(orderNo, newStatus) {
-    await supabaseClient.from('orders').update({ status: newStatus }).eq('order_no', orderNo);
-    window.loadOrders();
-  };
-
-  window.calculateDashboardStats = function(orders) {
-    let totalOrders = orders.length;
-    let totalRevenue = 0;
-    orders.forEach(o => { totalRevenue += parseFloat(o.total) || 0; });
-
-    if(document.getElementById("dashTotalOrders")) document.getElementById("dashTotalOrders").innerText = totalOrders;
-    if(document.getElementById("dashTotalRevenue")) document.getElementById("dashTotalRevenue").innerText = "RM " + totalRevenue.toFixed(2);
-  };
-
- // मेनु लोड गर्ने (सिरियल नम्बर मिलाएर देखाउने)
-  window.loadMenuList = async function() {
-    let { data, error } = await supabaseClient
-      .from('menu_items')
-      .select('*')
-      .order('id', { ascending: true });
-
-    if(error) { console.log("Menu error:", error); return; }
-
-    var menuList = document.getElementById("menuTableList");
-    if(!menuList) return;
-    let html = "";
-    
-    (data || []).forEach((r, index) => {
-      let rowRealId = r.id; // Supabase को वास्तविक ID (डिलिट/एडिट गर्न प्रयोग हुने)
-      let displaySerial = index + 1; // 👈 प्यानलमा देखाउने सिरियल नम्बर (१, २, ३...)
-      let imgTag = r.image ? `<img src="${r.image}" class="menu-thumb">` : `No Image`;
-      let stockStatus = r.status || "In Stock";
-      let stockBtnClass = stockStatus === "In Stock" ? "inStockBtn" : "outStockBtn";
-      let stockText = stockStatus === "In Stock" ? "🟢 In Stock" : "🔴 Out of Stock";
-
-      html += `<tr>
-        <td><b>${displaySerial}</b></td>
-        <td><b>${r.name || ''}</b></td>
-        <td style="color:#e91e63; font-weight:bold;">RM ${r.price || 0}</td>
-        <td>${imgTag}</td>
-        <td>${r.description || ''}</td>
-        <td><b>${r.category || ''}</b></td>
-        <td>
-          <button class="${stockBtnClass}" onclick="window.toggleStock(${rowRealId}, '${stockStatus}')">${stockText}</button>
-          <button class="editBtn" onclick="window.editProduct(${rowRealId}, '${r.name}', ${r.price}, '${r.description || ''}', '${r.category || ''}')">✏️ Edit</button>
-          <button class="removeBtn" onclick="window.deleteProduct(${rowRealId})">❌ Delete</button>
-        </td>
-      </tr>`;
-    });
-    menuList.innerHTML = html;
-  };
-
-  // स्टक परिवर्तन गर्ने
-  window.toggleStock = async function(rowId, currentStatus) {
-    let newStatus = currentStatus === "In Stock" ? "Out of Stock" : "In Stock";
-    let { error } = await supabaseClient.from('menu_items').update({ status: newStatus }).eq('id', rowId);
-    if(error) { alert("Error: " + error.message); } else { window.loadMenuList(); }
-  };
-
-  // नयाँ उत्पादन थप्ने
-  window.createNewProduct = async function() {
-    var name = document.getElementById("prodName").value.trim();
-    var price = parseFloat(document.getElementById("prodPrice").value) || 0;
-    var img = document.getElementById("prodImg").value.trim();
-    var desc = document.getElementById("prodDesc").value.trim();
-    var cat = document.getElementById("prodCat").value.trim();
-
-    if(!name || !price) { alert("Enter Name and Price!"); return; }
-
-    let { error } = await supabaseClient.from('menu_items').insert([
-      { name: name, price: price, image: img, description: desc, category: cat, status: "In Stock" }
-    ]);
-
-    if(error) {
-      alert("Error adding product: " + error.message);
-    } else {
-      alert("✅ Product Added & Saved!");
-      document.getElementById("prodName").value = "";
-      document.getElementById("prodPrice").value = "";
-      document.getElementById("prodImg").value = "";
-      document.getElementById("prodDesc").value = "";
-      document.getElementById("prodCat").value = "";
-      window.loadMenuList();
-    }
-  };
-
-  // एडिट गर्ने
-  window.editProduct = async function(rowId, oldName, oldPrice, oldDesc, oldCat) {
-    var newName = prompt("Edit Name:", oldName); if(newName === null) return;
-    var newPrice = parseFloat(prompt("Edit Price:", oldPrice)) || oldPrice;
-    var newDesc = prompt("Edit Description:", oldDesc); if(newDesc === null) return;
-    var newCat = prompt("Edit Category:", oldCat); if(newCat === null) return;
-
-    let { error } = await supabaseClient.from('menu_items')
-      .update({ name: newName, price: newPrice, description: newDesc, category: newCat })
-      .eq('id', rowId);
-
-    if(error) { alert("Error updating: " + error.message); } else { alert("✅ Updated Successfully!"); window.loadMenuList(); }
-  };
-
-  // डिलिट गर्ने
-  window.deleteProduct = async function(rowId) {
-    if(confirm("Delete this item?")) {
-      let { error } = await supabaseClient.from('menu_items').delete().eq('id', rowId);
-      if(error) { alert("Error deleting: " + error.message); } else { alert("✅ Deleted!"); window.loadMenuList(); }
-    }
-  };
-
-  window.showAdminPanel = function() {
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("adminContent").style.display = "block";
-    document.getElementById("userRoleBadge").innerText = myRole.toUpperCase();
-    
-    if (myRole === "admin" || myRole === "manager") {
-      document.getElementById("salesDashboardBox").style.display = "flex";
-      document.getElementById("menuManagementBox").style.display = "block";
-      window.loadMenuList();
-    }
-    window.loadOrders();
-  };
-
-  window.logout = function() { sessionStorage.clear(); window.location.reload(); };
-
-  if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
-    myRole = sessionStorage.getItem("USER_ROLE") || "admin";
-    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
-    window.showAdminPanel();
-  } else {
-    document.getElementById("loginScreen").style.display = "flex";
-  }
-  
-// १. पेमेन्ट स्लिप वा डेलिभरी प्रुफ क्लिक गर्दा ठूलो देखाउने
-  window.openImageViewer = function(imgUrl) {
-    var modalImg = document.getElementById("viewerTargetImage");
-    var modal = document.getElementById("imageViewerModal");
-    if(modalImg && modal) {
-      modalImg.src = imgUrl;
-      modal.style.display = "flex";
-    }
-  };
-
-  window.closeImageViewer = function() {
-    var modal = document.getElementById("imageViewerModal");
-    if(modal) modal.style.display = "none";
-  };
-
-  // २. अर्डरहरू लोड गर्ने (वर्कफ्लो अनुसार बटन र स्टेटस देखाउने)
-  window.loadOrders = async function() {
-    let { data, error } = await supabaseClient
-      .from('orders')
-      .select('*')
-      .order('time', { ascending: false });
-
-    if (error) {
-      console.log("Error loading orders: ", error);
-      return;
-    }
-
-    activeOrdersCache = data || [];
-    var tableBody = document.getElementById("ordersTable");
-    if(!tableBody) return;
-    
-    let html = "";
-    if(activeOrdersCache.length === 0) {
-      html = `<tr><td colspan="9" style="padding:20px;">No Active Orders Found.</td></tr>`;
-    } else {
-      activeOrdersCache.forEach(function(o){
-        let status = o.status || "Pending";
-        
-        let slipHtml = (o.payment_slip && o.payment_slip !== "None" && o.payment_slip !== "") ? 
-          `<img src="${o.payment_slip}" class="proof-thumb" onclick="window.openImageViewer('${o.payment_slip}')">` : `None`;
-        
-        let delivHtml = (o.proof_img && o.proof_img !== "None" && o.proof_img !== "") ? 
-          `<img src="${o.proof_img}" class="proof-thumb" onclick="window.openImageViewer('${o.proof_img}')">` : `None`;
-        
-        // Status ड्रपडाउन र Go बटन
         let statusSelect = `<select id="status_${o.order_no}">
           <option value="Pending" ${status=="Pending"?"selected":""}>Pending</option>
           <option value="Preparing" ${status=="Preparing"?"selected":""}>Preparing</option>
@@ -444,7 +240,7 @@ window.loadOrders = async function() {
         </select> 
         <button class="updateBtn" onclick="window.manualUpdate('${o.order_no}')">Go</button>`;
 
-        // Instant Action बटनहरू (तपाईंले भन्नुभएकाे नियम अनुसार दुरुस्तै)
+        // Instant Action बटनहरू (तपाईंको आवश्यकताअनुसार ठ्याक्कै मिलाइएको)
         let actionButtons = "";
         if (status === "Pending" || status === "Order Received") {
             actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
@@ -472,10 +268,12 @@ window.loadOrders = async function() {
       });
     }
     tableBody.innerHTML = html;
-    window.calculateDashboardStats(activeOrdersCache);
+    if(typeof window.calculateDashboardStats === "function") {
+        window.calculateDashboardStats(activeOrdersCache);
+    }
   };
 
-  // ३. Status परिवर्तन गर्ने मुख्य फंक्सन
+  // Status अपडेट गर्ने मुख्य फंक्सन
   window.updateOrderStatus = async function(orderNo, newStatus) {
     let updatePayload = { status: newStatus };
     if(newStatus === "Delivered") {
@@ -499,27 +297,27 @@ window.loadOrders = async function() {
     await window.updateOrderStatus(orderNo, s);
   };
 
-  // ४. KOT वा Bill प्रिन्ट गर्ने र Status अपटेड गर्ने
+  // KOT वा Bill प्रिन्ट गर्ने र Status अपडेट गर्ने फंक्सन
   window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
     await window.updateOrderStatus(orderNo, nextStatus);
     var o = activeOrdersCache.find(item => item.order_no === orderNo);
     if(!o) return;
 
     var isKot = (printType === "kot");
-    var invoiceHtml = `<div style="text-align:center; font-family:monospace;">
-      <h3 style="margin:0;">UGRATARA RESTAURANT</h3>
-      <p style="margin:2px 0; font-weight:bold; background:#000; color:#fff; display:inline-block; padding:2px 8px;">${isKot ? "🎫 KOT (KITCHEN ORDER)" : "🧾 INVOICE / BILL"}</p>
+    var invoiceHtml = `<div style="text-align: center; font-family: monospace;">
+      <h3 style="margin: 0; font-size: 15px;">UGRATARA RESTAURANT</h3>
+      <p style="margin: 2px 0; font-size: 11px; background: #000; color: #fff; display: inline-block; padding: 2px 8px;">${isKot ? "🎫 KOT (KITCHEN ORDER)" : "🧾 INVOICE / BILL"}</p>
     </div>
-    <hr style="border-top:1px dashed #000;">
-    <div style="font-family:monospace; font-size:12px;">
+    <hr style="border-top: 1px dashed #000; margin: 6px 0;">
+    <div style="font-family: monospace; font-size: 11.5px; line-height: 1.3;">
       <div><b>Order No:</b> ${o.order_no}</div>
       <div><b>Customer:</b> ${o.customer_name} (${o.phone})</div>
       <div><b>Date:</b> ${o.time}</div>
     </div>
-    <hr style="border-top:1px dashed #000;">
-    <div style="font-family:monospace; font-size:12px; white-space:pre-wrap;"><b>Items:</b><br>${o.items || 'Food Items'}</div>
-    <hr style="border-top:1px dashed #000;">
-    <div style="text-align:right; font-family:monospace; font-size:14px; font-weight:bold;">Total: RM ${o.total}</div>`;
+    <hr style="border-top: 1px dashed #000; margin: 6px 0;">
+    <div style="font-family: monospace; font-size: 11.5px; white-space: pre-wrap;"><b>Items:</b><br>${o.items || 'Food Items'}</div>
+    <hr style="border-top: 1px dashed #000; margin: 6px 0;">
+    <div style="text-align: right; font-family: monospace; font-size: 13px; font-weight: bold;">Total: RM ${o.total}</div>`;
     
     if(document.getElementById("printableInvoiceArea")) {
         document.getElementById("printableInvoiceArea").innerHTML = invoiceHtml;
@@ -527,7 +325,21 @@ window.loadOrders = async function() {
     }
   };
 
-  // ५. मोबाइल वा क्यामेराबाट Delivery Proof फोटो हाल्ने
+  window.closePrintModal = function() {
+    document.getElementById("printModalBox").style.display = "none";
+  };
+
+  window.executeSystemPrint = function() {
+    var printArea = document.getElementById("printableInvoiceArea");
+    if (!printArea) return;
+    var w = window.open('', '_blank', 'height=600,width=400');
+    w.document.write('<html><head><title>Print</title></head><body>' + printArea.innerHTML + '</body></html>');
+    w.document.close();
+    w.focus();
+    setTimeout(() => w.print(), 500);
+  };
+
+  // मोबाइल वा क्यामेराबाट Delivery Proof फोटो हाल्ने
   window.uploadDeliveryProof = function(orderNo, fileInput) {
     const file = fileInput.files[0];
     if(!file) return;
@@ -555,7 +367,143 @@ window.loadOrders = async function() {
     };
     reader.readAsDataURL(file);
   };
-  
+
+  window.calculateDashboardStats = function(orders) {
+    let totalOrders = orders.length;
+    let totalRevenue = 0;
+    orders.forEach(o => { totalRevenue += parseFloat(o.total) || 0; });
+
+    if(document.getElementById("dashTotalOrders")) document.getElementById("dashTotalOrders").innerText = totalOrders;
+    if(document.getElementById("dashTotalRevenue")) document.getElementById("dashTotalRevenue").innerText = "RM " + totalRevenue.toFixed(2);
+  };
+
+  // मेनु लोड गर्ने
+  window.loadMenuList = async function() {
+    let { data, error } = await supabaseClient
+      .from('menu_items')
+      .select('*')
+      .order('id', { ascending: true });
+
+    if(error) { console.log("Menu error:", error); return; }
+
+    var menuList = document.getElementById("menuTableList");
+    if(!menuList) return;
+    let html = "";
+    
+    (data || []).forEach((r, index) => {
+      let rowRealId = r.id; 
+      let displaySerial = index + 1; 
+      let imgTag = r.image ? `<img src="${r.image}" class="menu-thumb">` : `No Image`;
+      let stockStatus = r.status || "In Stock";
+      let stockBtnClass = stockStatus === "In Stock" ? "inStockBtn" : "outStockBtn";
+      let stockText = stockStatus === "In Stock" ? "🟢 In Stock" : "🔴 Out of Stock";
+
+      html += `<tr>
+        <td><b>${displaySerial}</b></td>
+        <td><b>${r.name || ''}</b></td>
+        <td style="color:#e91e63; font-weight:bold;">RM ${r.price || 0}</td>
+        <td>${imgTag}</td>
+        <td>${r.description || ''}</td>
+        <td><b>${r.category || ''}</b></td>
+        <td>
+          <button class="${stockBtnClass}" onclick="window.toggleStock(${rowRealId}, '${stockStatus}')">${stockText}</button>
+          <button class="editBtn" onclick="window.editProduct(${rowRealId}, '${r.name}', ${r.price}, '${r.description || ''}', '${r.category || ''}')">✏️ Edit</button>
+          <button class="removeBtn" onclick="window.deleteProduct(${rowRealId})">❌ Delete</button>
+        </td>
+      </tr>`;
+    });
+    menuList.innerHTML = html;
+  };
+
+  window.toggleStock = async function(rowId, currentStatus) {
+    let newStatus = currentStatus === "In Stock" ? "Out of Stock" : "In Stock";
+    let { error } = await supabaseClient.from('menu_items').update({ status: newStatus }).eq('id', rowId);
+    if(error) { alert("Error: " + error.message); } else { window.loadMenuList(); }
+  };
+
+  window.createNewProduct = async function() {
+    var name = document.getElementById("prodName").value.trim();
+    var price = parseFloat(document.getElementById("prodPrice").value) || 0;
+    var img = document.getElementById("prodImg").value.trim();
+    var desc = document.getElementById("prodDesc").value.trim();
+    var cat = document.getElementById("prodCat").value.trim();
+
+    if(!name || !price) { alert("Enter Name and Price!"); return; }
+
+    let { error } = await supabaseClient.from('menu_items').insert([
+      { name: name, price: price, image: img, description: desc, category: cat, status: "In Stock" }
+    ]);
+
+    if(error) {
+      alert("Error adding product: " + error.message);
+    } else {
+      alert("✅ Product Added & Saved!");
+      document.getElementById("prodName").value = "";
+      document.getElementById("prodPrice").value = "";
+      document.getElementById("prodImg").value = "";
+      document.getElementById("prodDesc").value = "";
+      document.getElementById("prodCat").value = "";
+      window.loadMenuList();
+    }
+  };
+
+  window.editProduct = async function(rowId, oldName, oldPrice, oldDesc, oldCat) {
+    var newName = prompt("Edit Name:", oldName); if(newName === null) return;
+    var newPrice = parseFloat(prompt("Edit Price:", oldPrice)) || oldPrice;
+    var newDesc = prompt("Edit Description:", oldDesc); if(newDesc === null) return;
+    var newCat = prompt("Edit Category:", oldCat); if(newCat === null) return;
+
+    let { error } = await supabaseClient.from('menu_items')
+      .update({ name: newName, price: newPrice, description: newDesc, category: newCat })
+      .eq('id', rowId);
+
+    if(error) { alert("Error updating: " + error.message); } else { alert("✅ Updated Successfully!"); window.loadMenuList(); }
+  };
+
+  window.deleteProduct = async function(rowId) {
+    if(confirm("Delete this item?")) {
+      let { error } = await supabaseClient.from('menu_items').delete().eq('id', rowId);
+      if(error) { alert("Error deleting: " + error.message); } else { alert("✅ Deleted!"); window.loadMenuList(); }
+    }
+  };
+
+  window.openImageViewer = function(imgUrl) {
+    var modalImg = document.getElementById("viewerTargetImage");
+    var modal = document.getElementById("imageViewerModal");
+    if(modalImg && modal) {
+      modalImg.src = imgUrl;
+      modal.style.display = "flex";
+    }
+  };
+
+  window.closeImageViewer = function() {
+    var modal = document.getElementById("imageViewerModal");
+    if(modal) modal.style.display = "none";
+  };
+
+  window.showAdminPanel = function() {
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("adminContent").style.display = "block";
+    document.getElementById("userRoleBadge").innerText = myRole.toUpperCase();
+    
+    if (myRole === "admin" || myRole === "manager") {
+      document.getElementById("salesDashboardBox").style.display = "flex";
+      document.getElementById("menuManagementBox").style.display = "block";
+      window.loadMenuList();
+    }
+    window.loadOrders();
+  };
+
+  window.logout = function() { sessionStorage.clear(); window.location.reload(); };
+  window.testBellSound = function() { alert("🔔 डिजिटल घण्टी सुचारु भयो!"); };
+
+  if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
+    myRole = sessionStorage.getItem("USER_ROLE") || "admin";
+    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
+    window.showAdminPanel();
+  } else {
+    document.getElementById("loginScreen").style.display = "flex";
+  }
 </script>
 </body>
 </html>
