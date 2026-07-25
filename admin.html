@@ -208,7 +208,7 @@
   };
 
   // १. अर्डर लोड गर्ने र सिरियल वाइज क्रम मिलाएर देखाउने सही फंक्सन
-  window.loadOrders = async function() {
+ window.loadOrders = async function() {
     let { data, error } = await supabaseClient
       .from('orders')
       .select('*');
@@ -221,6 +221,9 @@
     }
 
     activeOrdersCache = data || [];
+    
+    // 📊 ड्यासबोर्डका तथ्याङ्कहरू गणना गर्ने फंक्सनलाई यहाँ कल गर्ने
+    window.calculateDashboardStats(activeOrdersCache);
     
     // नयाँ अर्डरलाई सधैँ माथि देखाउने सर्टिङ
     activeOrdersCache.sort((a, b) => {
