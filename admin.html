@@ -81,7 +81,7 @@
     </div>
   </div>
 
-  <!-- 🛒 मुख्य अर्डर तालिका (Google Apps Script जस्तै ९ वटा सहि स्तम्भहरू) -->
+  <!-- 🛒 मुख्य अर्डर तालिका -->
   <div id="mainOrdersTableSection">
     <h3>🛒 Active Orders</h3>
     <div style="overflow-x: auto; width:100%;">
@@ -105,7 +105,8 @@
       </table>
     </div>
   </div>
-  <!-- 🍔 मेनु म्यानेजमेन्ट -->
+
+  <!-- 🍔 मेनु म्यानेजमेन्ट सेक्सन (यसको ठ्याक्कै तल रहनेछ) -->
   <div id="menuManagementBox" class="menu-section">
     <h3>🍔 Menu & Product Management</h3>
     <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #ddd;">
@@ -119,26 +120,23 @@
       <button id="addProductBtn" class="addBtn" onclick="window.createNewProduct()">+ Add Product</button>
     </div>
     <h4>Current Food Items</h4>
-    <table>
+    <div style="overflow-x: auto; width:100%;">
+      <table>
         <thead>
           <tr>
-            <th>Order Date & Time</th>
-            <th>Order No.</th>
-            <th>Customer</th>
-            <th>Total</th>
-            <th>Payment Slip</th>
-            <th>Delivery Date & Time</th>
-            <th>Delivery Proof</th>
-            <th>Status / Change</th>
-            <th>Instant Action</th>
+            <th>ID</th>
+            <th>Food Name</th>
+            <th>Price</th>
+            <th>Image</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Action</th>
           </tr>
         </thead>
-        <tbody id="ordersTable">
-          <tr><td colspan="9" style="padding:20px; font-weight:bold;">⏳ Loading Active Orders...</td></tr>
-        </tbody>
+        <tbody id="menuTableList"></tbody>
       </table>
+    </div>
   </div>
-</div>
 
 <script>
   const SUPABASE_URL = 'https://lorhrfdqzagulicwcctx.supabase.co  ';
