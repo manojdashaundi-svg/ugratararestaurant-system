@@ -136,17 +136,14 @@
 </div>
 
 <script>
-  // 🔑 आफ्नो Supabase Project को URL र Anon Key यहाँ राख्नुहोस्
-  const SUPABASE_URL = ' https://lorhrfdqzagulicwcctx.supabase.co ';
-  const SUPABASE_ANON_KEY = 'sb_publishable_YxubnsG5x3QD_OaPzEEy_w_wzLVLSlW';
-  
+  const SUPABASE_URL = 'https://lorhrfdqzagulicwcctx.supabase.co';
+  const SUPABASE_ANON_KEY = 'sb_publishable_YxubnsG5x3QD_OApZEEy_w_wzLVLSlW';
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   var myRole = "admin";
   var currentLoggedInUser = "";
   var activeOrdersCache = [];
 
-  // लगइन जाँच
   window.handleLogin = async function() {
     var u = document.getElementById("username").value.trim();
     var p = document.getElementById("password").value.trim();
@@ -154,141 +151,84 @@
     
     document.getElementById("loginBtn").innerText = "Verifying...";
     
-    let { data, error } = await supabaseClient
-  .from('admins')
-  .select('*')
-  .eq('email', u)
-  .eq('password', p)
-  .single();
-
+    let { data } = await supabaseClient.from('admins').select('*').eq('email', u).eq('password', p).single();
     document.getElementById("loginBtn").innerText = "Login";
 
     if (data) {
       sessionStorage.setItem("ADMIN_LOGIN", "true");
-      sessionStorage.setItem("USER_ROLE", data.role.toLowerCase());
+      sessionStorage.setItem("USER_ROLE", data.role ? data.role.toLowerCase() : "admin");
       sessionStorage.setItem("LOGGED_USER", u.toLowerCase());
-      myRole = data.role.toLowerCase();
+      myRole = data.role ? data.role.toLowerCase() : "admin";
       currentLoggedInUser = u.toLowerCase();
       window.showAdminPanel();
     } else {
-      alert("Wrong Username or Password.");
+      alert("Wrong Email or Password.");
     }
   };
 
-  // १. मेनु लोड गर्ने सही तरिका (id प्रयोग गरेर)
-  window.loadMenuList = async function() {
-    let { data, error } = await supabaseClient.from('menu_items').select('*');
-    if(error) { console.log("Menu load error:", error); return; }
+  window.loadOrders = async function() {
+    let { data, error } = await supabaseClient.from('orders').select('*');
+    if (error) { console.log("Orders error:", error); return; }
 
-    var menuList = document.getElementById("menuTableList");
-    if(!menuList) return;
-    let html = "";
+    activeOrdersCache = data || [];
+    var tableBody = document.getElementById("ordersTable");
+    if(!tableBody) return;
     
-    (data || []).forEach((r) => {
-      let rowId = r.id; // Supabase को वास्तविक id प्रयोग गरिएको
-      let imgTag = r.image ? `<img src="${r.image}" class="menu-thumb">` : `No Image`;
-      let stockStatus = r.status || "In Stock";
-      let stockBtnClass = stockStatus === "In Stock" ? "inStockBtn" : "outStockBtn";
-      let stockText = stockStatus === "In Stock" ? "🟢 In Stock" : "🔴 Out of Stock";
-
-      html += `<tr>
-        <td><b>${rowId}</b></td>
-        <td><b>${r.name || ''}</b></td>
-        <td style="color:#e91e63; font-weight:bold;">RM ${r.price || 0}</td>
-        <td>${imgTag}</td>
-        <td>${r.description || ''}</td>
-        <td><b>${r.category || ''}</b></td>
-        <td>
-          <button class="${stockBtnClass}" onclick="window.toggleStock(${rowId}, '${stockStatus}')">${stockText}</button>
-          <button class="editBtn" onclick="window.editProduct(${rowId}, '${r.name}', ${r.price}, '${r.description || ''}', '${r.category || ''}')">✏️ Edit</button>
-          <button class="removeBtn" onclick="window.deleteProduct(${rowId})">❌ Delete</button>
-        </td>
-      </tr>`;
-    });
-    menuList.innerHTML = html;
-  };
-
-  // २. स्टक (In Stock / Out of Stock) परिवर्तन गर्ने सही तरिका
-  window.toggleStock = async function(rowId, currentStatus) {
-    let newStatus = currentStatus === "In Stock" ? "Out of Stock" : "In Stock";
-    let { error } = await supabaseClient.from('menu_items').update({ status: newStatus }).eq('id', rowId);
-    if(error) {
-      alert("Failed to update stock: " + error.message);
+    let html = "";
+    if(activeOrdersCache.length === 0) {
+      html = `<tr><td colspan="7" style="padding:20px;">No Active Orders Found.</td></tr>`;
     } else {
-      window.loadMenuList();
+      activeOrdersCache.forEach(function(o){
+        let status = o.status || "Pending";
+        let slipHtml = o.payment_slip ? `<img src="${o.payment_slip}" class="proof-thumb">` : `None`;
+        
+        let statusSelect = `<select id="status_${o.order_no}" onchange="window.updateOrderStatus('${o.order_no}', this.value)">
+          <option value="Pending" ${status=="Pending"?"selected":""}>Pending</option>
+          <option value="Preparing" ${status=="Preparing"?"selected":""}>Preparing</option>
+          <option value="Ready" ${status=="Ready"?"selected":""}>Ready</option>
+          <option value="Delivered" ${status=="Delivered"?"selected":""}>Delivered</option>
+        </select>`;
+
+        html += `<tr>
+          <td>${o.time || '-'}</td>
+          <td><b>${o.order_no}</b></td>
+          <td>${o.customer_name || '-'}<br><small>${o.phone || ''}</small></td>
+          <td style="color:#e91e63; font-weight:bold;">RM ${o.total || '0'}</td>
+          <td>${slipHtml}</td>
+          <td>${statusSelect}</td>
+          <td><button class="rcvBtn" onclick="window.updateOrderStatus('${o.order_no}', 'Delivered')">✅ Complete</button></td>
+        </tr>`;
+      });
     }
+    tableBody.innerHTML = html;
+    window.calculateDashboardStats(activeOrdersCache);
   };
 
-  // ३. एडिट गरेर सेभ गर्ने सही तरिका
-  window.editProduct = async function(rowId, oldName, oldPrice, oldDesc, oldCat) {
-    var newName = prompt("Edit Product Name:", oldName); if(newName === null) return;
-    var newPrice = parseFloat(prompt("Edit Price (RM):", oldPrice)) || oldPrice;
-    var newDesc = prompt("Edit Description:", oldDesc); if(newDesc === null) return;
-    var newCat = prompt("Edit Category:", oldCat); if(newCat === null) return;
-
-    let { error } = await supabaseClient.from('menu_items')
-      .update({ name: newName, price: newPrice, description: newDesc, category: newCat })
-      .eq('id', rowId);
-
-    if(error) {
-      alert("Failed to update: " + error.message);
-    } else {
-      alert("✅ Successfully Updated & Saved to Supabase!");
-      window.loadMenuList();
-    }
-  };
-
-  // ४. आइटम डिलिट गर्ने सही तरिका
-  window.deleteProduct = async function(rowId) {
-    if(confirm("Delete this item?")) {
-      let { error } = await supabaseClient.from('menu_items').delete().eq('id', rowId);
-      if(error) {
-        alert("Failed to delete: " + error.message);
-      } else {
-        alert("✅ Item deleted successfully!");
-        window.loadMenuList();
-      }
-    }
-  };
-
-  // अर्डरको स्टटस अपडेट गर्ने
   window.updateOrderStatus = async function(orderNo, newStatus) {
-    let { error } = await supabaseClient
-      .from('orders')
-      .update({ status: newStatus })
-      .eq('order_no', orderNo);
-
-    if (error) {
-      alert("Failed to update status!");
-    } else {
-      window.loadOrders();
-    }
+    await supabaseClient.from('orders').update({ status: newStatus }).eq('order_no', orderNo);
+    window.loadOrders();
   };
 
-  // ड्यासबोर्ड तथ्याङ्क हिसाब गर्ने
   window.calculateDashboardStats = function(orders) {
     let totalOrders = orders.length;
     let totalRevenue = 0;
-    orders.forEach(o => {
-      totalRevenue += parseFloat(o.total) || 0;
-    });
+    orders.forEach(o => { totalRevenue += parseFloat(o.total) || 0; });
 
     if(document.getElementById("dashTotalOrders")) document.getElementById("dashTotalOrders").innerText = totalOrders;
     if(document.getElementById("dashTotalRevenue")) document.getElementById("dashTotalRevenue").innerText = "RM " + totalRevenue.toFixed(2);
   };
 
   // मेनु लोड गर्ने
-  // १. मेनु लोड गर्ने सही तरिका
   window.loadMenuList = async function() {
     let { data, error } = await supabaseClient.from('menu_items').select('*');
-    if(error) { console.log("Menu load error:", error); return; }
+    if(error) { console.log("Menu error:", error); return; }
 
     var menuList = document.getElementById("menuTableList");
     if(!menuList) return;
     let html = "";
     
     (data || []).forEach((r) => {
-      let rowId = r.id; // Supabase को वास्तविक ID प्रयोग गरिएको
+      let rowId = r.id; 
       let imgTag = r.image ? `<img src="${r.image}" class="menu-thumb">` : `No Image`;
       let stockStatus = r.status || "In Stock";
       let stockBtnClass = stockStatus === "In Stock" ? "inStockBtn" : "outStockBtn";
@@ -311,76 +251,14 @@
     menuList.innerHTML = html;
   };
 
-  // २. स्टक (In Stock / Out of Stock) परिवर्तन गर्ने
+  // स्टक परिवर्तन गर्ने
   window.toggleStock = async function(rowId, currentStatus) {
     let newStatus = currentStatus === "In Stock" ? "Out of Stock" : "In Stock";
     let { error } = await supabaseClient.from('menu_items').update({ status: newStatus }).eq('id', rowId);
-    if(error) {
-      alert("Failed to update stock: " + error.message);
-    } else {
-      window.loadMenuList();
-    }
+    if(error) { alert("Error: " + error.message); } else { window.loadMenuList(); }
   };
 
-  // ३. एडिट गरेर सेभ गर्ने
-  window.editProduct = async function(rowId, oldName, oldPrice, oldDesc, oldCat) {
-    var newName = prompt("Edit Product Name:", oldName); if(newName === null) return;
-    var newPrice = parseFloat(prompt("Edit Price (RM):", oldPrice)) || oldPrice;
-    var newDesc = prompt("Edit Description:", oldDesc); if(newDesc === null) return;
-    var newCat = prompt("Edit Category:", oldCat); if(newCat === null) return;
-
-    let { error } = await supabaseClient.from('menu_items')
-      .update({ name: newName, price: newPrice, description: newDesc, category: newCat })
-      .eq('id', rowId);
-
-    if(error) {
-      alert("Failed to update: " + error.message);
-    } else {
-      alert("✅ Successfully Updated & Saved to Supabase!");
-      window.loadMenuList();
-    }
-  };
-
-  // ४. आइटम डिलिट गर्ने
-  window.deleteProduct = async function(rowId) {
-    if(confirm("Delete this item?")) {
-      let { error } = await supabaseClient.from('menu_items').delete().eq('id', rowId);
-      if(error) {
-        alert("Failed to delete: " + error.message);
-      } else {
-        alert("✅ Item deleted successfully!");
-        window.loadMenuList();
-      }
-    }
-  };
-
-  // स्टक स्टाटस फेरेर Supabase मा स्वतः सेभ गर्ने
-  window.toggleStock = async function(id, currentStatus) {
-    let newStatus = currentStatus === "In Stock" ? "Out of Stock" : "In Stock";
-    await supabaseClient.from('menu_items').update({ status: newStatus }).eq('item_id', id);
-    window.loadMenuList();
-  };
-
-  // उत्पादन एडिट गरेर Supabase मा स्वतः सेभ गर्ने
-  window.editProduct = async function(id, oldName, oldPrice, oldDesc, oldCat) {
-    var newName = prompt("Edit Product Name:", oldName); if(newName === null) return;
-    var newPrice = parseFloat(prompt("Edit Price (RM):", oldPrice)) || oldPrice;
-    var newDesc = prompt("Edit Description:", oldDesc); if(newDesc === null) return;
-    var newCat = prompt("Edit Category:", oldCat); if(newCat === null) return;
-
-    let { error } = await supabaseClient.from('menu_items')
-      .update({ name: newName, price: newPrice, description: newDesc, category: newCat })
-      .eq('item_id', id);
-
-    if(error) {
-      alert("Failed to update: " + error.message);
-    } else {
-      alert("✅ Successfully Updated & Saved to Supabase!");
-      window.loadMenuList();
-    }
-  };
-  
-  // नयाँ उत्पादन सुरक्षित रूपमा थप्ने
+  // नयाँ उत्पादन थप्ने
   window.createNewProduct = async function() {
     var name = document.getElementById("prodName").value.trim();
     var price = parseFloat(document.getElementById("prodPrice").value) || 0;
@@ -388,7 +266,7 @@
     var desc = document.getElementById("prodDesc").value.trim();
     var cat = document.getElementById("prodCat").value.trim();
 
-    if(!name || !price) { alert("Please fill Product Name and Price!"); return; }
+    if(!name || !price) { alert("Enter Name and Price!"); return; }
 
     let { error } = await supabaseClient.from('menu_items').insert([
       { name: name, price: price, image: img, description: desc, category: cat, status: "In Stock" }
@@ -397,8 +275,7 @@
     if(error) {
       alert("Error adding product: " + error.message);
     } else {
-      alert("✅ Product Added & Saved to Supabase!");
-      document.getElementById("prodId").value = "";
+      alert("✅ Product Added & Saved!");
       document.getElementById("prodName").value = "";
       document.getElementById("prodPrice").value = "";
       document.getElementById("prodImg").value = "";
@@ -408,10 +285,25 @@
     }
   };
 
-  window.deleteProduct = async function(id) {
-    if(confirm("Delete item?")) {
-      await supabaseClient.from('menu_items').delete().eq('item_id', id);
-      window.loadMenuList();
+  // एडिट गर्ने
+  window.editProduct = async function(rowId, oldName, oldPrice, oldDesc, oldCat) {
+    var newName = prompt("Edit Name:", oldName); if(newName === null) return;
+    var newPrice = parseFloat(prompt("Edit Price:", oldPrice)) || oldPrice;
+    var newDesc = prompt("Edit Description:", oldDesc); if(newDesc === null) return;
+    var newCat = prompt("Edit Category:", oldCat); if(newCat === null) return;
+
+    let { error } = await supabaseClient.from('menu_items')
+      .update({ name: newName, price: newPrice, description: newDesc, category: newCat })
+      .eq('id', rowId);
+
+    if(error) { alert("Error updating: " + error.message); } else { alert("✅ Updated Successfully!"); window.loadMenuList(); }
+  };
+
+  // डिलिट गर्ने
+  window.deleteProduct = async function(rowId) {
+    if(confirm("Delete this item?")) {
+      let { error } = await supabaseClient.from('menu_items').delete().eq('id', rowId);
+      if(error) { alert("Error deleting: " + error.message); } else { alert("✅ Deleted!"); window.loadMenuList(); }
     }
   };
 
@@ -428,14 +320,8 @@
     window.loadOrders();
   };
 
-  window.logout = function() {
-    sessionStorage.clear();
-    window.location.reload();
-  };
+  window.logout = function() { sessionStorage.clear(); window.location.reload(); };
 
-  window.testBellSound = function() { alert("🔔 घण्टी बज्यो!"); };
-
-  // पगे लोड हुँदा लगइन चेक गर्ने
   if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
     myRole = sessionStorage.getItem("USER_ROLE") || "admin";
     currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
