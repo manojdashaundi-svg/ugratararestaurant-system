@@ -405,7 +405,7 @@ window.loadOrders = async function() {
     if(modal) modal.style.display = "none";
   };
 
-  // २. अर्डरहरू लोड गर्ने (Google Apps Script को नियम अनुसार)
+  // २. अर्डरहरू लोड गर्ने (वर्कफ्लो अनुसार बटन र स्टेटस देखाउने)
   window.loadOrders = async function() {
     let { data, error } = await supabaseClient
       .from('orders')
@@ -428,11 +428,9 @@ window.loadOrders = async function() {
       activeOrdersCache.forEach(function(o){
         let status = o.status || "Pending";
         
-        // Payment Slip थम्बनेल
         let slipHtml = (o.payment_slip && o.payment_slip !== "None" && o.payment_slip !== "") ? 
           `<img src="${o.payment_slip}" class="proof-thumb" onclick="window.openImageViewer('${o.payment_slip}')">` : `None`;
         
-        // Delivery Proof थम्बनेल
         let delivHtml = (o.proof_img && o.proof_img !== "None" && o.proof_img !== "") ? 
           `<img src="${o.proof_img}" class="proof-thumb" onclick="window.openImageViewer('${o.proof_img}')">` : `None`;
         
@@ -446,7 +444,7 @@ window.loadOrders = async function() {
         </select> 
         <button class="updateBtn" onclick="window.manualUpdate('${o.order_no}')">Go</button>`;
 
-        // Instant Action बटनहरू (तपाईंको नियम अनुसार)
+        // Instant Action बटनहरू (तपाईंले भन्नुभएकाे नियम अनुसार दुरुस्तै)
         let actionButtons = "";
         if (status === "Pending" || status === "Order Received") {
             actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
@@ -455,7 +453,7 @@ window.loadOrders = async function() {
         } else if (status === "Ready") {
             actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no}', 'Out for Delivery')">🚚 Dispatch</button>`;
         } else if (status === "Out for Delivery") {
-            actionButtons = `Upload Proof:<br><input type="file" accept="image/*,camera/*" onchange="window.uploadDeliveryProof('${o.order_no}', this)" style="width:110px;">`;
+            actionButtons = `Upload Proof:<br><input type="file" accept="image/*" capture="environment" onchange="window.uploadDeliveryProof('${o.order_no}', this)" style="width:110px;">`;
         } else if (status === "Delivered") {
             actionButtons = `<span style="color:green; font-weight:bold;">✅ Delivered</span>`;
         }
@@ -478,8 +476,8 @@ window.loadOrders = async function() {
   };
 
   // ३. Status परिवर्तन गर्ने मुख्य फंक्सन
-  window.updateOrderStatus = async function(orderNo, newStatus, extraData = {}) {
-    let updatePayload = { status: newStatus, ...extraData };
+  window.updateOrderStatus = async function(orderNo, newStatus) {
+    let updatePayload = { status: newStatus };
     if(newStatus === "Delivered") {
         updatePayload.delivery_time = new Date().toLocaleString();
     }
@@ -501,29 +499,35 @@ window.loadOrders = async function() {
     await window.updateOrderStatus(orderNo, s);
   };
 
-  // ४. KOT र Bill प्रिन्ट देखाउने फंक्सन
+  // ४. KOT वा Bill प्रिन्ट गर्ने र Status अपटेड गर्ने
   window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
     await window.updateOrderStatus(orderNo, nextStatus);
     var o = activeOrdersCache.find(item => item.order_no === orderNo);
     if(!o) return;
 
     var isKot = (printType === "kot");
-    var invoiceHtml = `<div style="text-align:center;"><h3>UGRATARA RESTAURANT</h3><p>${isKot ? "🎫 KOT (KITCHEN ORDER)" : "🧾 INVOICE / BILL"}</p></div>
-      <hr>
+    var invoiceHtml = `<div style="text-align:center; font-family:monospace;">
+      <h3 style="margin:0;">UGRATARA RESTAURANT</h3>
+      <p style="margin:2px 0; font-weight:bold; background:#000; color:#fff; display:inline-block; padding:2px 8px;">${isKot ? "🎫 KOT (KITCHEN ORDER)" : "🧾 INVOICE / BILL"}</p>
+    </div>
+    <hr style="border-top:1px dashed #000;">
+    <div style="font-family:monospace; font-size:12px;">
       <div><b>Order No:</b> ${o.order_no}</div>
       <div><b>Customer:</b> ${o.customer_name} (${o.phone})</div>
-      <div><b>Total:</b> RM ${o.total}</div>
-      <hr>
-      <div style="font-weight:bold;">Thank you!</div>`;
+      <div><b>Date:</b> ${o.time}</div>
+    </div>
+    <hr style="border-top:1px dashed #000;">
+    <div style="font-family:monospace; font-size:12px; white-space:pre-wrap;"><b>Items:</b><br>${o.items || 'Food Items'}</div>
+    <hr style="border-top:1px dashed #000;">
+    <div style="text-align:right; font-family:monospace; font-size:14px; font-weight:bold;">Total: RM ${o.total}</div>`;
     
-    // प्रिन्ट मोडल देखाउने
     if(document.getElementById("printableInvoiceArea")) {
         document.getElementById("printableInvoiceArea").innerHTML = invoiceHtml;
         document.getElementById("printModalBox").style.display = "flex";
     }
   };
 
-  // ५. डेलिभरी प्रुफ फोटो अपलोड गर्ने (Choose File / Camera)
+  // ५. मोबाइल वा क्यामेराबाट Delivery Proof फोटो हाल्ने
   window.uploadDeliveryProof = function(orderNo, fileInput) {
     const file = fileInput.files[0];
     if(!file) return;
@@ -533,7 +537,6 @@ window.loadOrders = async function() {
         const base64Img = reader.result;
         let currentTime = new Date().toLocaleString();
         
-        // Supabase मा Delivered, Proof Image र Delivery Time एकसाथ सेभ गर्ने
         let { error } = await supabaseClient
           .from('orders')
           .update({ 
@@ -546,7 +549,7 @@ window.loadOrders = async function() {
         if(error) {
             alert("Error saving proof: " + error.message);
         } else {
-            alert("✅ Delivery Proof Uploaded & Order Delivered!");
+            alert("✅ Delivery Proof Uploaded & Order Delivered Successfully!");
             window.loadOrders();
         }
     };
