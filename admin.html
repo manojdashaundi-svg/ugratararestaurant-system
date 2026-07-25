@@ -44,7 +44,6 @@
     .image-viewer-box img { max-width:100%; max-height:70vh; object-fit:contain; border-radius:8px; display:block; margin-bottom:15px; }
     .close-viewer-btn { background:#f44336; color:white; border:none; padding:8px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
 
-    /* 🎯 प्रिन्ट मोडल स्टाइल थपियो */
     .print-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:none; justify-content:center; align-items:center; z-index:999999; }
     .print-box { background:#fff; padding:25px; border-radius:12px; width:320px; max-height:85vh; overflow-y:auto; box-shadow:0 5px 20px rgba(0,0,0,0.3); }
     .print-area { font-family: 'Courier New', Courier, monospace; font-size:14px; color:#000; line-height:1.4; }
@@ -158,7 +157,7 @@
   </div>
 </div>
 
-<!-- 🎯 KOT र Bill प्रिन्ट मोडल बक्स थपियो -->
+<!-- 🎯 KOT र Bill प्रिन्ट मोडल बक्स -->
 <div id="printModalBox" class="print-modal">
   <div class="print-box">
     <div id="printableInvoiceArea" class="print-area"></div>
@@ -200,7 +199,7 @@
     }
   };
 
-  // 🛒 अर्डरहरू लोड गर्ने (वर्कफ्लो अनुसार सही बटन र स्टेटस देखाउने)
+  // १. अर्डर लोड गर्ने (Status अनुसार सही ड्रपडाउन र Instant Action बटनहरू देखाउने)
   window.loadOrders = async function() {
     let { data, error } = await supabaseClient
       .from('orders')
@@ -209,8 +208,6 @@
 
     if (error) {
       console.log("Error loading orders: ", error);
-      var tableBody = document.getElementById("ordersTable");
-      if(tableBody) tableBody.innerHTML = `<tr><td colspan="9" style="color:red; padding:20px;">Error loading orders: ${error.message}</td></tr>`;
       return;
     }
 
@@ -223,7 +220,7 @@
       html = `<tr><td colspan="9" style="padding:20px;">No Active Orders Found.</td></tr>`;
     } else {
       activeOrdersCache.forEach(function(o){
-        let status = o.status || "Pending";
+        let status = o.status ? o.status.trim() : "Pending";
         
         let slipHtml = (o.payment_slip && o.payment_slip !== "None" && o.payment_slip !== "") ? 
           `<img src="${o.payment_slip}" class="proof-thumb" onclick="window.openImageViewer('${o.payment_slip}')">` : `None`;
@@ -231,6 +228,7 @@
         let delivHtml = (o.proof_img && o.proof_img !== "None" && o.proof_img !== "") ? 
           `<img src="${o.proof_img}" class="proof-thumb" onclick="window.openImageViewer('${o.proof_img}')">` : `None`;
         
+        // Status ड्रपडाउनमा सही अप्सन सेलेक्टेड हुने गरी
         let statusSelect = `<select id="status_${o.order_no}">
           <option value="Pending" ${status=="Pending"?"selected":""}>Pending</option>
           <option value="Preparing" ${status=="Preparing"?"selected":""}>Preparing</option>
@@ -240,7 +238,7 @@
         </select> 
         <button class="updateBtn" onclick="window.manualUpdate('${o.order_no}')">Go</button>`;
 
-        // Instant Action बटनहरू (तपाईंको आवश्यकताअनुसार ठ्याक्कै मिलाइएको)
+        // Instant Action बटनहरू (Status अनुसार सही रूपमा परिवर्तन हुने)
         let actionButtons = "";
         if (status === "Pending" || status === "Order Received") {
             actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
@@ -268,8 +266,45 @@
       });
     }
     tableBody.innerHTML = html;
-    if(typeof window.calculateDashboardStats === "function") {
-        window.calculateDashboardStats(activeOrdersCache);
+  };
+
+  // २. KOT वा Bill प्रिन्ट गर्ने र Supabase मा तुरुन्त सेभ गरी टेबल रिफ्रेस गर्ने
+  window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
+    let { error } = await supabaseClient
+      .from('orders')
+      .update({ status: nextStatus })
+      .eq('order_no', orderNo);
+
+    if (error) {
+      alert("Error updating status: " + error.message);
+      return;
+    }
+
+    // तुरुन्तै प्यानलको डेटा अपडेट गर्ने
+    await window.loadOrders();
+
+    var o = activeOrdersCache.find(item => item.order_no === orderNo);
+    if(!o) return;
+
+    var isKot = (printType === "kot");
+    var invoiceHtml = `<div style="text-align: center; font-family: monospace;">
+      <h3 style="margin: 0; font-size: 15px;">UGRATARA RESTAURANT</h3>
+      <p style="margin: 2px 0; font-size: 11px; background: #000; color: #fff; display: inline-block; padding: 2px 8px;">${isKot ? "🎫 KOT (KITCHEN ORDER)" : "🧾 INVOICE / BILL"}</p>
+    </div>
+    <hr style="border-top: 1px dashed #000; margin: 6px 0;">
+    <div style="font-family: monospace; font-size: 11.5px; line-height: 1.3;">
+      <div><b>Order No:</b> ${o.order_no}</div>
+      <div><b>Customer:</b> ${o.customer_name} (${o.phone})</div>
+      <div><b>Date:</b> ${o.time || 'N/A'}</div>
+    </div>
+    <hr style="border-top: 1px dashed #000; margin: 6px 0;">
+    <div style="font-family: monospace; font-size: 11.5px; white-space: pre-wrap;"><b>Items:</b><br>${o.items || 'Food Items'}</div>
+    <hr style="border-top: 1px dashed #000; margin: 6px 0;">
+    <div style="text-align: right; font-family: monospace; font-size: 13px; font-weight: bold;">Total: RM ${o.total}</div>`;
+    
+    if(document.getElementById("printableInvoiceArea")) {
+        document.getElementById("printableInvoiceArea").innerHTML = invoiceHtml;
+        document.getElementById("printModalBox").style.display = "flex";
     }
   };
 
@@ -295,34 +330,6 @@
   window.manualUpdate = async function(orderNo) {
     var s = document.getElementById("status_" + orderNo).value;
     await window.updateOrderStatus(orderNo, s);
-  };
-
-  // KOT वा Bill प्रिन्ट गर्ने र Status अपडेट गर्ने फंक्सन
-  window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
-    await window.updateOrderStatus(orderNo, nextStatus);
-    var o = activeOrdersCache.find(item => item.order_no === orderNo);
-    if(!o) return;
-
-    var isKot = (printType === "kot");
-    var invoiceHtml = `<div style="text-align: center; font-family: monospace;">
-      <h3 style="margin: 0; font-size: 15px;">UGRATARA RESTAURANT</h3>
-      <p style="margin: 2px 0; font-size: 11px; background: #000; color: #fff; display: inline-block; padding: 2px 8px;">${isKot ? "🎫 KOT (KITCHEN ORDER)" : "🧾 INVOICE / BILL"}</p>
-    </div>
-    <hr style="border-top: 1px dashed #000; margin: 6px 0;">
-    <div style="font-family: monospace; font-size: 11.5px; line-height: 1.3;">
-      <div><b>Order No:</b> ${o.order_no}</div>
-      <div><b>Customer:</b> ${o.customer_name} (${o.phone})</div>
-      <div><b>Date:</b> ${o.time}</div>
-    </div>
-    <hr style="border-top: 1px dashed #000; margin: 6px 0;">
-    <div style="font-family: monospace; font-size: 11.5px; white-space: pre-wrap;"><b>Items:</b><br>${o.items || 'Food Items'}</div>
-    <hr style="border-top: 1px dashed #000; margin: 6px 0;">
-    <div style="text-align: right; font-family: monospace; font-size: 13px; font-weight: bold;">Total: RM ${o.total}</div>`;
-    
-    if(document.getElementById("printableInvoiceArea")) {
-        document.getElementById("printableInvoiceArea").innerHTML = invoiceHtml;
-        document.getElementById("printModalBox").style.display = "flex";
-    }
   };
 
   window.closePrintModal = function() {
