@@ -149,7 +149,7 @@ window.previewFile = function() {
     reader.readAsDataURL(file); 
 };
 
-// Supabase मा अर्डर सेभ गर्ने फंक्सन
+// Supabase मा क्रमबद्ध (Serial-wise) अर्डर नम्बर निकालेर सेभ गर्ने फंक्सन
 window.placeOrder = async function() {
     const name = document.getElementById("customerName").value.trim();
     const phone = document.getElementById("customerPhone").value.trim();
@@ -172,7 +172,19 @@ window.placeOrder = async function() {
     const subtotal = window.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
     const grandTotal = subtotal + deliveryCharge;
     
-    const orderNo = "ORD" + Math.floor(1000 + Math.random() * 9000);
+    // 🔢 सधैँ ORD1001, ORD1002, ORD1003 गर्दै सिरियल वाइज अर्डर नम्बर जेनेरेट गर्ने लजिक
+    let { data: existingOrders } = await window.supabaseClient.from('orders').select('order_no');
+    let nextSerialNo = 1001;
+
+    if (existingOrders && existingOrders.length > 0) {
+      let serials = existingOrders.map(o => {
+        let num = parseInt(String(o.order_no).replace(/[^0-9]/g, ''));
+        return isNaN(num) ? 1000 : num;
+      });
+      let maxNum = Math.max(...serials);
+      nextSerialNo = (maxNum >= 1001) ? (maxNum + 1) : (1001 + existingOrders.length);
+    }
+    let orderNo = "ORD" + nextSerialNo;
 
     const { data, error } = await window.supabaseClient
         .from("orders")
