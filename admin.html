@@ -166,9 +166,14 @@
     }
   };
 
-  window.loadOrders = async function() {
+ window.loadOrders = async function() {
     let { data, error } = await supabaseClient.from('orders').select('*');
-    if (error) { console.log("Orders error:", error); return; }
+    
+    if (error) {
+      console.log("Orders error:", error);
+      document.getElementById("ordersTable").innerHTML = `<tr><td colspan="7" style="color:red;">Error loading orders: ${error.message}</td></tr>`;
+      return;
+    }
 
     activeOrdersCache = data || [];
     var tableBody = document.getElementById("ordersTable");
