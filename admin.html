@@ -456,7 +456,7 @@
     reader.readAsDataURL(file);
   };
 
-  // 📊 सबै ड्यासबोर्ड तथ्याङ्कहरू स्वचालित रूपमा गणना गरी देखाउने फंक्सन
+  // 📊 सबै ड्यासबोर्ड तथ्याङ्कहरू सही तरिकाले गणना गर्ने फंक्सन
   window.calculateDashboardStats = function(orders) {
     let totalOrders = orders.length;
     let totalRevenue = 0;
@@ -474,8 +474,15 @@
 
       if (o.time) {
         let orderDate = new Date(o.time);
+        
+        // यदि सीधा Date parse भएन भने स्ट्रिङबाट मिलाउने
+        if (isNaN(orderDate.getTime())) {
+          let cleanTime = o.time.replace(/at/gi, "").trim();
+          orderDate = new Date(cleanTime);
+        }
+
         if (!isNaN(orderDate.getTime())) {
-          // आजको बिक्री हिसाब गर्ने
+          // 🟢 आजको मिति मिलेको छ कि छैन चेक गर्ने (Day, Month, Year)
           if (
             orderDate.getDate() === currentDay &&
             orderDate.getMonth() === currentMonth &&
@@ -483,7 +490,8 @@
           ) {
             todaySales += amount;
           }
-          // यो महिनाको बिक्री हिसाब गर्ने
+          
+          // 🟢 यो महिनाको बिक्री चेक गर्ने
           if (
             orderDate.getMonth() === currentMonth &&
             orderDate.getFullYear() === currentYear
