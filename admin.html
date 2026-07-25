@@ -267,24 +267,14 @@
     tableBody.innerHTML = html;
   };
 
- // 🎯 KOT वा Bill प्रिन्ट गर्ने र Supabase मा 'id' वा 'order_no' बाट स्टेटस अपडेट गर्ने अचूक फंक्सन
+// २. KOT वा Bill प्रिन्ट गर्ने र ५८मिमी प्रिन्टरको लागि सुन्दर डिजाइन बनाउने फंक्सन
   window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
-    console.log("Triggering action for identifier:", orderNo, "New Status:", nextStatus);
-
-    // १. पहिले क्यास वा सीधा डेटाबेसबाट यो अर्डरको सही 'id' पत्ता लगाउने
-    let targetId = orderNo;
-    let foundObj = activeOrdersCache.find(item => item.order_no == orderNo || item.id == orderNo || item.orderno == orderNo);
-    if (foundObj && foundObj.id) {
-      targetId = foundObj.id;
-    }
-
-    // २. Supabase मा 'id' र 'order_no' दुवैमार्फत अपडेट गर्ने प्रयास गर्ने
-    let res = await supabaseClient.from('orders').update({ status: nextStatus }).eq('id', targetId);
+    // Supabase मा status अपडेट गर्ने
+    let res = await supabaseClient.from('orders').update({ status: nextStatus }).eq('order_no', orderNo);
     if (res.error) {
-      await supabaseClient.from('orders').update({ status: nextStatus }).eq('order_no', orderNo);
+      await supabaseClient.from('orders').update({ status: nextStatus }).eq('id', orderNo);
     }
 
-    // ३. तुरुन्तै प्यानलको टेबल रिफ्रेस गर्ने
     await window.loadOrders();
 
     var o = activeOrdersCache.find(item => item.order_no == orderNo || item.id == orderNo || item.orderno == orderNo);
@@ -293,20 +283,59 @@
     }
 
     var isKot = (printType === "kot");
-    var invoiceHtml = `<div style="text-align: center; font-family: monospace;">
-      <h3 style="margin: 0; font-size: 15px;">UGRATARA RESTAURANT</h3>
-      <p style="margin: 2px 0; font-size: 11px; background: #000; color: #fff; display: inline-block; padding: 2px 8px;">${isKot ? "🎫 KOT (KITCHEN ORDER)" : "🧾 INVOICE / BILL"}</p>
-    </div>
-    <hr style="border-top: 1px dashed #000; margin: 6px 0;">
-    <div style="font-family: monospace; font-size: 11.5px; line-height: 1.3;">
-      <div><b>Order No:</b> ${o.order_no || o.orderno || orderNo}</div>
-      <div><b>Customer:</b> ${o.customer_name || 'Guest'} (${o.phone || '-'})</div>
-      <div><b>Date:</b> ${o.time || 'N/A'}</div>
-    </div>
-    <hr style="border-top: 1px dashed #000; margin: 6px 0;">
-    <div style="font-family: monospace; font-size: 11.5px; white-space: pre-wrap;"><b>Items:</b><br>${o.items || 'Food Items'}</div>
-    <hr style="border-top: 1px dashed #000; margin: 6px 0;">
-    <div style="text-align: right; font-family: monospace; font-size: 13px; font-weight: bold;">Total: RM ${o.total || '0'}</div>`;
+    
+    // 🎨 ५८मिमी प्रिन्टरको लागि KOT र Bill को छुट्टाछुट्टै र आकर्षक डिजाइन
+    var invoiceHtml = `
+    <div style="font-family: 'Courier New', Courier, monospace; width: 58mm; max-width: 58mm; padding: 5px; margin: 0 auto; color: #000; background: #fff; box-sizing: border-box;">
+      
+      <!-- 🏪 रेस्टुरेन्टको नाम (दुवैमा साझा) -->
+      <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 6px; margin-bottom: 6px;">
+        <h2 style="margin: 0; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">UGRATARA RESTAURANT</h2>
+        <p style="margin: 2px 0 0 0; font-size: 10px;">Fresh Food • Fast Delivery</p>
+      </div>
+
+      ${isKot ? `
+        <!-- 🎫 KOT (Kitchen Order Ticket) डिजाइन - भान्साको लागि स्पष्ट र बोल्ड -->
+        <div style="text-align: center; margin-bottom: 6px;">
+          <span style="font-size: 12px; font-weight: bold; background: #000; color: #fff; padding: 2px 10px; display: inline-block; border-radius: 3px;">KITCHEN TICKET (KOT)</span>
+        </div>
+        <div style="font-size: 11px; line-height: 1.4; margin-bottom: 6px; border-bottom: 1px dashed #000; padding-bottom: 5px;">
+          <div><b>Order No:</b> ${o.order_no || o.id || orderNo}</div>
+          <div><b>Time:</b> ${o.time || 'Now'}</div>
+        </div>
+        <div style="font-size: 12px; margin-bottom: 8px;">
+          <div style="font-weight: bold; border-bottom: 1px solid #000; margin-bottom: 4px; padding-bottom: 2px;">ITEMS TO PREPARE:</div>
+          <div style="white-space: pre-wrap; font-weight: bold; font-size: 12.5px;">${o.items || 'Food Items'}</div>
+        </div>
+      ` : `
+        <!-- 🧾 Customer Bill / Invoice डिजाइन - ग्राहकको लागि व्यावसायिक बिल -->
+        <div style="text-align: center; margin-bottom: 6px;">
+          <span style="font-size: 12px; font-weight: bold; border: 1px solid #000; padding: 2px 8px; display: inline-block;">TAX INVOICE / BILL</span>
+        </div>
+        <div style="font-size: 10.5px; line-height: 1.4; margin-bottom: 6px; border-bottom: 1px dashed #000; padding-bottom: 5px;">
+          <div><b>Bill No:</b> ${o.order_no || o.id || orderNo}</div>
+          <div><b>Customer:</b> ${o.customer_name || 'Guest'}</div>
+          <div><b>Phone:</b> ${o.phone || '-'}</div>
+          <div><b>Date:</b> ${o.time || 'N/A'}</div>
+        </div>
+        <div style="font-size: 11px; margin-bottom: 6px;">
+          <div style="font-weight: bold; border-bottom: 1px solid #000; margin-bottom: 4px; padding-bottom: 2px; display: flex; justify-content: space-between;">
+            <span>DESCRIPTION</span>
+            <span>TOTAL</span>
+          </div>
+          <div style="white-space: pre-wrap; line-height: 1.4;">${o.items || 'Food Items'}</div>
+        </div>
+        <hr style="border: 0; border-top: 1px dashed #000; margin: 6px 0;">
+        <div style="text-align: right; font-size: 13px; font-weight: bold; margin-bottom: 8px;">
+          Grand Total: RM ${o.total || '0'}
+        </div>
+        <div style="text-align: center; font-size: 10px; border-top: 1px dashed #000; padding-top: 6px; margin-top: 5px;">
+          <p style="margin: 0;">🙏 Thank you for your order!</p>
+          <p style="margin: 2px 0 0 0;">Please visit again.</p>
+        </div>
+      `}
+      
+    </div>`;
     
     if(document.getElementById("printableInvoiceArea")) {
         document.getElementById("printableInvoiceArea").innerHTML = invoiceHtml;
@@ -314,36 +343,41 @@
     }
   };
 
-  window.updateOrderStatus = async function(orderNo, newStatus) {
-    let updatePayload = { status: newStatus };
-    if(newStatus === "Delivered") {
-        updatePayload.delivery_time = new Date().toLocaleString();
-    }
-
-    let res = await supabaseClient.from('orders').update(updatePayload).eq('order_no', orderNo);
-    if (res.error) {
-      await supabaseClient.from('orders').update(updatePayload).eq('id', orderNo);
-    }
-    window.loadOrders();
-  };
-
-  window.manualUpdate = async function(orderNo) {
-    var s = document.getElementById("status_" + orderNo).value;
-    await window.updateOrderStatus(orderNo, s);
-  };
-
-  window.closePrintModal = function() {
-    document.getElementById("printModalBox").style.display = "none";
-  };
-
+  // 🖨️ ५८मिमी प्रिन्टरको पेपर साइज फिक्स गर्ने र अतिरिक्त हेडर/फुटर (URL, मिति आदि) हटाउने प्रिन्ट फंक्सन
   window.executeSystemPrint = function() {
     var printArea = document.getElementById("printableInvoiceArea");
     if (!printArea) return;
-    var w = window.open('', '_blank', 'height=600,width=400');
-    w.document.write('<html><head><title>Print</title></head><body>' + printArea.innerHTML + '</body></html>');
+    
+    var w = window.open('', '_blank', 'height=650,width=350');
+    w.document.write(`
+      <html>
+        <head>
+          <title>Print Receipt</title>
+          <style>
+            @page {
+              size: 58mm auto; /* ५८मिमी थर्मल पेपर साइज फिक्स */
+              margin: 0mm;
+            }
+            body {
+              margin: 0;
+              padding: 0;
+              background: #fff;
+              -webkit-print-color-adjust: exact;
+            }
+          </style>
+        </head>
+        <body>
+          ${printArea.innerHTML}
+        </body>
+      </html>
+    `);
     w.document.close();
     w.focus();
-    setTimeout(() => w.print(), 500);
+    
+    setTimeout(() => {
+      w.print();
+      w.close();
+    }, 400);
   };
 
   // 📸 डेलिभरी प्रुफ अपलोड गर्ने र Supabase मा 'Delivered' स्टेटस, फोटो र समय सेभ गर्ने अचूक फंक्सन
