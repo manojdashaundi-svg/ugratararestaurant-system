@@ -269,28 +269,25 @@
     tableBody.innerHTML = html;
   };
 
-  // २. KOT वा Bill प्रिन्ट गर्ने र Supabase मा सबै सम्भावित Column Name बाट स्टेटस अपडेट गर्ने
+  // 🎯 KOT वा Bill प्रिन्ट गर्ने र Supabase मा शतप्रतिशत स्टेटस अपडेट गर्ने फंक्सन
   window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
-    // 🛠️ 'order_no', 'orderno', र 'id' तीनवटै सम्भावित स्तम्भको नामबाट अपडेट ट्राइ गर्ने
-    let updated = false;
+    console.log("Updating order:", orderNo, "to status:", nextStatus);
 
-    let res1 = await supabaseClient.from('orders').update({ status: nextStatus }).eq('order_no', orderNo).select();
-    if(res1.data && res1.data.length > 0) updated = true;
-
-    if(!updated) {
-      let res2 = await supabaseClient.from('orders').update({ status: nextStatus }).eq('orderno', orderNo).select();
-      if(res2.data && res2.data.length > 0) updated = true;
+    // १. पहिले activeOrdersCache बाट यो अर्डरको सम्पूर्ण डाटा खोज्ने
+    var o = activeOrdersCache.find(item => item.order_no == orderNo || item.orderno == orderNo || item.id == orderNo);
+    
+    // २. Supabase मा ज-जसो भए पनि अपडेट गर्ने प्रयास गर्ने
+    let updateResult = await supabaseClient.from('orders').update({ status: nextStatus }).eq('order_no', orderNo);
+    if (updateResult.error) {
+      let res2 = await supabaseClient.from('orders').update({ status: nextStatus }).eq('orderno', orderNo);
+      if (res2.error) {
+        await supabaseClient.from('orders').update({ status: nextStatus }).eq('id', orderNo);
+      }
     }
 
-    if(!updated) {
-      let res3 = await supabaseClient.from('orders').update({ status: nextStatus }).eq('id', orderNo).select();
-      if(res3.data && res3.data.length > 0) updated = true;
-    }
-
-    // तुरुन्तै प्यानलको टेबल डेटा रिफ्रेस गर्ने
+    // ३. तुरुन्तै प्यानलको टेबल रिफ्रेस गर्ने
     await window.loadOrders();
 
-    var o = activeOrdersCache.find(item => item.order_no == orderNo || item.orderno == orderNo || item.id == orderNo);
     if(!o) {
       o = { order_no: orderNo, customer_name: "Valued Customer", phone: "", time: "Now", total: "0", items: "Food Items" };
     }
@@ -316,6 +313,7 @@
         document.getElementById("printModalBox").style.display = "flex";
     }
   };
+  
   window.updateOrderStatus = async function(orderNo, newStatus) {
     let updatePayload = { status: newStatus };
     if(newStatus === "Delivered") {
