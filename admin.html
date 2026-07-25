@@ -248,37 +248,80 @@
   };
 
   // मेनु लोड गर्ने
-  // मेनु लोड गर्ने (फोटो, विवरण र हुबहु बटनसहित)
+  // १. मेनु लोड गर्ने सही तरिका
   window.loadMenuList = async function() {
     let { data, error } = await supabaseClient.from('menu_items').select('*');
-    if(error) return;
+    if(error) { console.log("Menu load error:", error); return; }
 
     var menuList = document.getElementById("menuTableList");
     if(!menuList) return;
     let html = "";
     
     (data || []).forEach((r) => {
-      let itemId = r.item_id || r.id || '';
+      let rowId = r.id; // Supabase को वास्तविक ID प्रयोग गरिएको
       let imgTag = r.image ? `<img src="${r.image}" class="menu-thumb">` : `No Image`;
       let stockStatus = r.status || "In Stock";
       let stockBtnClass = stockStatus === "In Stock" ? "inStockBtn" : "outStockBtn";
       let stockText = stockStatus === "In Stock" ? "🟢 In Stock" : "🔴 Out of Stock";
 
       html += `<tr>
-        <td><b>${itemId}</b></td>
+        <td><b>${rowId}</b></td>
         <td><b>${r.name || ''}</b></td>
         <td style="color:#e91e63; font-weight:bold;">RM ${r.price || 0}</td>
         <td>${imgTag}</td>
         <td>${r.description || ''}</td>
         <td><b>${r.category || ''}</b></td>
         <td>
-          <button class="${stockBtnClass}" onclick="window.toggleStock('${itemId}', '${stockStatus}')">${stockText}</button>
-          <button class="editBtn" onclick="window.editProduct('${itemId}', '${r.name}', ${r.price}, '${r.description || ''}', '${r.category || ''}')">✏️ Edit</button>
-          <button class="removeBtn" onclick="window.deleteProduct('${itemId}')">❌ Delete</button>
+          <button class="${stockBtnClass}" onclick="window.toggleStock(${rowId}, '${stockStatus}')">${stockText}</button>
+          <button class="editBtn" onclick="window.editProduct(${rowId}, '${r.name}', ${r.price}, '${r.description || ''}', '${r.category || ''}')">✏️ Edit</button>
+          <button class="removeBtn" onclick="window.deleteProduct(${rowId})">❌ Delete</button>
         </td>
       </tr>`;
     });
     menuList.innerHTML = html;
+  };
+
+  // २. स्टक (In Stock / Out of Stock) परिवर्तन गर्ने
+  window.toggleStock = async function(rowId, currentStatus) {
+    let newStatus = currentStatus === "In Stock" ? "Out of Stock" : "In Stock";
+    let { error } = await supabaseClient.from('menu_items').update({ status: newStatus }).eq('id', rowId);
+    if(error) {
+      alert("Failed to update stock: " + error.message);
+    } else {
+      window.loadMenuList();
+    }
+  };
+
+  // ३. एडिट गरेर सेभ गर्ने
+  window.editProduct = async function(rowId, oldName, oldPrice, oldDesc, oldCat) {
+    var newName = prompt("Edit Product Name:", oldName); if(newName === null) return;
+    var newPrice = parseFloat(prompt("Edit Price (RM):", oldPrice)) || oldPrice;
+    var newDesc = prompt("Edit Description:", oldDesc); if(newDesc === null) return;
+    var newCat = prompt("Edit Category:", oldCat); if(newCat === null) return;
+
+    let { error } = await supabaseClient.from('menu_items')
+      .update({ name: newName, price: newPrice, description: newDesc, category: newCat })
+      .eq('id', rowId);
+
+    if(error) {
+      alert("Failed to update: " + error.message);
+    } else {
+      alert("✅ Successfully Updated & Saved to Supabase!");
+      window.loadMenuList();
+    }
+  };
+
+  // ४. आइटम डिलिट गर्ने
+  window.deleteProduct = async function(rowId) {
+    if(confirm("Delete this item?")) {
+      let { error } = await supabaseClient.from('menu_items').delete().eq('id', rowId);
+      if(error) {
+        alert("Failed to delete: " + error.message);
+      } else {
+        alert("✅ Item deleted successfully!");
+        window.loadMenuList();
+      }
+    }
   };
 
   // स्टक स्टाटस फेरेर Supabase मा स्वतः सेभ गर्ने
