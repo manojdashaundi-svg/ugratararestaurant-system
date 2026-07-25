@@ -214,11 +214,11 @@
 
     activeOrdersCache = data || [];
     
-    // यदि समय वा आईडी अनुसार मिलाउन चाहनुहुन्छ भने यहाँ सर्टिङ गर्न सकिन्छ
+    // 🛠️ नयाँ अर्डरलाई सधैँ माथि (Descending) देखाउने सही सर्टिङ
     activeOrdersCache.sort((a, b) => {
-      let idA = a.id || 0;
-      let idB = b.id || 0;
-      return idA > idB ? 1 : -1;
+      let timeA = new Date(a.time).getTime() || 0;
+      let timeB = new Date(b.time).getTime() || 0;
+      return timeB - timeA; // नयाँ समय भएको माथि आउँछ
     });
 
     var tableBody = document.getElementById("ordersTable");
