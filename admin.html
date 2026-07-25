@@ -199,12 +199,12 @@
     }
   };
 
-  // १. अर्डर लोड गर्ने (सबै प्रकारका केस र स्पेसहरू मिलाएर सही बटन देखाउने)
+  // १. अर्डर लोड गर्ने र सिरियल वाइज वा समयको क्रममा देखाउने फंक्सन
   window.loadOrders = async function() {
     let { data, error } = await supabaseClient
       .from('orders')
       .select('*')
-      .order('time', { ascending: false });
+      .order('id', { ascending: true }); // 🛠️ 'id' वा 'order_no' को आधारमा सिरियल वाइज (क्रमबद्ध) देखाउन
 
     if (error) {
       console.log("Error loading orders: ", error);
@@ -219,7 +219,7 @@
     if(activeOrdersCache.length === 0) {
       html = `<tr><td colspan="9" style="padding:20px;">No Active Orders Found.</td></tr>`;
     } else {
-      activeOrdersCache.forEach(function(o){
+      activeOrdersCache.forEach(function(o, index){
         let rawStatus = o.status ? String(o.status).trim() : "Pending";
         let status = rawStatus.toLowerCase();
         
@@ -266,7 +266,6 @@
     }
     tableBody.innerHTML = html;
   };
-
   // २. KOT वा Bill प्रिन्ट गर्ने र ५८मिमी प्रिन्टरको लागि सुन्दर डिजाइन बनाउने फंक्सन
   window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
     let res = await supabaseClient.from('orders').update({ status: nextStatus }).eq('order_no', orderNo);
