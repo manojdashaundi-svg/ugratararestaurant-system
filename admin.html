@@ -223,9 +223,13 @@
     if(document.getElementById("dashTotalRevenue")) document.getElementById("dashTotalRevenue").innerText = "RM " + totalRevenue.toFixed(2);
   };
 
-  // मेनु लोड गर्ने
+  // मेनु लोड गर्ने (Row हरू सधैँ ID अनुसार स्थिर रहने गरी)
   window.loadMenuList = async function() {
-    let { data, error } = await supabaseClient.from('menu_items').select('*');
+    let { data, error } = await supabaseClient
+      .from('menu_items')
+      .select('*')
+      .order('id', { ascending: true }); // 👈 यो थपिएको छ जसले Row परिवर्तन हुन दिँदैन
+
     if(error) { console.log("Menu error:", error); return; }
 
     var menuList = document.getElementById("menuTableList");
