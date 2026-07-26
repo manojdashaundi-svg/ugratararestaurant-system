@@ -27,7 +27,10 @@ async function loadMenu() {
     
     if (error) {
         console.error("Error loading menu:", error);
-        document.getElementById("menu").innerHTML = `<p style='color:red; text-align:center;'>⚠️ Error loading menu items!</p>`;
+        let menuEl = document.getElementById("menu");
+        if (menuEl) {
+            menuEl.innerHTML = `<p style='color:red; text-align:center;'>⚠️ Error loading menu items!</p>`;
+        }
         return;
     }
 
@@ -66,7 +69,10 @@ window.showMenu = function(data) {
             </div>
         `;
     });
-    document.getElementById("menu").innerHTML = html;
+    let menuContainer = document.getElementById("menu");
+    if (menuContainer) {
+        menuContainer.innerHTML = html;
+    }
     window.searchFood();
 };
 
@@ -179,7 +185,7 @@ window.placeOrder = async function() {
     const subtotal = window.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
     const grandTotal = subtotal + deliveryCharge;
     
-    let client = window.supabaseClient || window.supabase;
+    let client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
     let { data: existingOrders } = await client.from('orders').select('order_no');
     let nextSerialNo = 1001;
 
@@ -243,7 +249,7 @@ window.trackMyOrder = async function() {
 
     document.getElementById("trackResult").innerHTML = "Searching...";
 
-    let client = window.supabaseClient || window.supabase;
+    let client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
     const { data, error } = await client
         .from("orders")
         .select("*")
@@ -360,7 +366,7 @@ window.loadStaffList = async function() {
 window.deleteStaff = async function(id) {
     if (!confirm("के तपाईं यो स्टाफलाई हटाउन चाहनुहुन्छ?")) return;
 
-    let client = window.supabaseClient || window.supabase;
+    let client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
     let { error } = await client.from('admins').delete().eq('id', id);
     if (error) {
         alert("डिलिट गर्न असफल भयो: " + error.message);
