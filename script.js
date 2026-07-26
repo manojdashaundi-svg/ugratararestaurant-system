@@ -6,15 +6,10 @@ window.base64SlipData = "";
 
 // पेज लोड हुनेबित्तिकै Supabase कनेक्सन चेक गरेर मात्र मेनु र स्टाफ लोड गर्ने
 document.addEventListener("DOMContentLoaded", function () {
-    let checkSupabase = setInterval(() => {
-        if (window.supabaseClient) {
-            clearInterval(checkSupabase);
-            loadMenu();
-            if (typeof window.loadStaffList === 'function') {
-                window.loadStaffList();
-            }
-        }
-    }, 100);
+    if (typeof loadMenu === 'function') loadMenu();
+    if (typeof window.loadStaffList === 'function') {
+        window.loadStaffList();
+    }
 });
 
 // Supabase बाट मेनु लोड गर्ने फंक्सन
