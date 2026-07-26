@@ -6,8 +6,12 @@ window.base64SlipData = "";
 
 // 🔒 सुरक्षित रूपमा Supabase क्लाइन्ट तान्ने ग्लोबल फंक्सन
 function getSupabaseClient() {
-    let client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
-    return client;
+    // admin.html मा परिभाषित गरिएको supabaseClient लाई पहिलो प्राथमिकता दिने
+    if (typeof supabaseClient !== 'undefined' && supabaseClient) return supabaseClient;
+    if (window.supabaseClient) return window.supabaseClient;
+    if (window.supabase) return window.supabase;
+    if (typeof supabase !== 'undefined' && supabase.from) return supabase;
+    return null;
 }
 
 // पेज लोड हुनेबित्तिकै Supabase कनेक्सन चेक गरेर मात्र मेनु र स्टाफ लोड गर्ने
