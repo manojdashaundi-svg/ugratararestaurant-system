@@ -1247,6 +1247,103 @@ window.deleteExpense = async function(id) {
         window.loadExpenses();
     }
 };
+
+  // ➕ नयाँ खर्च Supabase मा सेभ गर्ने फंक्सन
+window.addExpense = async function() {
+    let dateVal = document.getElementById("expenseDateInput").value;
+    let category = document.getElementById("expenseCategory").value.trim();
+    let amount = parseFloat(document.getElementById("expenseAmount").value);
+    let description = document.getElementById("expenseDescription").value.trim();
+
+    if (!dateVal || !category || isNaN(amount)) {
+        alert("⚠️ कृपया मिति, श्रेणी (Category) र रकम (Amount) सही तरिकाले भर्नुहोस्!");
+        return;
+    }
+
+    let { error } = await supabaseClient.from('expenses').insert([
+        { date: dateVal, category: category, amount: amount, description: description }
+    ]);
+
+    if (error) {
+        alert("❌ Error adding expense: " + error.message);
+    } else {
+        alert("✅ Expense Added Successfully!");
+        document.getElementById("expenseDateInput").value = "";
+        document.getElementById("expenseCategory").value = "";
+        document.getElementById("expenseAmount").value = "";
+        document.getElementById("expenseDescription").value = "";
+        window.loadExpenseSummary();
+    }
+};
+
+// 📊 जम्मा खर्च र Net Profit लोड गर्ने फंक्सन
+window.loadExpenseSummary = async function() {
+    try {
+        let { data, error } = await supabaseClient.from('expenses').select('*');
+        if (error) {
+            console.log("Error loading expenses:", error.message);
+            return;
+        }
+
+        let totalExpense = 0;
+        (data || []).forEach(item => {
+            totalExpense += parseFloat(item.amount) || 0;
+        });
+
+        document.getElementById("summaryExpense").innerText = "RM " + totalExpense.toFixed(2);
+
+        // Net Profit हिसाब (Revenue मानौं 147.00 छ)
+        let totalRevenue = 147.00;
+        let netProfit = totalRevenue - totalExpense;
+        let netProfitEl = document.getElementById("summaryNetProfit");
+        netProfitEl.innerText = "RM " + netProfit.toFixed(2);
+        netProfitEl.style.color = netProfit >= 0 ? "#388E3C" : "#D32F2F";
+
+    } catch (err) {
+        console.log("Catch error:", err);
+    }
+};
+
+// पेज खुल्दा यो चल्नेछ
+window.loadExpenseSummary();
+
+// 📥 Excel (CSV) मा Export गर्ने फंक्सन
+window.exportExpenseExcel = async function() {
+    let startDate = document.getElementById("expenseStartDate").value;
+    let endDate = document.getElementById("expenseEndDate").value;
+
+    let query = supabaseClient.from('expenses').select('*');
+    if (startDate && endDate) {
+        query = query.gte('date', startDate).lte('date', endDate);
+    }
+
+    let { data, error } = await query;
+    if (error) {
+        alert("❌ Error exporting data: " + error.message);
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        alert("⚠️ यो मितिभित्र कुनै खर्च भेटिएन!");
+        return;
+    }
+
+    let csv = [];
+    csv.push("Date,Category,Amount (RM),Description");
+
+    data.forEach(item => {
+        csv.push(`"${item.date}","${item.category}",${item.amount},"${item.description || ''}"`);
+    });
+
+    let csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+    let downloadLink = document.createElement("a");
+    downloadLink.download = "Expense_Report_" + (startDate || "All") + "_to_" + (endDate || "All") + ".csv";
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+};
   
 </script>
 </body>
