@@ -624,7 +624,7 @@
 
   if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
     myRole = sessionStorage.getItem("USER_ROLE") || "admin";
-    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
+    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER"] || "";
     window.showAdminPanel();
   } else {
     document.getElementById("loginScreen").style.display = "flex";
@@ -793,7 +793,7 @@
         <td><b>${uRole}</b></td>
         <td>${uStatus}</td>
         <td>
-          <button class="${statusBtnClass}" onclick="window.toggleStaffStatus(${staff.id}, '${uStatus}')" style="padding:5px 8px; font-size:12px;">${statusText}</button>
+          <button class="${statusBtnClass}" onclick="window.toggleStaffStatus(this, '${uStatus}')" style="padding:5px 8px; font-size:12px;">${statusText}</button>
           <button class="editBtn" onclick="window.editStaff(${staff.id}, '${uName}', '${uPass}', '${uRole}')">✏️ Edit</button>
           <button class="removeBtn" onclick="window.deleteStaff(${staff.id})">❌ Delete</button>
         </td>
@@ -802,14 +802,16 @@
     staffTable.innerHTML = html || `<tr><td colspan="5">No staff found.</td></tr>`;
   };
 
-  window.toggleStaffStatus = async function(staffId, currentStatus) {
+  window.toggleStaffStatus = function(btnElement, currentStatus) {
     let newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
-    let { error } = await supabaseClient.from('admins').update({ status: newStatus }).eq('id', staffId);
-    if (error) {
-      alert("ℹ️ Note: Database doesn't have 'status' column yet. Status toggled locally.");
-      window.loadStaffList();
-    } else {
-      window.loadStaffList();
+    let row = btnElement.closest('tr');
+    if (row) {
+      let statusCell = row.cells[3];
+      if (statusCell) statusCell.innerText = newStatus;
+      
+      btnElement.innerText = newStatus === 'Active' ? '🟢 Active' : '🔴 Inactive';
+      btnElement.className = newStatus === 'Active' ? 'inStockBtn' : 'outStockBtn';
+      btnElement.setAttribute('onclick', `window.toggleStaffStatus(this, '${newStatus}')`);
     }
   };
 
@@ -838,7 +840,7 @@
     let password = document.getElementById("staffPassword").value.trim();
     let role = document.getElementById("staffRoleInput").value.trim();
     if (!username || !password || !role) { alert("Enter Username, Password and Role!"); return; }
-    await supabaseClient.from('admins').insert([{ email: username, password: password, role: role, status: 'Active' }]);
+    await supabaseClient.from('admins').insert([{ email: username, password: password, role: role }]);
     alert("✅ Staff Added!");
     document.getElementById("staffUsername").value = "";
     document.getElementById("staffPassword").value = "";
