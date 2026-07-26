@@ -705,20 +705,42 @@
     if(modal) modal.style.display = "none";
   };
 
-  window.showAdminPanel = function() {
+ window.showAdminPanel = function() {
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("adminContent").style.display = "block";
     window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
     
-    document.getElementById("userRoleBadge").innerText = myRole.toUpperCase();
-    
+    let roleBadge = document.getElementById("userRoleBadge");
+    if(roleBadge) roleBadge.innerText = myRole.toUpperCase();
+
+    // 🔒 यदि लगइन गर्ने व्यक्ति MANAGER हो भने, Add New Staff ड्रपडाउनबाट 'Hotel Manager' र 'Full Admin' हटाउने
+    let roleSelect = document.getElementById("staffRoleSelect");
+    if (roleSelect) {
+      if (myRole === "manager") {
+        roleSelect.innerHTML = `
+          <option value="ORDER_TAKER">Order Taker</option>
+          <option value="DELIVERY">Delivery Boy</option>
+        `;
+      } else {
+        roleSelect.innerHTML = `
+          <option value="MANAGER">Hotel Manager</option>
+          <option value="ORDER_TAKER">Order Taker</option>
+          <option value="DELIVERY">Delivery Boy</option>
+          <option value="ADMIN">Full Admin</option>
+        `;
+      }
+    }
+
     if (myRole === "admin" || myRole === "manager") {
-      document.getElementById("salesDashboardBox").style.display = "flex";
-      document.getElementById("menuManagementBox").style.display = "block";
+      let dashBox = document.getElementById("salesDashboardBox");
+      if(dashBox) dashBox.style.display = "flex";
+      let menuBox = document.getElementById("menuManagementBox");
+      if(menuBox) menuBox.style.display = "block";
       window.loadMenuList();
     }
-    window.loadOrders();
-    window.loadStaffList();
+
+    if(typeof window.loadOrders === 'function') window.loadOrders();
+    if(typeof window.loadStaffList === 'function') window.loadStaffList();
   };
 
   window.logout = function() { sessionStorage.clear(); window.location.reload(); };
