@@ -1007,49 +1007,55 @@ if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
   };
 
   // 👥 स्टाफहरूको सूची लोड गर्ने (सुरक्षासहित: म्यानेजरले एडमिन लुकाउने)
-  window.loadStaffList = async function() {
-    let { data, error } = await supabaseClient
-      .from('admins')
-      .select('*')
-      .order('id', { ascending: true });
-
-    if (error) {
-      console.log("Error loading staff:", error);
-      return;
-    }
-
+ window.loadStaffList = async function() {
     let staffTable = document.getElementById("staffTableList");
     if (!staffTable) return;
 
-    let html = "";
-    (data || []).forEach(staff => {
-      let uName = staff.email || staff.username || '';
-      let uRole = staff.role || 'STAFF';
+    try {
+        let { data, error } = await supabaseClient.from('admins').select('*');
+        if (error) {
+            staffTable.innerHTML = `<tr><td colspan="4" style="color:red; padding:10px;">Error: ${error.message}</td></tr>`;
+            return;
+        }
 
-      // 🔒 सुरक्षा: यदि लगइन गर्ने व्यक्ति 'manager' हो भने, 'admin' रोल भएकोलाई लुकाउने
-      if (window.myRole === 'manager' && uRole.toLowerCase() === 'admin') {
-          return;
-      }
+        let html = "";
+        (data || []).forEach(staff => {
+            let uName = staff.email || staff.username || '';
+            let uPass = staff.password || '';
+            let uRole = staff.role || 'STAFF';
 
-      let isMainAdmin = (uName.toLowerCase() === "manoj" || uRole === "ADMIN" && staff.id === 1);
-      let actionHtml = isMainAdmin ? 
-        `<span style="color:#e91e63; font-weight:bold;">👑 Admin</span>` : 
-        `<button class="editBtn" onclick="window.editStaff(${staff.id}, '${uName}', '${staff.password}', '${uRole}')" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
-         <button class="removeBtn" onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">❌ Delete</button>`;
+            // 🔒 सुरक्षा: यदि लगइन गर्ने व्यक्ति 'manager' हो भने, 'admin' रोल भएकोलाई लुकाउने
+            if (window.myRole === 'manager' && uRole.toLowerCase() === 'admin') {
+                return;
+            }
 
-      html += `
-        <tr>
-          <td><b>${uName}</b></td>
-          <td>${staff.password || ''}</td>
-          <td><b>${uRole}</b></td>
-          <td>${actionHtml}</td>
-        </tr>
-      `;
-    });
+            let isMainAdmin = (uName.toLowerCase() === "manoj" || uRole === "ADMIN" && staff.id === 1);
+            let actionHtml = isMainAdmin ? 
+                `<span style="color:#e91e63; font-weight:bold;">👑 Admin</span>` : 
+                `<button class="editBtn" onclick="window.editStaff(${staff.id}, '${uName}', '${uPass}', '${uRole}')" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
+                 <button class="removeBtn" onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">❌ Delete</button>`;
 
-    staffTable.innerHTML = html;
-  };
+            html += `
+                <tr>
+                    <td><b>${uName}</b></td>
+                    <td>${uPass}</td>
+                    <td><b>${uRole}</b></td>
+                    <td>${actionHtml}</td>
+                </tr>
+            `;
+        });
 
+        if (html === "") {
+            html = `<tr><td colspan="4" style="padding:15px;">No staff members found.</td></tr>`;
+        }
+
+        staffTable.innerHTML = html;
+
+    } catch (err) {
+        console.log("Load staff catch error:", err);
+        staffTable.innerHTML = `<tr><td colspan="4" style="color:red; padding:10px;">Error loading staff.</td></tr>`;
+    }
+};
   // ➕ नयाँ स्टाफ थप्ने फंक्सन
   window.createNewStaff = async function() {
     let username = document.getElementById("staffUsername").value.trim();
