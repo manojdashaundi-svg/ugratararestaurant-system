@@ -220,38 +220,7 @@
   var currentLoggedInUser = "";
   var activeOrdersCache = [];
 
-  window.handleLogin = async function() {
-    var u = document.getElementById("username").value.trim();
-    var p = document.getElementById("password").value.trim();
-    if(u === "" || p === "") { alert("Enter credentials."); return; }
-    
-    document.getElementById("loginBtn").innerText = "Verifying...";
-    
-    try {
-      let { data, error } = await supabaseClient.from('admins').select('*').eq('email', u).eq('password', p).maybeSingle();
-      
-      document.getElementById("loginBtn").innerText = "Login";
-
-      if (error || !data) {
-        alert("Wrong Email or Password.");
-        return;
-      }
-
-      sessionStorage.setItem("ADMIN_LOGIN", "true");
-      let userRole = data.role ? data.role.toLowerCase() : "admin";
-      sessionStorage.setItem("USER_ROLE", userRole);
-      localStorage.setItem("adminRole", userRole);
-      sessionStorage.setItem("LOGGED_USER", u.toLowerCase());
-      
-      window.myRole = userRole;
-      currentLoggedInUser = u.toLowerCase();
-      window.showAdminPanel();
-
-    } catch (err) {
-      document.getElementById("loginBtn").innerText = "Login";
-      alert("Login Error: " + err.message);
-    }
-  };
+  handleLogin
 
   window.loadOrders = async function() {
     let { data, error } = await supabaseClient.from('orders').select('*');
