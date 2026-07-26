@@ -766,7 +766,7 @@
         if (!isNaN(orderDate.getTime())) {
           let year = orderDate.getFullYear();
           let month = String(orderDate.getMonth() + 1).padStart(2, '0');
-          let key = `${year}-${month}`; // जस्तै: 2026-06, 2026-07
+          let key = `${year}-${month}`;
 
           if (!monthlyDataMap[key]) {
             monthlyDataMap[key] = 0;
@@ -776,7 +776,6 @@
       }
     });
 
-    // महिना अनुसार क्रम मिलाउने
     let sortedKeys = Object.keys(monthlyDataMap).sort();
     
     let chartArray = [['Months (Year-MM)', 'Revenue (RM)']];
@@ -792,7 +791,7 @@
 
     let options = {
       legend: { position: 'none' },
-      colors: ['#8E24AA'], // जामुनी रङ्ग (Purple)
+      colors: ['#8E24AA'],
       hAxis: { title: 'Months (Year-MM)' },
       vAxis: { title: 'Revenue (RM)', minValue: 0 },
       animation: { startup: true, duration: 1000, easing: 'out' }
@@ -801,7 +800,8 @@
     let chart = new google.visualization.ColumnChart(document.getElementById('monthlySalesChart'));
     chart.draw(data, options);
   };
-// 📊 आजको प्रतिघण्टा बिक्रीको ट्रेन्ड (Today's Hourly Sales Trend) देखाउने फंक्सन
+
+  // 📊 आजको प्रतिघण्टा बिक्रीको ट्रेन्ड देखाउने फंक्सन
   window.drawHourlySalesChart = function(orders) {
     if (typeof google === 'undefined' || !google.visualization) return;
 
@@ -826,7 +826,6 @@
         }
 
         if (!isNaN(orderDate.getTime())) {
-          // केवल आजको अर्डरहरू मात्र फिल्टर गर्ने
           if (
             orderDate.getDate() === currentDay &&
             orderDate.getMonth() === currentMonth &&
@@ -849,10 +848,10 @@
 
     let options = {
       legend: { position: 'none' },
-      colors: ['#E91E63'], // गुलाबी/रातो रङ्ग (Pink/Red)
+      colors: ['#E91E63'],
       hAxis: { title: 'Time (Hours)', slantedText: true },
       vAxis: { title: 'Revenue (RM)', minValue: 0 },
-      curveType: 'function', // गोलो घुमेको चिल्लो लाइन देखाउन
+      curveType: 'function',
       animation: { startup: true, duration: 1000, easing: 'out' }
     };
 
@@ -1044,9 +1043,9 @@
     if (newRole === null) return;
 
     let client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
-let { error } = await client.from('admins')
-    .update({ email: newEmail, password: newPass, role: newRole.toUpperCase() })
-    .eq('id', staffId);
+    let { error } = await client.from('admins')
+      .update({ email: newEmail, password: newPass, role: newRole.toUpperCase() })
+      .eq('id', staffId);
 
     if (error) {
       alert("❌ Error updating staff: " + error.message);
@@ -1054,6 +1053,51 @@ let { error } = await client.from('admins')
       alert("✅ Staff Updated Successfully!");
       window.loadStaffList();
     }
+  };
+
+  // 👥 एडमिन प्यानलको लागि स्टाफ लिस्ट लोड गर्ने फंक्सन
+  window.loadStaffList = async function() {
+    let staffTable = document.getElementById("staffTableList");
+    if (!staffTable) return;
+
+    let client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+    
+    if (!client || typeof client.from !== 'function') {
+        staffTable.innerHTML = `<tr><td colspan="4" style="color:red; padding:10px;">Supabase client not initialized! Please check script tags.</td></tr>`;
+        return;
+    }
+
+    let { data, error } = await client.from('admins').select('*');
+
+    if (error) {
+        staffTable.innerHTML = `<tr><td colspan="4" style="color:red; padding:10px;">Error: ${error.message}</td></tr>`;
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        staffTable.innerHTML = `<tr><td colspan="4" style="padding:10px; color:#666;">No staff found.</td></tr>`;
+        return;
+    }
+
+    let html = "";
+    data.forEach(staff => {
+        let uName = staff.email || staff.full_name || staff.username || '';
+        let uPass = staff.password || '';
+        let uRole = staff.role || 'STAFF';
+
+        html += `
+            <tr>
+                <td><b>${uName}</b></td>
+                <td>${uPass}</td>
+                <td><b>${uRole}</b></td>
+                <td>
+                    <button class="editBtn" onclick="window.editStaff(${staff.id}, '${uName}', '${uPass}', '${uRole}')">✏️ Edit</button>
+                    <button class="removeBtn" onclick="window.deleteStaff(${staff.id})">❌ Delete</button>
+                </td>
+            </tr>
+        `;
+    });
+    staffTable.innerHTML = html;
   };
   
 </script>
