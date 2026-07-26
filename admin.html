@@ -1097,14 +1097,13 @@
                 <td>${uPass}</td>
                 <td><b>${uRole}</b></td>
                 <td>
-                    <button class="editBtn" onclick="window.editStaff(${staff.id}, '${uName}', '${uPass}', '${uRole}')">✏️ Edit</button>
-                    <button class="removeBtn" onclick="window.deleteStaff(${staff.id})">❌ Delete</button>
+                    <button class="editBtn" onclick="window.editStaff(${staff.id}, '${uName}', '${uPass}', '${uRole}')" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
+                    <button class="removeBtn" onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">Delete</button>
                 </td>
             </tr>
         `;
     });
     staffTable.innerHTML = html;
-  };
   
 </script>
 <script src="script.js"></script>
