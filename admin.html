@@ -713,7 +713,7 @@
     let roleBadge = document.getElementById("userRoleBadge");
     if(roleBadge) roleBadge.innerText = myRole.toUpperCase();
 
-    // 🔒 यदि लगइन गर्ने व्यक्ति MANAGER हो भने, Add New Staff ड्रपडाउनबाट 'Hotel Manager' र 'Full Admin' हटाउने
+    // 🔒 म्यानेजरको लागि एडमिन/म्यानेजर अप्सन लुकाउने लजिक
     let roleSelect = document.getElementById("staffRoleSelect");
     if (roleSelect) {
       if (myRole === "manager") {
@@ -721,6 +721,26 @@
           <option value="ORDER_TAKER">Order Taker</option>
           <option value="DELIVERY">Delivery Boy</option>
         `;
+      } else {
+        roleSelect.innerHTML = `
+          <option value="MANAGER">Hotel Manager</option>
+          <option value="ORDER_TAKER">Order Taker</option>
+          <option value="DELIVERY">Delivery Boy</option>
+          <option value="ADMIN">Full Admin</option>
+        `;
+      }
+    }
+
+    if (myRole === "admin" || myRole === "manager") {
+      let dashBox = document.getElementById("salesDashboardBox");
+      if(dashBox) dashBox.style.display = "flex";
+      let menuBox = document.getElementById("menuManagementBox");
+      if(menuBox) menuBox.style.display = "block";
+      window.loadMenuList();
+    }
+    window.loadOrders();
+    window.loadStaffList();
+};
       } else {
         roleSelect.innerHTML = `
           <option value="MANAGER">Hotel Manager</option>
