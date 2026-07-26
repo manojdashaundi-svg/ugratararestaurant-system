@@ -806,7 +806,7 @@
     let newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
     let { error } = await supabaseClient.from('admins').update({ status: newStatus }).eq('id', staffId);
     if (error) {
-      // यदि database मा status स्तम्भ छैन भने UI मा मात्र toggle गर्ने वा अलर्ट देखाउने
+      alert("ℹ️ Note: Database doesn't have 'status' column yet. Status toggled locally.");
       window.loadStaffList();
     } else {
       window.loadStaffList();
