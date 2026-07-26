@@ -220,7 +220,32 @@
   var currentLoggedInUser = "";
   var activeOrdersCache = [];
 
-  handleLogin
+  window.handleLogin = async function() {
+    var u = document.getElementById("username").value.trim();
+    var p = document.getElementById("password").value.trim();
+    if(u === "" || p === "") { alert("Enter credentials."); return; }
+    
+    document.getElementById("loginBtn").innerText = "Verifying...";
+    
+    let client = window.supabaseClient || window.supabase || supabaseClient;
+    let { data, error } = await client.from('admins').select('*').eq('email', u).eq('password', p).maybeSingle();
+    document.getElementById("loginBtn").innerText = "Login";
+
+    if (error || !data) {
+      alert("Wrong Email or Password.");
+      return;
+    }
+
+    sessionStorage.setItem("ADMIN_LOGIN", "true");
+    let userRole = data.role ? data.role.toLowerCase() : "admin";
+    sessionStorage.setItem("USER_ROLE", userRole);
+    localStorage.setItem("adminRole", userRole);
+    sessionStorage.setItem("LOGGED_USER", u.toLowerCase());
+    
+    window.myRole = userRole;
+    currentLoggedInUser = u.toLowerCase();
+    window.showAdminPanel();
+  };
 
   window.loadOrders = async function() {
     let { data, error } = await supabaseClient.from('orders').select('*');
@@ -248,7 +273,7 @@
         let delivHtml = (o.proof_img && o.proof_img !== "None" && o.proof_img !== "") ?  
           `<img src="${o.proof_img}" class="proof-thumb" onclick="window.openImageViewer('${o.proof_img}')">` : `None`;
         
-        // पुरानै जस्तो ड्रपडाउन र गो बटन
+        // ड्रपडाउन र गो बटन
         let statusSelect = `<select id="status_${o.order_no || o.id}">
           <option value="Pending" ${status==="pending"?"selected":""}>Pending</option>
           <option value="Preparing" ${status==="preparing"?"selected":""}>Preparing</option>
@@ -258,7 +283,7 @@
         </select> 
         <button class="updateBtn" onclick="window.manualUpdate('${o.order_no || o.id}')">Go</button>`;
 
-        // अर्डरको स्थिति अनुसार मिल्ने इन्स्ट्यान्ट बटनहरू
+        // अर्डरको स्थिति अनुसार इन्स्ट्यान्ट बटनहरू
         let actionButtons = "";
         if (status === "pending" || status === "order received" || status === "") {
             actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
@@ -286,6 +311,43 @@
       });
     }
     tableBody.innerHTML = html;
+  };
+
+  window.manualUpdate = async function(orderNo) {
+    var s = document.getElementById("status_" + orderNo).value;
+    await window.updateOrderStatus(orderNo, s);
+  };
+
+  window.updateOrderStatus = async function(orderNo, newStatus) {
+    let updatePayload = { status: newStatus };
+    if(newStatus === "Delivered") {
+        updatePayload.delivery_time = new Date().toLocaleString();
+    }
+    let res = await supabaseClient.from('orders').update(updatePayload).eq('order_no', orderNo);
+    if (res.error) {
+      await supabaseClient.from('orders').update(updatePayload).eq('id', orderNo);
+    }
+    window.loadOrders();
+  };
+
+  window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
+    await supabaseClient.from('orders').update({ status: nextStatus }).eq('order_no', orderNo);
+    await window.loadOrders();
+  };
+
+  window.uploadDeliveryProof = function(orderNo, fileInput) {
+    const file = fileInput.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = async function() {
+        const base64Img = reader.result;
+        let updatePayload = { status: "Delivered", proof_img: base64Img, delivery_time: new Date().toLocaleString() };
+        await supabaseClient.from('orders').update(updatePayload).eq('order_no', orderNo);
+        alert("✅ Proof Uploaded & Delivered!");
+        await window.loadOrders();
+    };
+    reader.readAsDataURL(file);
+  };
 
   window.calculateDashboardStats = function(orders) {
     let totalOrders = orders.length;
@@ -399,7 +461,6 @@
     }
   };
 
-  // 👥 स्टाफ लिस्ट लोड गर्ने (सुरक्षासहित: म्यानेजरले एडमिन देख्दैन)
   window.loadStaffList = async function() {
     let staffTable = document.getElementById("staffTableList");
     if (!staffTable) return;
@@ -416,7 +477,6 @@
         let uPass = staff.password || '';
         let uRole = staff.role || 'STAFF';
 
-        // 🔒 सुरक्षा: यदि लगइन गर्ने व्यक्ति "manager" हो भने, 'admin' रोल भएकोलाई लुकाउने
         if (window.myRole === 'manager' && uRole.toLowerCase() === 'admin') {
             return;
         }
