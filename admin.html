@@ -30,7 +30,6 @@
     .editBtn { background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
     .removeBtn { background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
     .staff-section, .menu-section { background:#fff; padding:20px; border-radius:10px; margin-top:40px; border:1px solid #ddd; display:none; }
-    .report-section { background:#fff; padding:20px; border-radius:10px; margin-top:20px; border:1px solid #ddd; display:none; }
     .excelBtn { background:#1F7246; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
     .pdfBtn { background:#E01A22; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
     .login-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f5f5f5; display:flex; justify-content:center; align-items:center; z-index:99999; }
@@ -61,7 +60,7 @@
     <h2>🔐 STAFF LOGIN</h2>
     <input id="username" type="text" placeholder="Username" autocomplete="off">
     <input id="password" type="password" placeholder="Password" autocomplete="off">
-    <button id="loginBtn" onclick="handleLogin()">Login</button>
+    <button id="loginBtn" onclick="window.handleLogin()">Login</button>
   </div>
 </div>
 
@@ -74,7 +73,7 @@
     <span id="emailAutomationStatusBadge" class="automation-badge" style="display: none;">Supabase: 🟢 Active</span>
   </h2>
 
-  <!-- 📊 ड्यासबोर्ड कार्डहरू (५ वटा) -->
+  <!-- 📊 ड्यासबोर्ड कार्डहरू -->
   <div id="salesDashboardBox" style="display: none; gap: 12px; margin: 20px 0; flex-wrap: wrap;">
     <div style="flex: 1; min-width: 140px; background: #fff; padding: 15px; border-radius: 10px; border-left: 5px solid #2196F3; text-align: center;">
       <span style="font-size: 13px; color: #777; font-weight: bold;">Total Orders</span>
@@ -104,7 +103,7 @@
     <div id="monthlySalesChart" style="width: 100%; height: 250px;"></div>
   </div>
   
-<!-- 📈 Today's Hourly Sales Trend Chart Section -->
+  <!-- 📈 Today's Hourly Sales Trend Chart Section -->
   <div class="chart-container" id="hourlySalesChartDiv" style="display: block; width: 100%; height: 320px; background: #fff; padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
     <h3 style="color: #e91e63; margin-bottom: 10px; font-size: 16px;">Today's Hourly Sales Trend (RM)</h3>
     <div id="hourlySalesChart" style="width: 100%; height: 250px;"></div>
@@ -204,7 +203,11 @@
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
         <input id="staffUsername" type="text" placeholder="Username / Email" style="flex: 1; min-width: 180px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
         <input id="staffPassword" type="password" placeholder="Password" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-        <input id="staffRoleInput" type="text" placeholder="Role (e.g. Driver, Cook, Salesman)" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
+        <select id="staffRoleSelect" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
+            <option value="MANAGER">Hotel Manager</option>
+            <option value="ORDER_TAKER">Order Taker</option>
+            <option value="DELIVERY">Delivery Boy</option>
+            <option value="ADMIN">Full Admin</option>
         </select>
         <button class="addBtn" onclick="window.createNewStaff()" style="background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add Staff</button>
       </div>
@@ -223,7 +226,7 @@
       </tr>
     </thead>
         <tbody id="staffTableList">
-          <tr><td colspan="4" style="padding: 15px;">Loading staff members...</td></tr>
+          <tr><td colspan="5" style="padding: 15px;">Loading staff members...</td></tr>
         </tbody>
       </table>
     </div>
@@ -241,7 +244,7 @@
         <button onclick="window.addExpense()" style="background: #e91e63; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer;">+ Add Expense</button>
     </div>
 
-    <!-- 📊 Expense Report Generator & Export सेक्सन (Sales Report जस्तै) -->
+    <!-- 📊 Expense Report Generator & Export सेक्सन -->
     <div style="margin-bottom: 20px;">
         <h4 style="color: #333; margin-bottom: 10px;">📊 Expense Report Generator & Export</h4>
         <div style="display: flex; gap: 15px; align-items: center; background: #f9f9f9; padding: 15px; border-radius: 6px; flex-wrap: wrap;">
@@ -260,7 +263,7 @@
         </div>
     </div>
 
-    <!-- Total Summary (जम्मा Revenue, Total Expense, Net Profit) देखाउने सेक्सन -->
+    <!-- Total Summary देखाउने सेक्सन -->
     <div style="border-top: 2px solid #eee; padding-top: 15px; font-size: 16px; display: flex; flex-direction: column; gap: 8px;">
         <div style="color: #1976D2; font-weight: bold;">जम्मा Total Revenue: <span id="summaryRevenue">RM 147.00</span></div>
         <div style="color: #D32F2F; font-weight: bold;">जम्मा Total Expense: <span id="summaryExpense">RM 0.00</span></div>
@@ -314,26 +317,18 @@
     window.showAdminPanel();
   };
 
-  // १. अर्डर लोड गर्ने र सिरियल वाइज क्रम मिलाएर देखाउने सही फंक्सन
   window.loadOrders = async function() {
     try {
-      let { data, error } = await supabaseClient
-        .from('orders')
-        .select('*');
-
+      let { data, error } = await supabaseClient.from('orders').select('*');
       if (error) {
-        console.log("Error loading orders: ", error);
         var tableBody = document.getElementById("ordersTable");
         if(tableBody) tableBody.innerHTML = `<tr><td colspan="9" style="padding:20px; color:red;">Error loading orders: ${error.message}</td></tr>`;
         return;
       }
 
       activeOrdersCache = data || [];
-      
-      // 📊 ड्यासबोर्डका तथ्याङ्कहरू गणना गर्ने फंक्सनलाई यहाँ कल गर्ने
       window.calculateDashboardStats(activeOrdersCache);
       
-      // नयाँ अर्डरलाई सधैँ माथि देखाउने सर्टिङ
       activeOrdersCache.sort((a, b) => {
         let timeA = new Date(a.time).getTime() || 0;
         let timeB = new Date(b.time).getTime() || 0;
@@ -376,8 +371,7 @@
           } else if (status === "ready") {
               actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no || o.id}', 'Out for Delivery')">🚚 Dispatch</button>`;
           } else if (status === "out for delivery") {
-              let actionButton = `Upload Proof:<br><input type="file" accept="image/*" capture="environment" onchange="window.uploadDeliveryProof('${o.order_no || o.id}', this)" style="width:110px;">`;
-              actionButtons = actionButton;
+              actionButtons = `Upload Proof:<br><input type="file" accept="image/*" capture="environment" onchange="window.uploadDeliveryProof('${o.order_no || o.id}', this)" style="width:110px;">`;
           } else if (status === "delivered") {
               actionButtons = `<span style="color:green; font-weight:bold;">✅ Delivered</span>`;
           }
@@ -398,77 +392,61 @@
         });
       }
       tableBody.innerHTML = html;
-
     } catch (err) {
-      console.log("Load orders catch error:", err);
-      var tableBody = document.getElementById("ordersTable");
-      if(tableBody) tableBody.innerHTML = `<tr><td colspan="9" style="padding:20px; color:red;">Error: ${err.message}</td></tr>`;
+      console.log("Load orders error:", err);
     }
   };
 
-  // २. KOT वा Bill प्रिन्ट गर्ने र ५८मिमी प्रिन्टरको लागि सुन्दर डिजाइन बनाउने फंक्सन
   window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
-    let res = await supabaseClient.from('orders').update({ status: nextStatus }).eq('order_no', orderNo);
-    if (res.error) {
-      await supabaseClient.from('orders').update({ status: nextStatus }).eq('id', orderNo);
-    }
-
+    await supabaseClient.from('orders').update({ status: nextStatus }).eq('order_no', orderNo);
     await window.loadOrders();
 
-    var o = activeOrdersCache.find(item => item.order_no == orderNo || item.id == orderNo || item.orderno == orderNo);
-    if(!o) {
-      o = { order_no: orderNo, customer_name: "Valued Customer", phone: "", time: "Now", total: "0", items: "Food Items" };
-    }
+    var o = activeOrdersCache.find(item => item.order_no == orderNo || item.id == orderNo);
+    if(!o) o = { order_no: orderNo, customer_name: "Valued Customer", time: "Now", total: "0", items: "Food Items" };
 
     var isKot = (printType === "kot");
-    
     var invoiceHtml = `
-    <div style="font-family: 'Courier New', Courier, monospace; width: 58mm; max-width: 58mm; padding: 5px; margin: 0 auto; color: #000; background: #fff; box-sizing: border-box;">
-      
+    <div style="font-family: 'Courier New', Courier, monospace; width: 58mm; max-width: 58mm; padding: 5px; margin: 0 auto; color: #000; background: #fff;">
       <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 6px; margin-bottom: 6px;">
-        <h2 style="margin: 0; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">UGRATARA RESTAURANT</h2>
+        <h2 style="margin: 0; font-size: 16px; font-weight: bold;">UGRATARA RESTAURANT</h2>
         <p style="margin: 2px 0 0 0; font-size: 10px;">Fresh Food • Fast Delivery</p>
       </div>
-
       ${isKot ? `
         <div style="text-align: center; margin-bottom: 6px;">
-          <span style="font-size: 12px; font-weight: bold; background: #000; color: #fff; padding: 2px 10px; display: inline-block; border-radius: 3px;">KITCHEN TICKET (KOT)</span>
+          <span style="font-size: 12px; font-weight: bold; background: #000; color: #fff; padding: 2px 10px; display: inline-block;">KITCHEN TICKET (KOT)</span>
         </div>
-        <div style="font-size: 11px; line-height: 1.4; margin-bottom: 6px; border-bottom: 1px dashed #000; padding-bottom: 5px;">
-          <div><b>Order No:</b> ${o.order_no || o.id || orderNo}</div>
+        <div style="font-size: 11px; margin-bottom: 6px; border-bottom: 1px dashed #000; padding-bottom: 5px;">
+          <div><b>Order No:</b> ${o.order_no || orderNo}</div>
           <div><b>Time:</b> ${o.time || 'Now'}</div>
         </div>
-        <div style="font-size: 12px; margin-bottom: 8px;">
-          <div style="font-weight: bold; border-bottom: 1px solid #000; margin-bottom: 4px; padding-bottom: 2px;">ITEMS TO PREPARE:</div>
-          <div style="white-space: pre-wrap; font-weight: bold; font-size: 12.5px;">${o.items || 'Food Items'}</div>
+        <div style="font-size: 12px;">
+          <div style="font-weight: bold; border-bottom: 1px solid #000; margin-bottom: 4px;">ITEMS TO PREPARE:</div>
+          <div style="white-space: pre-wrap; font-weight: bold;">${o.items || 'Food Items'}</div>
         </div>
       ` : `
         <div style="text-align: center; margin-bottom: 6px;">
           <span style="font-size: 12px; font-weight: bold; border: 1px solid #000; padding: 2px 8px; display: inline-block;">TAX INVOICE / BILL</span>
         </div>
-        <div style="font-size: 10.5px; line-height: 1.4; margin-bottom: 6px; border-bottom: 1px dashed #000; padding-bottom: 5px;">
-          <div><b>Bill No:</b> ${o.order_no || o.id || orderNo}</div>
+        <div style="font-size: 10.5px; margin-bottom: 6px; border-bottom: 1px dashed #000; padding-bottom: 5px;">
+          <div><b>Bill No:</b> ${o.order_no || orderNo}</div>
           <div><b>Customer:</b> ${o.customer_name || 'Guest'}</div>
           <div><b>Phone:</b> ${o.phone || '-'}</div>
           <div><b>Date:</b> ${o.time || 'N/A'}</div>
         </div>
         <div style="font-size: 11px; margin-bottom: 6px;">
-          <div style="font-weight: bold; border-bottom: 1px solid #000; margin-bottom: 4px; padding-bottom: 2px; display: flex; justify-content: space-between;">
-            <span>DESCRIPTION</span>
-            <span>TOTAL</span>
+          <div style="font-weight: bold; border-bottom: 1px solid #000; margin-bottom: 4px; display: flex; justify-content: space-between;">
+            <span>DESCRIPTION</span><span>TOTAL</span>
           </div>
-          <div style="white-space: pre-wrap; line-height: 1.4;">${o.items || 'Food Items'}</div>
+          <div style="white-space: pre-wrap;">${o.items || 'Food Items'}</div>
         </div>
         <hr style="border: 0; border-top: 1px dashed #000; margin: 6px 0;">
         <div style="text-align: right; font-size: 13px; font-weight: bold; margin-bottom: 8px;">
           Grand Total: RM ${o.total || '0'}
         </div>
-        <div style="text-align: center; font-size: 10px; border-top: 1px dashed #000; padding-top: 6px; margin-top: 5px;">
+        <div style="text-align: center; font-size: 10px; border-top: 1px dashed #000; padding-top: 6px;">
           <p style="margin: 0;">🙏 Thank you for your order!</p>
-          <p style="margin: 2px 0 0 0;">Please visit again.</p>
         </div>
       `}
-      
     </div>`;
     
     if(document.getElementById("printableInvoiceArea")) {
@@ -477,61 +455,25 @@
     }
   };
 
-  // 🖨️ ५८मिमी प्रिन्टरको पेपर साइज फिक्स गर्ने र अतिरिक्त हेडर/फुटर हटाउने प्रिन्ट फंक्सन
   window.executeSystemPrint = function() {
     var printArea = document.getElementById("printableInvoiceArea");
     if (!printArea) return;
-    
     var w = window.open('', '_blank', 'height=650,width=350');
-    w.document.write(`
-      <html>
-        <head>
-          <title>Print Receipt</title>
-          <style>
-            @page {
-              size: 58mm auto;
-              margin: 0mm;
-            }
-            body {
-              margin: 0;
-              padding: 0;
-              background: #fff;
-              -webkit-print-color-adjust: exact;
-            }
-          </style>
-        </head>
-        <body>
-          ${printArea.innerHTML}
-        </body>
-      </html>
-    `);
+    w.document.write(`<html><head><title>Print Receipt</title><style>@page{size:58mm auto;margin:0mm;}body{margin:0;padding:0;background:#fff;}</style></head><body>${printArea.innerHTML}</body></html>`);
     w.document.close();
     w.focus();
-    
-    setTimeout(() => {
-      w.print();
-      w.close();
-    }, 400);
+    setTimeout(() => { w.print(); w.close(); }, 400);
   };
 
-  // ❌ प्रिन्ट मोडल बक्स बन्द गर्ने सही फंक्सन
   window.closePrintModal = function() {
     var modalBox = document.getElementById("printModalBox");
-    if(modalBox) {
-      modalBox.style.display = "none";
-    }
+    if(modalBox) modalBox.style.display = "none";
   };
 
   window.updateOrderStatus = async function(orderNo, newStatus) {
     let updatePayload = { status: newStatus };
-    if(newStatus === "Delivered") {
-        updatePayload.delivery_time = new Date().toLocaleString();
-    }
-
-    let res = await supabaseClient.from('orders').update(updatePayload).eq('order_no', orderNo);
-    if (res.error) {
-      await supabaseClient.from('orders').update(updatePayload).eq('id', orderNo);
-    }
+    if(newStatus === "Delivered") updatePayload.delivery_time = new Date().toLocaleString();
+    await supabaseClient.from('orders').update(updatePayload).eq('order_no', orderNo);
     window.loadOrders();
   };
 
@@ -543,132 +485,65 @@
   window.uploadDeliveryProof = function(orderNo, fileInput) {
     const file = fileInput.files[0];
     if(!file) return;
-
     const reader = new FileReader();
     reader.onload = async function() {
-        const base64Img = reader.result;
-        let currentTime = new Date().toLocaleString();
-        
-        let updatePayload = { 
-          status: "Delivered", 
-          proof_img: base64Img, 
-          delivery_time: currentTime 
-        };
-
-        let res = await supabaseClient.from('orders').update(updatePayload).eq('order_no', orderNo);
-        if (res.error) {
-          let res2 = await supabaseClient.from('orders').update(updatePayload).eq('id', orderNo);
-          if (res2.error) {
-            alert("❌ Failed to save proof: " + res2.error.message);
-            return;
-          }
-        }
-
-        alert("✅ Delivery Proof Uploaded & Order Delivered Successfully!");
-        await window.loadOrders();
+        let updatePayload = { status: "Delivered", proof_img: reader.result, delivery_time: new Date().toLocaleString() };
+        await supabaseClient.from('orders').update(updatePayload).eq('order_no', orderNo);
+        alert("✅ Delivery Proof Uploaded Successfully!");
+        window.loadOrders();
     };
     reader.readAsDataURL(file);
   };
 
-  // 📊 सबै ड्यासबोर्ड तथ्याङ्कहरू सही तरिकाले गणना गर्ने फंक्सन
   window.calculateDashboardStats = function(orders) {
     let totalOrders = orders.length;
-    let totalRevenue = 0;
-    let todaySales = 0;
-    let monthSales = 0;
-
-    let now = new Date();
-    let currentDay = now.getDate();
-    let currentMonth = now.getMonth();
-    let currentYear = now.getFullYear();
+    let totalRevenue = 0, todaySales = 0, monthSales = 0;
+    let now = new Date(), currentDay = now.getDate(), currentMonth = now.getMonth(), currentYear = now.getFullYear();
 
     orders.forEach(o => {
       let amount = parseFloat(o.total) || 0;
       totalRevenue += amount;
-
       if (o.time) {
         let orderDate = new Date(o.time);
-        
-        // यदि सीधा Date parse भएन भने स्ट्रिङबाट मिलाउने
-        if (isNaN(orderDate.getTime())) {
-          let cleanTime = o.time.replace(/at/gi, "").trim();
-          orderDate = new Date(cleanTime);
-        }
-
+        if (isNaN(orderDate.getTime())) orderDate = new Date(o.time.replace(/at/gi, "").trim());
         if (!isNaN(orderDate.getTime())) {
-          // 🟢 आजको मिति मिलेको छ कि छैन चेक गर्ने (Day, Month, Year)
-          if (
-            orderDate.getDate() === currentDay &&
-            orderDate.getMonth() === currentMonth &&
-            orderDate.getFullYear() === currentYear
-          ) {
-            todaySales += amount;
-          }
-          
-          // 🟢 यो महिनाको बिक्री चेक गर्ने
-          if (
-            orderDate.getMonth() === currentMonth &&
-            orderDate.getFullYear() === currentYear
-          ) {
-            monthSales += amount;
-          }
+          if (orderDate.getDate() === currentDay && orderDate.getMonth() === currentMonth && orderDate.getFullYear() === currentYear) todaySales += amount;
+          if (orderDate.getMonth() === currentMonth && orderDate.getFullYear() === currentYear) monthSales += amount;
         }
       }
     });
 
     let avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders) : 0;
-
-    if(document.getElementById("dashTotalOrders")) 
-      document.getElementById("dashTotalOrders").innerText = totalOrders;
-    
-    if(document.getElementById("dashTotalRevenue")) 
-      document.getElementById("dashTotalRevenue").innerText = "RM " + totalRevenue.toFixed(2);
-    
-    if(document.getElementById("dashTodaySales")) 
-      document.getElementById("dashTodaySales").innerText = "RM " + todaySales.toFixed(2);
-
-    if(document.getElementById("dashMonthSales")) 
-      document.getElementById("dashMonthSales").innerText = "RM " + monthSales.toFixed(2);
-
-    if(document.getElementById("dashAvgOrder")) 
-      document.getElementById("dashAvgOrder").innerText = "RM " + avgOrderValue.toFixed(2);
+    if(document.getElementById("dashTotalOrders")) document.getElementById("dashTotalOrders").innerText = totalOrders;
+    if(document.getElementById("dashTotalRevenue")) document.getElementById("dashTotalRevenue").innerText = "RM " + totalRevenue.toFixed(2);
+    if(document.getElementById("dashTodaySales")) document.getElementById("dashTodaySales").innerText = "RM " + todaySales.toFixed(2);
+    if(document.getElementById("dashMonthSales")) document.getElementById("dashMonthSales").innerText = "RM " + monthSales.toFixed(2);
+    if(document.getElementById("dashAvgOrder")) document.getElementById("dashAvgOrder").innerText = "RM " + avgOrderValue.toFixed(2);
     
     window.drawMonthlySalesChart(orders);
-    
     window.drawHourlySalesChart(orders);
   };
 
   window.loadMenuList = async function() {
-    let { data, error } = await supabaseClient
-      .from('menu_items')
-      .select('*')
-      .order('id', { ascending: true });
-
-    if(error) { console.log("Menu error:", error); return; }
-
+    let { data } = await supabaseClient.from('menu_items').select('*').order('id', { ascending: true });
     var menuList = document.getElementById("menuTableList");
     if(!menuList) return;
     let html = "";
-    
     (data || []).forEach((r, index) => {
-      let rowRealId = r.id; 
-      let displaySerial = index + 1; 
-      let imgTag = r.image ? `<img src="${r.image}" class="menu-thumb">` : `No Image`;
       let stockStatus = r.status || "In Stock";
       let stockBtnClass = stockStatus === "In Stock" ? "inStockBtn" : "outStockBtn";
       let stockText = stockStatus === "In Stock" ? "🟢 In Stock" : "🔴 Out of Stock";
-
       html += `<tr>
-        <td><b>${displaySerial}</b></td>
+        <td><b>${index + 1}</b></td>
         <td><b>${r.name || ''}</b></td>
         <td style="color:#e91e63; font-weight:bold;">RM ${r.price || 0}</td>
-        <td>${imgTag}</td>
+        <td>${r.image ? `<img src="${r.image}" class="menu-thumb">` : 'No Image'}</td>
         <td>${r.description || ''}</td>
         <td><b>${r.category || ''}</b></td>
         <td>
-          <button class="${stockBtnClass}" onclick="window.toggleStock(${rowRealId}, '${stockStatus}')">${stockText}</button>
-          <button class="editBtn" onclick="window.editProduct(${rowRealId}, '${r.name}', ${r.price}, '${r.description || ''}', '${r.category || ''}')">✏️ Edit</button>
-          <button class="removeBtn" onclick="window.deleteProduct(${rowRealId})">❌ Delete</button>
+          <button class="${stockBtnClass}" onclick="window.toggleStock(${r.id}, '${stockStatus}')">${stockText}</button>
+          <button class="editBtn" onclick="window.editProduct(${r.id}, '${r.name}', ${r.price}, '${r.description || ''}', '${r.category || ''}')">✏️ Edit</button>
+          <button class="removeBtn" onclick="window.deleteProduct(${r.id})">❌ Delete</button>
         </td>
       </tr>`;
     });
@@ -677,71 +552,43 @@
 
   window.toggleStock = async function(rowId, currentStatus) {
     let newStatus = currentStatus === "In Stock" ? "Out of Stock" : "In Stock";
-    let { error } = await supabaseClient.from('menu_items').update({ status: newStatus }).eq('id', rowId);
-    if(error) { alert("Error: " + error.message); } else { window.loadMenuList(); }
+    await supabaseClient.from('menu_items').update({ status: newStatus }).eq('id', rowId);
+    window.loadMenuList();
   };
 
   window.createNewProduct = async function() {
     var name = document.getElementById("prodName").value.trim();
     var price = parseFloat(document.getElementById("prodPrice").value) || 0;
-    var img = document.getElementById("prodImg").value.trim();
-    var desc = document.getElementById("prodDesc").value.trim();
-    var cat = document.getElementById("prodCat").value.trim();
-
     if(!name || !price) { alert("Enter Name and Price!"); return; }
-
-    let { error } = await supabaseClient.from('menu_items').insert([
-      { name: name, price: price, image: img, description: desc, category: cat, status: "In Stock" }
-    ]);
-
-    if(error) {
-      alert("Error adding product: " + error.message);
-    } else {
-      alert("✅ Product Added & Saved!");
-      document.getElementById("prodName").value = "";
-      document.getElementById("prodPrice").value = "";
-      document.getElementById("prodImg").value = "";
-      document.getElementById("prodDesc").value = "";
-      document.getElementById("prodCat").value = "";
-      window.loadMenuList();
-    }
+    await supabaseClient.from('menu_items').insert([{ name: name, price: price, image: document.getElementById("prodImg").value.trim(), description: document.getElementById("prodDesc").value.trim(), category: document.getElementById("prodCat").value.trim(), status: "In Stock" }]);
+    alert("✅ Product Added!");
+    window.loadMenuList();
   };
 
   window.editProduct = async function(rowId, oldName, oldPrice, oldDesc, oldCat) {
     var newName = prompt("Edit Name:", oldName); if(newName === null) return;
     var newPrice = parseFloat(prompt("Edit Price:", oldPrice)) || oldPrice;
-    var newDesc = prompt("Edit Description:", oldDesc); if(newDesc === null) return;
-    var newCat = prompt("Edit Category:", oldCat); if(newCat === null) return;
-
-    let { error } = await supabaseClient.from('menu_items')
-      .update({ name: newName, price: newPrice, description: newDesc, category: newCat })
-      .eq('id', rowId);
-
-    if(error) { alert("Error updating: " + error.message); } else { alert("✅ Updated Successfully!"); window.loadMenuList(); }
+    await supabaseClient.from('menu_items').update({ name: newName, price: newPrice }).eq('id', rowId);
+    window.loadMenuList();
   };
 
   window.deleteProduct = async function(rowId) {
-    if(confirm("Delete this item?")) {
-      let { error } = await supabaseClient.from('menu_items').delete().eq('id', rowId);
-      if(error) { alert("Error deleting: " + error.message); } else { alert("✅ Deleted!"); window.loadMenuList(); }
+    if(confirm("Delete item?")) {
+      await supabaseClient.from('menu_items').delete().eq('id', rowId);
+      window.loadMenuList();
     }
   };
 
   window.openImageViewer = function(imgUrl) {
-    var modalImg = document.getElementById("viewerTargetImage");
-    var modal = document.getElementById("imageViewerModal");
-    if(modalImg && modal) {
-      modalImg.src = imgUrl;
-      modal.style.display = "flex";
-    }
+    document.getElementById("viewerTargetImage").src = imgUrl;
+    document.getElementById("imageViewerModal").style.display = "flex";
   };
 
   window.closeImageViewer = function() {
-    var modal = document.getElementById("imageViewerModal");
-    if(modal) modal.style.display = "none";
+    document.getElementById("imageViewerModal").style.display = "none";
   };
 
-window.showAdminPanel = function() {
+  window.showAdminPanel = function() {
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("adminContent").style.display = "block";
     window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
@@ -749,523 +596,140 @@ window.showAdminPanel = function() {
     let roleBadge = document.getElementById("userRoleBadge");
     if(roleBadge) roleBadge.innerText = myRole.toUpperCase();
 
-    // 🔒 सुरक्षित तरिकाले स्टाफ रोलको ड्रपडाउन कन्ट्रोल गर्ने
-    let roleSelect = document.getElementById("staffRoleSelect");
-    if (roleSelect) {
-      if (myRole === "manager") {
-        roleSelect.innerHTML = `
-          <option value="ORDER_TAKER">Order Taker</option>
-          <option value="DELIVERY">Delivery Boy</option>
-        `;
-      } else {
-        roleSelect.innerHTML = `
-          <option value="MANAGER">Hotel Manager</option>
-          <option value="ORDER_TAKER">Order Taker</option>
-          <option value="DELIVERY">Delivery Boy</option>
-          <option value="ADMIN">Full Admin</option>
-        `;
-      }
-    }
-
     if (myRole === "admin" || myRole === "manager") {
       let dashBox = document.getElementById("salesDashboardBox");
       if(dashBox) dashBox.style.display = "flex";
       let menuBox = document.getElementById("menuManagementBox");
       if(menuBox) menuBox.style.display = "block";
-      if(typeof window.loadMenuList === 'function') window.loadMenuList();
+      window.loadMenuList();
     }
+    window.loadOrders();
+    window.loadStaffList();
+    window.loadExpenseSummary();
+  };
 
-    if(typeof window.loadOrders === 'function') window.loadOrders();
-    if(typeof window.loadStaffList === 'function') window.loadStaffList();
-};
+  window.logout = function() { sessionStorage.clear(); window.location.reload(); };
+  window.testBellSound = function() { alert("🔔 डिजिटल घण्टी सुचारु भयो!"); };
 
-window.logout = function() { 
-    sessionStorage.clear(); 
-    window.location.reload(); 
-};
-
-window.testBellSound = function() { 
-    alert("🔔 डिजिटल घण्टी सुचारु भयो!"); 
-};
-
-if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
+  if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
     myRole = sessionStorage.getItem("USER_ROLE") || "admin";
     currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
     window.showAdminPanel();
-} else {
+  } else {
     document.getElementById("loginScreen").style.display = "flex";
-}
-  // 📊 मासिक बिक्रीको चार्ट (Monthly Sales Insights & Growth) देखाउने फंक्सन
+  }
+
   window.drawMonthlySalesChart = function(orders) {
     if (typeof google === 'undefined' || !google.visualization) return;
-
     let monthlyDataMap = {};
-
     orders.forEach(o => {
       let amount = parseFloat(o.total) || 0;
       if (o.time) {
         let orderDate = new Date(o.time);
-        if (isNaN(orderDate.getTime())) {
-          let cleanTime = o.time.replace(/at/gi, "").trim();
-          orderDate = new Date(cleanTime);
-        }
-
+        if (isNaN(orderDate.getTime())) orderDate = new Date(o.time.replace(/at/gi, "").trim());
         if (!isNaN(orderDate.getTime())) {
-          let year = orderDate.getFullYear();
-          let month = String(orderDate.getMonth() + 1).padStart(2, '0');
-          let key = `${year}-${month}`;
-
-          if (!monthlyDataMap[key]) {
-            monthlyDataMap[key] = 0;
-          }
-          monthlyDataMap[key] += amount;
+          let key = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, '0')}`;
+          monthlyDataMap[key] = (monthlyDataMap[key] || 0) + amount;
         }
       }
     });
-
-    let sortedKeys = Object.keys(monthlyDataMap).sort();
-    
     let chartArray = [['Months (Year-MM)', 'Revenue (RM)']];
-    sortedKeys.forEach(key => {
-      chartArray.push([key, monthlyDataMap[key]]);
-    });
-
-    if (sortedKeys.length === 0) {
-      chartArray.push(['No Data', 0]);
-    }
-
-    let data = google.visualization.arrayToDataTable(chartArray);
-
-    let options = {
-      legend: { position: 'none' },
-      colors: ['#8E24AA'],
-      hAxis: { title: 'Months (Year-MM)' },
-      vAxis: { title: 'Revenue (RM)', minValue: 0 },
-      animation: { startup: true, duration: 1000, easing: 'out' }
-    };
-
-    let chart = new google.visualization.ColumnChart(document.getElementById('monthlySalesChart'));
-    chart.draw(data, options);
+    Object.keys(monthlyDataMap).sort().forEach(k => chartArray.push([k, monthlyDataMap[k]]));
+    if (chartArray.length === 1) chartArray.push(['No Data', 0]);
+    new google.visualization.ColumnChart(document.getElementById('monthlySalesChart')).draw(google.visualization.arrayToDataTable(chartArray), { legend: { position: 'none' }, colors: ['#8E24AA'] });
   };
 
-  // 📊 आजको प्रतिघण्टा बिक्रीको ट्रेन्ड (Today's Hourly Sales Trend) देखाउने फंक्सन
   window.drawHourlySalesChart = function(orders) {
     if (typeof google === 'undefined' || !google.visualization) return;
-
     let hourlyMap = {};
-    for (let i = 0; i < 24; i++) {
-      let hourKey = i < 10 ? `0${i}:00` : `${i}:00`;
-      hourlyMap[hourKey] = 0;
-    }
-
+    for (let i = 0; i < 24; i++) hourlyMap[i < 10 ? `0${i}:00` : `${i}:00`] = 0;
     let now = new Date();
-    let currentDay = now.getDate();
-    let currentMonth = now.getMonth();
-    let currentYear = now.getFullYear();
-
     orders.forEach(o => {
       let amount = parseFloat(o.total) || 0;
       if (o.time) {
         let orderDate = new Date(o.time);
-        if (isNaN(orderDate.getTime())) {
-          let cleanTime = o.time.replace(/at/gi, "").trim();
-          orderDate = new Date(cleanTime);
-        }
-
-        if (!isNaN(orderDate.getTime())) {
-          if (
-            orderDate.getDate() === currentDay &&
-            orderDate.getMonth() === currentMonth &&
-            orderDate.getFullYear() === currentYear
-          ) {
-            let hour = orderDate.getHours();
-            let hourKey = hour < 10 ? `0${hour}:00` : `${hour}:00`;
-            hourlyMap[hourKey] += amount;
-          }
+        if (isNaN(orderDate.getTime())) orderDate = new Date(o.time.replace(/at/gi, "").trim());
+        if (!isNaN(orderDate.getTime()) && orderDate.getDate() === now.getDate() && orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear()) {
+          let hour = orderDate.getHours();
+          let hourKey = hour < 10 ? `0${hour}:00` : `${hour}:00`;
+          hourlyMap[hourKey] += amount;
         }
       }
     });
-
     let chartArray = [['Time (Hours)', 'Revenue (RM)']];
-    Object.keys(hourlyMap).sort().forEach(hour => {
-      chartArray.push([hour, hourlyMap[hour]]);
-    });
-
-    let data = google.visualization.arrayToDataTable(chartArray);
-
-    let options = {
-      legend: { position: 'none' },
-      colors: ['#E91E63'],
-      hAxis: { title: 'Time (Hours)', slantedText: true },
-      vAxis: { title: 'Revenue (RM)', minValue: 0 },
-      curveType: 'function',
-      animation: { startup: true, duration: 1000, easing: 'out' }
-    };
-
-    let chart = new google.visualization.LineChart(document.getElementById('hourlySalesChart'));
-    chart.draw(data, options);
+    Object.keys(hourlyMap).sort().forEach(h => chartArray.push([h, hourlyMap[h]]));
+    new google.visualization.LineChart(document.getElementById('hourlySalesChart')).draw(google.visualization.arrayToDataTable(chartArray), { legend: { position: 'none' }, colors: ['#E91E63'], curveType: 'function' });
   };
 
-  // 📥 Excel (.CSV) मा रिपोर्ट एक्सपोर्ट गर्ने फंक्सन
   window.exportExcelReport = function() {
-    let startDate = document.getElementById("reportStartDate").value;
-    let endDate = document.getElementById("reportEndDate").value;
-
     let filteredOrders = activeOrdersCache;
-    if (startDate && endDate) {
-      let start = new Date(startDate);
-      let end = new Date(endDate);
-      end.setHours(23, 59, 59);
-
-      filteredOrders = activeOrdersCache.filter(o => {
-        let oDate = new Date(o.time);
-        return oDate >= start && oDate <= end;
-      });
-    }
-
-    if (filteredOrders.length === 0) {
-      alert("⚠️ No orders found for the selected date range!");
-      return;
-    }
-
     let csvContent = "data:text/csv;charset=utf-8,Order Date,Order No,Customer Name,Phone,Address,Items,Total (RM),Status\r\n";
-
     filteredOrders.forEach(o => {
-      let row = [
-        `"${o.time || ''}"`,
-        `"${o.order_no || ''}"`,
-        `"${o.customer_name || ''}"`,
-        `"${o.phone || ''}"`,
-        `"${(o.address || '').replace(/"/g, '""')}"`,
-        `"${(o.items || '').replace(/\n/g, ' ').replace(/"/g, '""')}"`,
-        `"${o.total || '0'}"`,
-        `"${o.status || ''}"`
-      ];
-      csvContent += row.join(",") + "\r\n";
+      csvContent += `"${o.time || ''}","${o.order_no || ''}","${o.customer_name || ''}","${o.phone || ''}","${(o.address || '').replace(/"/g, '""')}","${(o.items || '').replace(/\n/g, ' ')}","${o.total || '0'}","${o.status || ''}"\r\n`;
     });
-
-    let encodedUri = encodeURI(csvContent);
     let link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
+    link.setAttribute("href", encodeURI(csvContent));
     link.setAttribute("download", `Sales_Report_${new Date().toISOString().slice(0,10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   };
 
-  // 🖨️ PDF वा प्रिन्ट रिपोर्ट तयार पार्ने फंक्सन
   window.printPdfReport = function() {
-    let startDate = document.getElementById("reportStartDate").value;
-    let endDate = document.getElementById("reportEndDate").value;
-
-    let filteredOrders = activeOrdersCache;
-    if (startDate && endDate) {
-      let start = new Date(startDate);
-      let end = new Date(endDate);
-      end.setHours(23, 59, 59);
-
-      filteredOrders = activeOrdersCache.filter(o => {
-        let oDate = new Date(o.time);
-        return oDate >= start && oDate <= end;
-      });
-    }
-
-    if (filteredOrders.length === 0) {
-      alert("⚠️ No orders found for the selected date range!");
-      return;
-    }
-
-    let totalRev = 0;
-    filteredOrders.forEach(o => { totalRev += parseFloat(o.total) || 0; });
-
     let printWindow = window.open('', '_blank', 'height=700,width=900');
-    let htmlContent = `
-      <html>
-        <head>
-          <title>Ugratara Sales Report</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
-            h2 { color: #e91e63; text-align: center; margin-bottom: 5px; }
-            p { text-align: center; color: #666; font-size: 14px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 13px; }
-            th { background: #e91e63; color: white; }
-            .summary { margin-top: 20px; font-size: 16px; font-weight: bold; text-align: right; }
-          </style>
-        </head>
-        <body>
-          <h2>🍽 UGRATARA RESTAURANT - SALES REPORT</h2>
-          <p>Report Period: ${startDate || 'All Time'} To ${endDate || 'Present'}</p>
-          <table>
-            <thead>
-              <tr>
-                <th>Date & Time</th>
-                <th>Order No</th>
-                <th>Customer</th>
-                <th>Phone</th>
-                <th>Items</th>
-                <th>Total (RM)</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-    `;
-
-    filteredOrders.forEach(o => {
-      htmlContent += `
-        <tr>
-          <td>${o.time || ''}</td>
-          <td><b>${o.order_no || ''}</b></td>
-          <td>${o.customer_name || ''}</td>
-          <td>${o.phone || ''}</td>
-          <td style="text-align: left; white-space: pre-wrap; font-size: 11px;">${o.items || ''}</td>
-          <td><b>RM ${o.total || '0'}</b></td>
-          <td>${o.status || ''}</td>
-        </tr>
-      `;
+    let htmlContent = `<html><head><title>Sales Report</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #ddd;padding:8px;text-align:center;}th{background:#e91e63;color:white;}</style></head><body><h2>UGRATARA RESTAURANT</h2><table><thead><tr><th>Date</th><th>Order No</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead><tbody>`;
+    activeOrdersCache.forEach(o => {
+      htmlContent += `<tr><td>${o.time}</td><td><b>${o.order_no}</b></td><td>${o.customer_name}</td><td>RM ${o.total}</td><td>${o.status}</td></tr>`;
     });
-
-    htmlContent += `
-            </tbody>
-          </table>
-          <div class="summary">
-            Total Orders: ${filteredOrders.length} | Grand Revenue: RM ${totalRev.toFixed(2)}
-          </div>
-          <script>
-            window.onload = function() { window.print(); window.close(); }
-          <\/script>
-        </body>
-      </html>
-    `;
-
+    htmlContent += `</tbody></table><script>window.onload=function(){window.print();window.close();}<\/script></body></html>`;
     printWindow.document.write(htmlContent);
     printWindow.document.close();
   };
 
-  // 👥 स्टाफहरूको सूची लोड गर्ने (Custom Role र Access Status सहित)
-// 👥 स्टाफहरूको सूची लोड गर्ने (Custom Role, Access Status र Admin लाई पनि Edit/Delete मिल्ने)
-window.loadStaffList = async function() {
+  window.loadStaffList = async function() {
     let staffTable = document.getElementById("staffTableList");
     if (!staffTable) return;
+    let { data } = await supabaseClient.from('admins').select('*');
+    let html = "";
+    (data || []).forEach(staff => {
+      let uName = staff.email || staff.username || '';
+      html += `<tr><td><b>${uName}</b></td><td>${staff.password}</td><td><b>${staff.role}</b></td><td>${staff.status || 'Active'}</td><td><button class="removeBtn" onclick="window.deleteStaff(${staff.id})">❌ Delete</button></td></tr>`;
+    });
+    staffTable.innerHTML = html || `<tr><td colspan="5">No staff found.</td></tr>`;
+  };
 
-    try {
-        let { data, error } = await supabaseClient.from('admins').select('*');
-        if (error) {
-            staffTable.innerHTML = `<tr><td colspan="5" style="color:red; padding:10px;">Error: ${error.message}</td></tr>`;
-            return;
-        }
-
-        let html = "";
-        (data || []).forEach(staff => {
-            let uName = staff.email || staff.username || '';
-            let uPass = staff.password || '';
-            let uRole = staff.role || 'STAFF';
-            let uStatus = staff.status !== undefined ? staff.status : 'Active';
-
-            // 🔒 सुरक्षा: यदि लगइन गर्ने व्यक्ति 'manager' हो भने, 'admin' रोल भएकोलाई लुकाउने
-            if (window.myRole === 'manager' && uRole.toLowerCase() === 'admin') {
-                return;
-            }
-
-            let statusBtnClass = uStatus === 'Active' ? 'inStockBtn' : 'outStockBtn';
-            let statusText = uStatus === 'Active' ? '🟢 Active' : '🔴 Inactive';
-
-            // अब एडमिन सहित सबैको लागि Status, Edit र Delete बटन देखा पर्नेछ
-            let actionHtml = `
-                <button class="${statusBtnClass}" onclick="window.toggleStaffStatus(${staff.id}, '${uStatus}')" style="padding:5px 8px; font-size:12px;">${statusText}</button>
-                <button class="editBtn" onclick="window.editStaff(${staff.id}, '${uName}', '${uPass}', '${uRole}')" style="background:#2196F3; color:white; border:none; padding:5px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
-                <button class="removeBtn" onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">❌ Delete</button>
-            `;
-
-            html += `
-                <tr>
-                    <td><b>${uName}</b></td>
-                    <td>${uPass}</td>
-                    <td><b>${uRole}</b></td>
-                    <td>${uStatus}</td>
-                    <td>${actionHtml}</td>
-                </tr>
-            `;
-        });
-
-        if (html === "") {
-            html = `<tr><td colspan="5" style="padding:15px;">No staff members found.</td></tr>`;
-        }
-
-        staffTable.innerHTML = html;
-
-    } catch (err) {
-        console.log("Load staff catch error:", err);
-        staffTable.innerHTML = `<tr><td colspan="5" style="color:red; padding:10px;">Error loading staff.</td></tr>`;
-    }
-};
-
-// 🔄 स्टाफको Access चालू वा बन्द (Active/Inactive) गर्ने फंक्सन
-window.toggleStaffStatus = async function(staffId, currentStatus) {
-    let newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
-    let { error } = await supabaseClient.from('admins').update({ status: newStatus }).eq('id', staffId);
-    if (error) {
-      alert("❌ Error updating status: " + error.message);
-    } else {
-      window.loadStaffList();
-    }
-};
-  // ➕ नयाँ स्टाफ थप्ने फंक्सन
   window.createNewStaff = async function() {
     let username = document.getElementById("staffUsername").value.trim();
     let password = document.getElementById("staffPassword").value.trim();
     let role = document.getElementById("staffRoleSelect").value;
-
-    if (!username || !password) {
-      alert("⚠️ Please enter both Username and Password!");
-      return;
-    }
-
-    let { error } = await supabaseClient.from('admins').insert([
-      { email: username, password: password, role: role }
-    ]);
-
-    if (error) {
-      alert("❌ Error adding staff: " + error.message);
-    } else {
-      alert("✅ Staff Added Successfully!");
-      document.getElementById("staffUsername").value = "";
-      document.getElementById("staffPassword").value = "";
-      window.loadStaffList();
-      window.loadExpenses();
-    }
+    if (!username || !password) { alert("Enter Username and Password!"); return; }
+    await supabaseClient.from('admins').insert([{ email: username, password: password, role: role }]);
+    alert("✅ Staff Added!");
+    window.loadStaffList();
   };
 
-  // ❌ स्टाफ मेटाउने फंक्सन
   window.deleteStaff = async function(staffId) {
-    if (confirm("Are you sure you want to delete this staff member?")) {
-      let { error } = await supabaseClient.from('admins').delete().eq('id', staffId);
-      if (error) {
-        alert("❌ Error deleting staff: " + error.message);
-      } else {
-        alert("✅ Staff Deleted Successfully!");
-        window.loadStaffList();
-      }
-    }
-  };
-
-  // ✏️ स्टाफको विवरण एडिट गर्ने फंक्सन
-  window.editStaff = async function(staffId, oldEmail, oldPass, oldRole) {
-    let newEmail = prompt("Edit Username / Email:", oldEmail);
-    if (newEmail === null) return;
-    let newPass = prompt("Edit Password:", oldPass);
-    if (newPass === null) return;
-    let newRole = prompt("Edit Role (MANAGER, ORDER_TAKER, DELIVERY, ADMIN):", oldRole);
-    if (newRole === null) return;
-
-    let { error } = await supabaseClient.from('admins')
-      .update({ email: newEmail, password: newPass, role: newRole.toUpperCase() })
-      .eq('id', staffId);
-
-    if (error) {
-      alert("❌ Error updating staff: " + error.message);
-    } else {
-      alert("✅ Staff Updated Successfully!");
+    if (confirm("Delete staff?")) {
+      await supabaseClient.from('admins').delete().eq('id', staffId);
       window.loadStaffList();
     }
   };
-// 📊 खर्चहरूको सूची लोड गर्ने फंक्सन
-window.loadExpenses = async function() {
-    let expenseTable = document.getElementById("expenseTableList");
-    if (!expenseTable) return;
 
-    try {
-        let { data, error } = await supabaseClient.from('expenses').select('*').order('id', { ascending: false });
-        
-        if (error) {
-            expenseTable.innerHTML = `<tr><td colspan="5" style="color:red; padding:10px;">Error: ${error.message}</td></tr>`;
-            return;
-        }
-
-        let html = "";
-        (data || []).forEach(item => {
-            html += `
-                <tr>
-                    <td style="padding: 10px; border-bottom: 1px solid #ddd;">${item.date || ''}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #ddd;"><b>${item.category || ''}</b></td>
-                    <td style="padding: 10px; border-bottom: 1px solid #ddd; color: #d32f2f; font-weight: bold;">RM ${item.amount || 0}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #ddd;">${item.description || ''}</td>
-                    <td style="padding: 10px; border-bottom: 1px solid #ddd;">
-                        <button onclick="window.deleteExpense(${item.id})" style="background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">❌ Delete</button>
-                    </td>
-                </tr>
-            `;
-        });
-
-        if (html === "") {
-            html = `<tr><td colspan="5" style="padding: 15px; text-align: center;">No expenses found.</td></tr>`;
-        }
-
-        expenseTable.innerHTML = html;
-
-    } catch (err) {
-        console.log("Error loading expenses:", err);
-        expenseTable.innerHTML = `<tr><td colspan="5" style="color:red; padding:10px;">Error loading expenses.</td></tr>`;
-    }
-};
-
-// ➕ नयाँ खर्च थप्ने फंक्सन
-window.addExpense = async function() {
-    let category = document.getElementById("expenseCategory").value.trim();
-    let amount = parseFloat(document.getElementById("expenseAmount").value);
-    let description = document.getElementById("expenseDescription").value.trim();
-    let currentDate = new Date().toLocaleString();
-
-    if (!category || isNaN(amount)) {
-        alert("⚠️ Please enter valid Category and Amount!");
-        return;
-    }
-
-    let { error } = await supabaseClient.from('expenses').insert([
-        { category: category, amount: amount, description: description, date: currentDate }
-    ]);
-
-    if (error) {
-        alert("❌ Error adding expense: " + error.message);
-    } else {
-        alert("✅ Expense Added Successfully!");
-        document.getElementById("expenseCategory").value = "";
-        document.getElementById("expenseAmount").value = "";
-        document.getElementById("expenseDescription").value = "";
-        window.loadExpenses();
-    }
-};
-
-// ❌ खर्च मेटाउने फंक्सन
-window.deleteExpense = async function(id) {
-    if (!confirm("Are you sure you want to delete this expense?")) return;
-
-    let { error } = await supabaseClient.from('expenses').delete().eq('id', id);
-    if (error) {
-        alert("❌ Error deleting expense: " + error.message);
-    } else {
-        window.loadExpenses();
-    }
-};
-
-  // ➕ नयाँ खर्च Supabase मा सेभ गर्ने फंक्सन
-window.addExpense = async function() {
+  // ➕ नयाँ खर्च Supabase मा सेभ गर्ने (मिति सहितको एकमात्र सही फंक्सन)
+  window.addExpense = async function() {
     let dateVal = document.getElementById("expenseDateInput").value;
     let category = document.getElementById("expenseCategory").value.trim();
     let amount = parseFloat(document.getElementById("expenseAmount").value);
     let description = document.getElementById("expenseDescription").value.trim();
 
     if (!dateVal || !category || isNaN(amount)) {
-        alert("⚠️ कृपया मिति, श्रेणी (Category) र रकम (Amount) सही तरिकाले भर्नुहोस्!");
+        alert("⚠️ कृपया मिति, श्रेणी र रकम सही तरिकाले भर्नुहोस्!");
         return;
     }
 
-    let { error } = await supabaseClient.from('expenses').insert([
-        { date: dateVal, category: category, amount: amount, description: description }
-    ]);
-
+    let { error } = await supabaseClient.from('expenses').insert([{ date: dateVal, category: category, amount: amount, description: description }]);
     if (error) {
-        alert("❌ Error adding expense: " + error.message);
+        alert("❌ Error: " + error.message);
     } else {
         alert("✅ Expense Added Successfully!");
         document.getElementById("expenseDateInput").value = "";
@@ -1274,16 +738,13 @@ window.addExpense = async function() {
         document.getElementById("expenseDescription").value = "";
         window.loadExpenseSummary();
     }
-};
+  };
 
-// 📊 जम्मा खर्च र Net Profit लोड गर्ने फंक्सन
-window.loadExpenseSummary = async function() {
+  // 📊 जम्मा खर्च र Net Profit लोड गर्ने फंक्सन
+  window.loadExpenseSummary = async function() {
     try {
         let { data, error } = await supabaseClient.from('expenses').select('*');
-        if (error) {
-            console.log("Error loading expenses:", error.message);
-            return;
-        }
+        if (error) return;
 
         let totalExpense = 0;
         (data || []).forEach(item => {
@@ -1292,23 +753,18 @@ window.loadExpenseSummary = async function() {
 
         document.getElementById("summaryExpense").innerText = "RM " + totalExpense.toFixed(2);
 
-        // Net Profit हिसाब (Revenue मानौं 147.00 छ)
         let totalRevenue = 147.00;
         let netProfit = totalRevenue - totalExpense;
         let netProfitEl = document.getElementById("summaryNetProfit");
         netProfitEl.innerText = "RM " + netProfit.toFixed(2);
         netProfitEl.style.color = netProfit >= 0 ? "#388E3C" : "#D32F2F";
-
     } catch (err) {
         console.log("Catch error:", err);
     }
-};
+  };
 
-// पेज खुल्दा यो चल्नेछ
-window.loadExpenseSummary();
-
-// 📥 Excel (CSV) मा Export गर्ने फंक्सन
-window.exportExpenseExcel = async function() {
+  // 📥 Excel (CSV) मा Export गर्ने फंक्सन
+  window.exportExpenseExcel = async function() {
     let startDate = document.getElementById("expenseStartDate").value;
     let endDate = document.getElementById("expenseEndDate").value;
 
@@ -1318,19 +774,12 @@ window.exportExpenseExcel = async function() {
     }
 
     let { data, error } = await query;
-    if (error) {
-        alert("❌ Error exporting data: " + error.message);
-        return;
-    }
-
-    if (!data || data.length === 0) {
+    if (error || !data || data.length === 0) {
         alert("⚠️ यो मितिभित्र कुनै खर्च भेटिएन!");
         return;
     }
 
-    let csv = [];
-    csv.push("Date,Category,Amount (RM),Description");
-
+    let csv = ["Date,Category,Amount (RM),Description"];
     data.forEach(item => {
         csv.push(`"${item.date}","${item.category}",${item.amount},"${item.description || ''}"`);
     });
@@ -1343,8 +792,87 @@ window.exportExpenseExcel = async function() {
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
-};
-  
+  };
+
+  // 🖨️ केवल Expense Report Statement मात्र प्रिन्ट गर्ने फंक्सन
+  window.printExpensePDF = async function() {
+    let startDate = document.getElementById("expenseStartDate").value;
+    let endDate = document.getElementById("expenseEndDate").value;
+
+    let query = supabaseClient.from('expenses').select('*');
+    if (startDate && endDate) {
+        query = query.gte('date', startDate).lte('date', endDate);
+    }
+
+    let { data, error } = await query;
+    if (error || !data || data.length === 0) {
+        alert("⚠️ यो मितिभित्र प्रिन्ट गर्न कुनै खर्च भेटिएन!");
+        return;
+    }
+
+    let totalExp = 0;
+    let tableRows = "";
+
+    data.forEach((item, index) => {
+        let amt = parseFloat(item.amount) || 0;
+        totalExp += amt;
+        tableRows += `
+            <tr>
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${index + 1}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">${item.date || ''}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;"><b>${item.category || ''}</b></td>
+                <td style="padding: 8px; border: 1px solid #ddd;">${item.description || ''}</td>
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #d32f2f;"><b>RM ${amt.toFixed(2)}</b></td>
+            </tr>
+        `;
+    });
+
+    let printWindow = window.open('', '_blank', 'height=700,width=900');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Expense Report Statement</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+                .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e91e63; padding-bottom: 10px; }
+                .header h2 { margin: 0; color: #e91e63; font-size: 24px; }
+                .header p { margin: 5px 0 0 0; color: #666; font-size: 14px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                th { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; text-align: left; }
+                td { border: 1px solid #ddd; padding: 8px; }
+                .summary-box { margin-top: 20px; text-align: right; font-size: 16px; background: #fff5f5; padding: 12px; border-radius: 6px; border: 1px solid #ffe0e0; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h2>UGRATARA RESTAURANT</h2>
+                <p>📊 <b>Expense Report Statement</b> (${startDate || 'All Time'} to ${endDate || 'All Time'})</p>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 40px; text-align: center;">S.N.</th>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th style="text-align: right;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${tableRows}
+                </tbody>
+            </table>
+            <div class="summary-box">
+                <span style="color: #d32f2f; font-weight: bold;">Total Expense: RM ${totalExp.toFixed(2)}</span>
+            </div>
+            <script>
+                window.onload = function() { window.print(); window.close(); }
+            <\/script>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+  };
 </script>
 </body>
 </html>
