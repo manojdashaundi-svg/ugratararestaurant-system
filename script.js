@@ -15,21 +15,23 @@ document.addEventListener("DOMContentLoaded", function () {
 // Supabase बाट मेनु लोड गर्ने फंक्सन
 async function loadMenu() {
     console.log("Loading menu...");
+    
+    // Supabase क्लाइन्ट सुरक्षित रूपमा ताnes गर्ने
+    let client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+    if (!client) {
+        console.error("Supabase client not found for menu!");
+        return;
+    }
 
-    const { data, error } = await window.supabaseClient
-        .from("menu_items")
-        .select("*");
-
+    const { data, error } = await client.from("menu_items").select("*");
+    
     if (error) {
         console.error("Error loading menu:", error);
-        document.getElementById("menu").innerHTML = "<p style='color:red; text-align:center;'>⚠️ Error loading menu items!</p>";
+        document.getElementById("menu").innerHTML = `<p style='color:red; text-align:center;'>⚠️ Error loading menu items!</p>`;
         return;
     }
-
-    if (!data || data.length === 0) {
-        document.getElementById("menu").innerHTML = "<p style='text-align:center;'>No menu items found.</p>";
-        return;
-    }
+    // बाँकीको मेनु लोड हुने कोड...
+}
 
     window.globalMenuData = data;
     showMenu(data);
