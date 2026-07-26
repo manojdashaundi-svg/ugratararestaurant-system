@@ -253,7 +253,7 @@
   var currentLoggedInUser = "";
   var activeOrdersCache = [];
 
-  window.handleLogin = async function() {
+ window.handleLogin = async function() {
     var u = document.getElementById("username").value.trim();
     var p = document.getElementById("password").value.trim();
     if(u === "" || p === "") { alert("Enter credentials."); return; }
@@ -265,9 +265,15 @@
 
     if (data) {
       sessionStorage.setItem("ADMIN_LOGIN", "true");
-      sessionStorage.setItem("USER_ROLE", data.role ? data.role.toLowerCase() : "admin");
+      
+      // 🟢 डेटाबेसमा भएको सहि रोल (admin, manager, आदि) लिने
+      let userRole = data.role ? data.role.toLowerCase() : "admin";
+      
+      sessionStorage.setItem("USER_ROLE", userRole);
+      localStorage.setItem("adminRole", userRole); // यो थप्नुहोस्
       sessionStorage.setItem("LOGGED_USER", u.toLowerCase());
-      myRole = data.role ? data.role.toLowerCase() : "admin";
+      
+      myRole = userRole;
       currentLoggedInUser = u.toLowerCase();
       window.showAdminPanel();
     } else {
@@ -700,7 +706,7 @@
     document.getElementById("adminContent").style.display = "block";
     
     // 🔑 सुरक्षित रूपमा रोल सेट गर्ने
-    window.myRole = String(localStorage.getItem("adminRole") || "manager").toLowerCase();
+    window.myRole = String(sessionStorage.getItem("USER_ROLE") || localStorage.getItem("adminRole") || "admin").toLowerCase();
     
     let roleBadge = document.getElementById("userRoleBadge");
     if(roleBadge) roleBadge.innerText = myRole.toUpperCase();
