@@ -253,7 +253,7 @@
   var currentLoggedInUser = "";
   var activeOrdersCache = [];
 
- window.handleLogin = async function() {
+  window.handleLogin = async function() {
     var u = document.getElementById("username").value.trim();
     var p = document.getElementById("password").value.trim();
     if(u === "" || p === "") { alert("Enter credentials."); return; }
@@ -287,7 +287,7 @@
   };
   
   // १. अर्डर लोड गर्ने र सिरियल वाइज क्रम मिलाएर देखाउने सही फंक्सन
- window.loadOrders = async function() {
+  window.loadOrders = async function() {
     let { data, error } = await supabaseClient
       .from('orders')
       .select('*');
@@ -1109,7 +1109,7 @@
         `;
     });
     staffTable.innerHTML = html;
-  
+  };
 </script>
 <script src="script.js"></script>
 </body>
