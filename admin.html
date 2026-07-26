@@ -29,7 +29,7 @@
     .addBtn { background:#e91e63; color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; }
     .editBtn { background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
     .removeBtn { background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
-    .staff-section, .menu-section { background:#fff; padding:20px; border-radius:10px; margin-top:40px; border:1px solid #ddd; display:block; }
+    .staff-section, .menu-section, .inventory-section { background:#fff; padding:20px; border-radius:10px; margin-top:40px; border:1px solid #ddd; display:block; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
     .excelBtn { background:#1F7246; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
     .pdfBtn { background:#E01A22; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
     .login-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f5f5f5; display:flex; justify-content:center; align-items:center; z-index:99999; }
@@ -184,6 +184,45 @@
       </table>
     </div>
   </div>
+
+  <!-- 📦 Inventory Management Section -->
+  <div class="inventory-section">
+    <h3>📦 Inventory Management</h3>
+    <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #ddd;">
+      <div style="margin-bottom: 12px;">
+        <select id="inventoryItemSelect" onchange="window.onInventoryItemSelect()" style="width: 100%; max-width: 400px; padding: 10px; font-size: 14px; font-weight: bold; border-radius: 6px; border: 1px solid #ccc;">
+          <option value="">-- Item ID छान्नुहोस् --</option>
+        </select>
+      </div>
+      <div style="margin-bottom: 8px; font-size: 15px; font-weight: bold; color: #333;" id="invDisplayName">Name: -</div>
+      <div style="margin-bottom: 12px; font-size: 15px; font-weight: bold; color: #333;" id="invDisplayCategory">Category: -</div>
+      <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+        <label style="font-weight: bold; color: #555;">Current Stock:</label>
+        <input id="invCurrentStock" type="number" placeholder="Enter Current Stock" style="width: 180px; padding: 8px;">
+      </div>
+      <div style="margin-bottom: 15px; font-size: 15px; font-weight: bold; color: #555;" id="invDisplayAlertLimit">Alert Limit: 50</div>
+      <button onclick="window.saveInventoryStock()" style="background:#4CAF50; color:white; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer; font-size: 15px;">Save Stock</button>
+    </div>
+
+    <h3 style="color: #e91e63; margin-top: 25px;">⚠️ Stock Alert Items</h3>
+    <div style="overflow-x: auto; width:100%;">
+      <table>
+        <thead>
+          <tr>
+            <th>ItemID</th>
+            <th>ItemName</th>
+            <th>Category</th>
+            <th>Current</th>
+            <th>Limit</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="inventoryTableList">
+          <tr><td colspan="6" style="padding: 15px;">Loading Inventory...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
 </div>
 
 <!-- 🎯 इमेज भ्यूअर मोडल -->
@@ -191,89 +230,6 @@
   <div class="image-viewer-box" onclick="event.stopPropagation()">
     <img id="viewerTargetImage" src="" alt="Proof View">
     <button class="close-viewer-btn" onclick="window.closeImageViewer()">Close Window ✕</button>
-  </div>
-</div>
-
-  <!-- 👥 Staff & Access Management Section -->
-  <div id="staffManagementBox" class="staff-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-    <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">👥 Staff & Access Management</h3>
-    
-    <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd;">
-      <h4 style="margin-bottom: 10px; color: #333;">+ Add New Staff</h4>
-      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <input id="staffUsername" type="text" placeholder="Username / Email" style="flex: 1; min-width: 180px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-        <input id="staffPassword" type="password" placeholder="Password" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-        <input id="staffRoleInput" type="text" placeholder="Role (e.g. Driver, Cook, Salesman)" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
-        <button class="addBtn" onclick="window.createNewStaff()" style="background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add Staff</button>
-      </div>
-    </div>
-
-    <h4 style="margin-bottom: 10px; color: #333;">Current Staff Members</h4>
-    <div style="overflow-x: auto; width: 100%;">
-      <table>
-       <thead>
-      <tr>
-        <th>Username</th>
-        <th>Password</th>
-        <th>Role</th>
-        <th>Status</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-        <tbody id="staffTableList">
-          <tr><td colspan="5" style="padding: 15px;">Loading staff members...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-<div style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
-    <h3 style="margin-bottom: 15px; color: #333;">💰 Expense & Profit Tracker</h3>
-    
-    <!-- खर्च थप्ने इनपुट बक्सहरू -->
-    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center;">
-        <input type="date" id="expenseDateInput" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-        <input type="text" id="expenseCategory" placeholder="Category (e.g. Rent, Salary)" style="padding: 8px; flex: 1; border: 1px solid #ccc; border-radius: 4px;">
-        <input type="number" id="expenseAmount" placeholder="Amount (RM)" style="padding: 8px; width: 130px; border: 1px solid #ccc; border-radius: 4px;">
-        <input type="text" id="expenseDescription" placeholder="Description" style="padding: 8px; flex: 2; border: 1px solid #ccc; border-radius: 4px;">
-        <button onclick="window.addExpense()" style="background: #e91e63; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer;">+ Add Expense</button>
-    </div>
-
-    <!-- 📊 Expense Report Generator & Export सेक्सन -->
-    <div style="margin-bottom: 20px;">
-        <h4 style="color: #333; margin-bottom: 10px;">📊 Expense Report Generator & Export</h4>
-        <div style="display: flex; gap: 15px; align-items: center; background: #f9f9f9; padding: 15px; border-radius: 6px; flex-wrap: wrap;">
-            <div>
-                <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">Start Date:</label>
-                <input type="date" id="expenseStartDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-            </div>
-            <div>
-                <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">End Date:</label>
-                <input type="date" id="expenseEndDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-            </div>
-            <div style="display: flex; gap: 10px; align-items: flex-end; margin-top: 20px;">
-                <button onclick="window.exportExpenseExcel()" style="background: #2e7d32; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📥 Export Excel (.CSV)</button>
-               <button onclick="window.printExpensePDF()" style="background: #d32f2f; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">🖨️ Print / Download PDF</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Total Summary देखाउने सेक्सन -->
-    <div style="border-top: 2px solid #eee; padding-top: 15px; font-size: 16px; display: flex; flex-direction: column; gap: 8px;">
-        <div style="color: #1976D2; font-weight: bold;">जम्मा Total Revenue: <span id="summaryRevenue">RM 147.00</span></div>
-        <div style="color: #D32F2F; font-weight: bold;">जम्मा Total Expense: <span id="summaryExpense">RM 0.00</span></div>
-        <div style="color: #388E3C; font-weight: bold; font-size: 18px;">जम्मा Net Profit: <span id="summaryNetProfit">RM 0.00</span></div>
-    </div>
-</div>
-
-<!-- 🎯 KOT र Bill प्रिन्ट मोडल बक्स -->
-<div id="printModalBox" class="print-modal">
-  <div class="print-box">
-    <div id="printableInvoiceArea" class="print-area"></div>
-    <div style="margin-top:20px; text-align:center;">
-       <button class="rcvBtn" onclick="window.executeSystemPrint()" style="padding:10px 20px;">🖨 Print Now</button>
-       <button class="close-viewer-btn" onclick="window.closePrintModal()" style="padding:10px 20px; margin-left:10px;">Close ✕</button>
-    </div>
   </div>
 </div>
 
@@ -285,6 +241,7 @@
   var myRole = "admin";
   var currentLoggedInUser = "";
   var activeOrdersCache = [];
+  var menuItemsCache = [];
 
   window.handleLogin = async function() {
     var u = document.getElementById("username").value.trim();
@@ -389,6 +346,100 @@
       tableBody.innerHTML = html;
     } catch (err) {
       console.log("Load orders error:", err);
+    }
+  };
+
+  window.loadInventoryData = async function() {
+    let { data: menuData } = await supabaseClient.from('menu_items').select('*').order('id', { ascending: true });
+    menuItemsCache = menuData || [];
+
+    let selectEl = document.getElementById("inventoryItemSelect");
+    if (selectEl) {
+      let opts = `<option value="">-- Item ID छान्नुहोस् --</option>`;
+      menuItemsCache.forEach(m => {
+        opts += `<option value="${m.id}">${m.id} - ${m.name} (${m.category || 'General'})</option>`;
+      });
+      selectEl.innerHTML = opts;
+    }
+
+    let { data: invData } = await supabaseClient.from('inventory').select('*');
+    let inventoryTable = document.getElementById("inventoryTableList");
+    if (!inventoryTable) return;
+
+    let html = "";
+    (invData || []).forEach(inv => {
+      let current = parseFloat(inv.current_stock) || 0;
+      let limit = parseFloat(inv.alert_limit) || 50;
+      
+      // Alert Limit भन्दा Current Stock बराबर वा कम हुँदा मात्र टेबलमा देखाउने र रातो status राख्ने
+      if (current <= limit) {
+        html += `<tr>
+          <td><b>${inv.id || inv.item_id || '-'}</b></td>
+          <td><b>${inv.name || inv.item_name || '-'}</b></td>
+          <td><b>${inv.category || '-'}</b></td>
+          <td style="font-weight:bold; color:#d32f2f;">${current}</td>
+          <td>${limit}</td>
+          <td><span style="background:#ffe0e0; color:#d32f2f; padding:4px 10px; border-radius:4px; font-weight:bold;">🔴 Low Stock</span></td>
+        </tr>`;
+      }
+    });
+
+    inventoryTable.innerHTML = html || `<tr><td colspan="6" style="padding:15px; color:#555;">No items below alert limit. All stocks are sufficient!</td></tr>`;
+  };
+
+  window.onInventoryItemSelect = function() {
+    let selectEl = document.getElementById("inventoryItemSelect");
+    let selectedId = selectEl.value;
+    if (!selectedId) {
+      document.getElementById("invDisplayName").innerText = "Name: -";
+      document.getElementById("invDisplayCategory").innerText = "Category: -";
+      document.getElementById("invCurrentStock").value = "";
+      return;
+    }
+
+    let matchedItem = menuItemsCache.find(m => String(m.id) === String(selectedId));
+    if (matchedItem) {
+      document.getElementById("invDisplayName").innerText = "Name: " + (matchedItem.name || '-');
+      document.getElementById("invDisplayCategory").innerText = "Category: " + (matchedItem.category || '-');
+      document.getElementById("invCurrentStock").value = matchedItem.current_stock || "";
+    }
+  };
+
+  window.saveInventoryStock = async function() {
+    let selectEl = document.getElementById("inventoryItemSelect");
+    let selectedId = selectEl.value;
+    let currentStockVal = parseFloat(document.getElementById("invCurrentStock").value);
+
+    if (!selectedId) {
+      alert("⚠️ कृपया पहिले Item ID छान्नुहोस्!");
+      return;
+    }
+    if (isNaN(currentStockVal)) {
+      alert("⚠️ कृपया सही Current Stock हाल्नुहोस्!");
+      return;
+    }
+
+    let matchedItem = menuItemsCache.find(m => String(m.id) === String(selectedId));
+    if (!matchedItem) return;
+
+    let payload = {
+      id: parseInt(selectedId),
+      name: matchedItem.name,
+      category: matchedItem.category || 'General',
+      current_stock: currentStockVal,
+      alert_limit: 50
+    };
+
+    let { error } = await supabaseClient.from('inventory').upsert(payload, { onConflict: 'id' });
+    if (error) {
+      alert("❌ Error saving inventory: " + error.message);
+    } else {
+      alert("✅ Stock Saved Successfully!");
+      document.getElementById("inventoryItemSelect").value = "";
+      document.getElementById("invDisplayName").innerText = "Name: -";
+      document.getElementById("invDisplayCategory").innerText = "Category: -";
+      document.getElementById("invCurrentStock").value = "";
+      window.loadInventoryData();
     }
   };
 
@@ -617,6 +668,7 @@
     window.loadOrders();
     window.loadStaffList();
     window.loadExpenseSummary();
+    window.loadInventoryData();
   };
 
   window.logout = function() { sessionStorage.clear(); window.location.reload(); };
@@ -686,7 +738,6 @@
     document.body.removeChild(link);
   };
 
-  // 🖨️ Sales Report लाई Expense Report जस्तै सुन्दर र व्यवस्थित प्रिन्ट गर्ने फंक्सन
   window.printPdfReport = function() {
     let startDate = document.getElementById("reportStartDate").value;
     let endDate = document.getElementById("reportEndDate").value;
@@ -853,180 +904,6 @@
       await supabaseClient.from('admins').delete().eq('id', staffId);
       window.loadStaffList();
     }
-  };
-
-  // ➕ नयाँ खर्च Supabase मा सेभ गर्ने फंक्सन
-  window.addExpense = async function() {
-    let dateVal = document.getElementById("expenseDateInput").value;
-    let category = document.getElementById("expenseCategory").value.trim();
-    let amount = parseFloat(document.getElementById("expenseAmount").value);
-    let description = document.getElementById("expenseDescription").value.trim();
-
-    if (!dateVal || !category || isNaN(amount)) {
-        alert("⚠️ कृपया मिति, श्रेणी र रकम सही तरिकाले भर्नुहोस्!");
-        return;
-    }
-
-    let { error } = await supabaseClient.from('expenses').insert([{ date: dateVal, category: category, amount: amount, description: description }]);
-    if (error) {
-        alert("❌ Error: " + error.message);
-    } else {
-        alert("✅ Expense Added Successfully!");
-        document.getElementById("expenseDateInput").value = "";
-        document.getElementById("expenseCategory").value = "";
-        document.getElementById("expenseAmount").value = "";
-        document.getElementById("expenseDescription").value = "";
-        window.loadExpenseSummary();
-    }
-  };
-
-  // 📊 जम्मा खर्च र Net Profit लोड गर्ने फंक्सन
-  window.loadExpenseSummary = async function() {
-    try {
-        let { data, error } = await supabaseClient.from('expenses').select('*');
-        if (error) return;
-
-        let totalExpense = 0;
-        (data || []).forEach(item => {
-            totalExpense += parseFloat(item.amount) || 0;
-        });
-
-        document.getElementById("summaryExpense").innerText = "RM " + totalExpense.toFixed(2);
-
-        let totalRevenue = 147.00;
-        let netProfit = totalRevenue - totalExpense;
-        let netProfitEl = document.getElementById("summaryNetProfit");
-        netProfitEl.innerText = "RM " + netProfit.toFixed(2);
-        netProfitEl.style.color = netProfit >= 0 ? "#388E3C" : "#D32F2F";
-    } catch (err) {
-        console.log("Catch error:", err);
-    }
-  };
-
-  // 📥 Excel (CSV) मा Export गर्ने सही फंक्सन (मिति फिल्टर सहित)
-  window.exportExpenseExcel = async function() {
-    let startDate = document.getElementById("expenseStartDate").value;
-    let endDate = document.getElementById("expenseEndDate").value;
-
-    let { data, error } = await supabaseClient.from('expenses').select('*');
-    if (error || !data || data.length === 0) {
-        alert("⚠️ कुनै खर्च डेटा भेटिएन!");
-        return;
-    }
-
-    let filteredData = data.filter(item => {
-        if (!startDate || !endDate) return true;
-        let itemDateOnly = String(item.date).split(',')[0].trim();
-        let itemDt = new Date(itemDateOnly);
-        let startDt = new Date(startDate);
-        let endDt = new Date(endDate);
-        return itemDt >= startDt && itemDt <= endDt;
-    });
-
-    if (filteredData.length === 0) {
-        alert("⚠️ यो मितिभित्र कुनै खर्च भेटिएन!");
-        return;
-    }
-
-    let csv = ["Date,Category,Amount (RM),Description"];
-    filteredData.forEach(item => {
-        csv.push(`"${item.date}","${item.category}",${item.amount},"${item.description || ''}"`);
-    });
-
-    let csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
-    let downloadLink = document.createElement("a");
-    downloadLink.download = "Expense_Report.csv";
-    downloadLink.href = window.URL.createObjectURL(csvFile);
-    downloadLink.click();
-  };
-
-  // 🖨️ केवल Expense Report Statement मात्र प्रिन्ट गर्ने सही फंक्सन (मिति फिल्टर सहित)
-  window.printExpensePDF = async function() {
-    let startDate = document.getElementById("expenseStartDate").value;
-    let endDate = document.getElementById("expenseEndDate").value;
-
-    let { data, error } = await supabaseClient.from('expenses').select('*');
-    if (error || !data || data.length === 0) {
-        alert("⚠️ प्रिन्ट गर्न कुनै खर्च डेटा भेटिएन!");
-        return;
-    }
-
-    let filteredData = data.filter(item => {
-        if (!startDate || !endDate) return true;
-        let itemDateOnly = String(item.date).split(',')[0].trim();
-        let itemDt = new Date(itemDateOnly);
-        let startDt = new Date(startDate);
-        let endDt = new Date(endDate);
-        return itemDt >= startDt && itemDt <= endDt;
-    });
-
-    if (filteredData.length === 0) {
-        alert("⚠️ यो मितिभित्र प्रिन्ट गर्न कुनै खर्च भेटिएन!");
-        return;
-    }
-
-    let totalExp = 0;
-    let tableRows = "";
-
-    filteredData.forEach((item, index) => {
-        let amt = parseFloat(item.amount) || 0;
-        totalExp += amt;
-        tableRows += `
-            <tr>
-                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${index + 1}</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">${item.date || ''}</td>
-                <td style="padding: 8px; border: 1px solid #ddd;"><b>${item.category || ''}</b></td>
-                <td style="padding: 8px; border: 1px solid #ddd;">${item.description || ''}</td>
-                <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #d32f2f;"><b>RM ${amt.toFixed(2)}</b></td>
-            </tr>
-        `;
-    });
-
-    let printWindow = window.open('', '_blank', 'height=700,width=900');
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>Expense Report Statement</title>
-            <style>
-                body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
-                .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e91e63; padding-bottom: 10px; }
-                .header h2 { margin: 0; color: #e91e63; font-size: 24px; }
-                .header p { margin: 5px 0 0 0; color: #666; font-size: 14px; }
-                table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-                th { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; text-align: left; }
-                td { border: 1px solid #ddd; padding: 8px; }
-                .summary-box { margin-top: 20px; text-align: right; font-size: 16px; background: #fff5f5; padding: 12px; border-radius: 6px; border: 1px solid #ffe0e0; }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h2>UGRATARA RESTAURANT</h2>
-                <p>📊 <b>Expense Report Statement</b> (${startDate || 'All Time'} to ${endDate || 'All Time'})</p>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 40px; text-align: center;">S.N.</th>
-                        <th>Date</th>
-                        <th>Category</th>
-                        <th>Description</th>
-                        <th style="text-align: right;">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${tableRows}
-                </tbody>
-            </table>
-            <div class="summary-box">
-                <span style="color: #d32f2f; font-weight: bold;">Total Expense: RM ${totalExp.toFixed(2)}</span>
-            </div>
-            <script>
-                window.onload = function() { window.print(); window.close(); }
-            <\/script>
-        </body>
-        </html>
-    `);
-    printWindow.document.close();
   };
 </script>
 </body>
