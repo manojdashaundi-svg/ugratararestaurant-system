@@ -261,12 +261,16 @@
     document.getElementById("loginBtn").innerText = "Verifying...";
     
     try {
-      let client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
-      if (!client) {
-          alert("Supabase client not initialized!");
-          document.getElementById("loginBtn").innerText = "Login";
-          return;
-      }
+     // Supabase क्लाइन्ट सुरक्षित र पक्का तरिकाले तान्ने
+    let client = window.supabaseClient;
+    if (!client && typeof supabase !== 'undefined' && supabase.createClient) {
+        client = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+    if (!client || typeof client.from !== 'function') {
+        alert("Supabase client not initialized properly!");
+        document.getElementById("loginBtn").innerText = "Login";
+        return;
+    }
 
       let { data, error } = await client.from('admins').select('*').eq('email', u).eq('password', p);
       
