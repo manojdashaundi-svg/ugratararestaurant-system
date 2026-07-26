@@ -1043,9 +1043,10 @@
     let newRole = prompt("Edit Role (MANAGER, ORDER_TAKER, DELIVERY, ADMIN):", oldRole);
     if (newRole === null) return;
 
-    let { error } = await supabaseClient.from('admins')
-      .update({ email: newEmail, password: newPass, role: newRole.toUpperCase() })
-      .eq('id', staffId);
+    let client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+let { error } = await client.from('admins')
+    .update({ email: newEmail, password: newPass, role: newRole.toUpperCase() })
+    .eq('id', staffId);
 
     if (error) {
       alert("❌ Error updating staff: " + error.message);
