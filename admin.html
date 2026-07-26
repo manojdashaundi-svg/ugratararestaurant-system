@@ -1000,62 +1000,56 @@
     let staffTable = document.getElementById("staffTableList");
     if (!staffTable) return;
 
-    try {
-      let { data, error } = await supabaseClient
-        .from('admins')
-        .select('*');
+    let { data, error } = await supabaseClient.from('admins').select('*');
 
-      if (error) {
-        staffTable.innerHTML = `<tr><td colspan="4" style="color:red; padding:15px;">Database Error: ${error.message}</td></tr>`;
-        return;
-      }
-
-      if (!data || data.length === 0) {
-        staffTable.innerHTML = `<tr><td colspan="4" style="padding:15px; color:#666;">No staff members found in database.</td></tr>`;
-        return;
-      }
-
-      let html = "";
-      data.forEach(staff => {
-        let uName = staff.email || staff.full_name || staff.username || '';
-        let uPass = staff.password || '';
-        let uRole = staff.role || 'STAFF';
-        let uRoleUpper = String(uRole).toUpperCase();
-        let isManagerUser = (typeof myRole !== 'undefined' && myRole === "manager");
-        let isTargetAdminOrManager = (uRoleUpper === "ADMIN" || uRoleUpper === "MANAGER");
-
-        let actionHtml = "";
-        if (isManagerUser) {
-          if (isTargetAdminOrManager) {
-            actionHtml = `<span style="color:#888; font-size:12px;">🔒 Restricted</span>`;
-          } else {
-            actionHtml = `
-              <button onclick="window.editStaff(${staff.id}, '${uName}', '${uPass}', '${uRole}')" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
-              <button onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">❌ Delete</button>
-            `;
-          }
-        } else {
-          let isMainAdmin = (uName === "Manoj" || (uRoleUpper === "ADMIN" && staff.id === 1));
-          actionHtml = isMainAdmin ? 
-            `<span style="color:#e91e63; font-weight:bold;">👑 Admin</span>` : 
-            `<button onclick="window.editStaff(${staff.id}, '${uName}', '${uPass}', '${uRole}')" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
-             <button onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">❌ Delete</button>`;
-        }
-
-        html += `
-          <tr>
-            <td><b>${uName}</b></td>
-            <td>${uPass}</td>
-            <td><b>${uRole}</b></td>
-            <td>${actionHtml}</td>
-          </tr>
-        `;
-      });
-
-      staffTable.innerHTML = html;
-    } catch (err) {
-      staffTable.innerHTML = `<tr><td colspan="4" style="color:red; padding:15px;">Error: ${err.message}</td></tr>`;
+    if (error) {
+      staffTable.innerHTML = `<tr><td colspan="4" style="color:red; padding:10px;">Error: ${error.message}</td></tr>`;
+      return;
     }
+
+    if (!data || data.length === 0) {
+      staffTable.innerHTML = `<tr><td colspan="4" style="padding:10px; color:#666;">No staff found.</td></tr>`;
+      return;
+    }
+
+    let html = "";
+    data.forEach(staff => {
+      let uName = staff.email || staff.full_name || staff.username || '';
+      let uPass = staff.password || '';
+      let uRole = staff.role || 'STAFF';
+      let uRoleUpper = String(uRole).toUpperCase();
+      let isManager = (typeof myRole !== 'undefined' && myRole === "manager");
+      let isAdminOrMgr = (uRoleUpper === "ADMIN" || uRoleUpper === "MANAGER");
+
+      let actionHtml = "";
+      if (isManager) {
+        if (isAdminOrMgr) {
+          actionHtml = `<span style="color:#888; font-size:12px;">🔒 Restricted</span>`;
+        } else {
+          actionHtml = `
+            <button onclick="window.editStaff(${staff.id}, '${uName}', '${uPass}', '${uRole}')" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer;">Edit</button>
+            <button onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer;">Delete</button>
+          `;
+        }
+      } else {
+        let isMain = (uName === "Manoj" || (uRoleUpper === "ADMIN" && staff.id === 1));
+        actionHtml = isMain ? 
+          `<span style="color:#e91e63; font-weight:bold;">👑 Admin</span>` : 
+          `<button onclick="window.editStaff(${staff.id}, '${uName}', '${uPass}', '${uRole}')" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer;">Edit</button>
+           <button onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer;">Delete</button>`;
+      }
+
+      html += `
+        <tr>
+          <td><b>${uName}</b></td>
+          <td>${uPass}</td>
+          <td><b>${uRole}</b></td>
+          <td>${actionHtml}</td>
+        </tr>
+      `;
+    });
+
+    staffTable.innerHTML = html;
   };
   
   // ➕ नयाँ स्टाफ थप्ने फंक्सन
