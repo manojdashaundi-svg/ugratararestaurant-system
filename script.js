@@ -16,7 +16,7 @@ document.addEventListener("DOMContentLoaded", function () {
 async function loadMenu() {
     console.log("Loading menu...");
     
-    // Supabase क्लाइन्ट सुरक्षित रूपमा ताnes गर्ने
+    // Supabase क्लाइन्ट सुरक्षित रूपमा तान्ने
     let client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
     if (!client) {
         console.error("Supabase client not found for menu!");
@@ -30,8 +30,6 @@ async function loadMenu() {
         document.getElementById("menu").innerHTML = `<p style='color:red; text-align:center;'>⚠️ Error loading menu items!</p>`;
         return;
     }
-    // बाँकीको मेनु लोड हुने कोड...
-}
 
     window.globalMenuData = data;
     showMenu(data);
@@ -80,7 +78,9 @@ window.filterCategory = function(category, element) {
 };
 
 window.searchFood = function() {
-    const keyword = document.getElementById("searchFood").value.toLowerCase();
+    const searchInput = document.getElementById("searchFood");
+    if (!searchInput) return;
+    const keyword = searchInput.value.toLowerCase();
     const cards = document.querySelectorAll(".food-card");
     cards.forEach(card => {
         const h3El = card.querySelector("h3");
@@ -123,17 +123,18 @@ window.showCart = function() {
             subtotal += itemTotal; 
             html += `<div style='padding: 0 5px;'><p><b>${item.food}</b><br><button class="qty-btn" style='padding:5px 12px; font-size:13px;' onclick="window.decreaseQty(${i})">−</button> <span style='margin:0 10px;font-weight:bold;'>${item.qty}</span> <button class="qty-btn" style='padding:5px 12px; font-size:13px;' onclick="window.increaseQty(${i})">+</button> &nbsp;&nbsp; RM ${itemTotal.toFixed(2)} <button onclick="window.removeItem(${i})" style="background:red;color:white;border:none;padding:5px 10px;border-radius:6px;cursor:pointer;margin-left:10px;">✕</button></p></div><hr style="margin:10px 0; border:0; border-top:1px dashed #ccc;">`; 
         });
-    }
+    } 
     
     let zoneSelect = document.getElementById("deliveryZoneSelect");
     let deliveryCharge = zoneSelect ? parseFloat(zoneSelect.value) : 0;
     let grandTotal = subtotal + deliveryCharge;
     
-    document.getElementById("cart").innerHTML = html; 
+    let cartEl = document.getElementById("cart");
+    if(cartEl) cartEl.innerHTML = html; 
     if(document.getElementById("subtotalPrice")) document.getElementById("subtotalPrice").innerText = subtotal.toFixed(2);
     if(document.getElementById("deliveryPriceLabel")) document.getElementById("deliveryPriceLabel").innerText = deliveryCharge.toFixed(2);
-    document.getElementById("total").innerText = grandTotal.toFixed(2); 
-    document.getElementById("cartCount").innerText = window.cart.reduce((sum, item) => sum + item.qty, 0);
+    if(document.getElementById("total")) document.getElementById("total").innerText = grandTotal.toFixed(2); 
+    if(document.getElementById("cartCount")) document.getElementById("cartCount").innerText = window.cart.reduce((sum, item) => sum + item.qty, 0);
 };
 
 window.openCart = function() {
@@ -142,19 +143,20 @@ window.openCart = function() {
 };
 
 window.previewFile = function() { 
-    const file = document.getElementById("paymentSlipFile").files[0]; 
+    const fileInput = document.getElementById("paymentSlipFile");
+    if (!fileInput || !fileInput.files[0]) return;
+    const file = fileInput.files[0]; 
     const status = document.getElementById("fileStatus"); 
-    if (!file) return; 
-    status.innerText = "Processing Image..."; 
+    if (status) status.innerText = "Processing Image..."; 
     const reader = new FileReader(); 
     reader.onloadend = function() { 
         window.base64SlipData = reader.result; 
-        status.innerText = "📸 Slip Attached Successfully!"; 
+        if (status) status.innerText = "📸 Slip Attached Successfully!"; 
     }; 
     reader.readAsDataURL(file); 
 };
 
-// Supabase मा क्रमबद्ध (Serial-wise) अर्डर नम्बर निकालेर सेभ गर्ने फंक्सन
+// Supabase मा सिरियल वाइज अर्डर नम्बर निकालेर सेभ गर्ने फंक्सन
 window.placeOrder = async function() {
     const name = document.getElementById("customerName").value.trim();
     const phone = document.getElementById("customerPhone").value.trim();
@@ -177,8 +179,8 @@ window.placeOrder = async function() {
     const subtotal = window.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
     const grandTotal = subtotal + deliveryCharge;
     
-    // 🔢 सधैँ ORD1001, ORD1002, ORD1003 गर्दै सिरियल वाइज अर्डर नम्बर जेनेरेट गर्ने लजिक
-    let { data: existingOrders } = await window.supabaseClient.from('orders').select('order_no');
+    let client = window.supabaseClient || window.supabase;
+    let { data: existingOrders } = await client.from('orders').select('order_no');
     let nextSerialNo = 1001;
 
     if (existingOrders && existingOrders.length > 0) {
@@ -191,7 +193,7 @@ window.placeOrder = async function() {
     }
     let orderNo = "ORD" + nextSerialNo;
 
-    const { data, error } = await window.supabaseClient
+    const { data, error } = await client
         .from("orders")
         .insert([
             {
@@ -232,14 +234,17 @@ window.placeOrder = async function() {
     if(zoneSelect) zoneSelect.value = "0";
 };
 
-// अर्डर ट्र्याक गर्ने फंक्शन (सुन्दर Order Journey र Feedback सहित)
+// अर्डर ट्र्याक गर्ने फंक्शन
 window.trackMyOrder = async function() {
-    const orderNo = document.getElementById("trackOrderNo").value.trim().toUpperCase();
+    const trackInput = document.getElementById("trackOrderNo");
+    if (!trackInput) return;
+    const orderNo = trackInput.value.trim().toUpperCase();
     if (orderNo === "") return;
 
     document.getElementById("trackResult").innerHTML = "Searching...";
 
-    const { data, error } = await window.supabaseClient
+    let client = window.supabaseClient || window.supabase;
+    const { data, error } = await client
         .from("orders")
         .select("*")
         .eq("order_no", orderNo)
@@ -312,7 +317,6 @@ window.loadStaffList = async function() {
     let staffTable = document.getElementById("staffTableList");
     if (!staffTable) return;
 
-    // सबै सम्भावित Supabase भेरिएबल नेमहरू चेक गर्ने लजिक
     let client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
     
     if (!client || typeof client.from !== 'function') {
@@ -351,15 +355,17 @@ window.loadStaffList = async function() {
     });
     staffTable.innerHTML = html;
 };
+
 // ❌ स्टाफ डिलिट गर्ने फंक्सन
 window.deleteStaff = async function(id) {
     if (!confirm("के तपाईं यो स्टाफलाई हटाउन चाहनुहुन्छ?")) return;
 
-    let { error } = await window.supabaseClient.from('admins').delete().eq('id', id);
+    let client = window.supabaseClient || window.supabase;
+    let { error } = await client.from('admins').delete().eq('id', id);
     if (error) {
         alert("डिलिट गर्न असफल भयो: " + error.message);
         return;
     }
-    alert("स्टاف सफलतापूर्वक हटाइयो!");
+    alert("स्टाफ सफलतापूर्वक हटाइयो!");
     window.loadStaffList();
 };
