@@ -763,49 +763,66 @@
     }
   };
 
-  // 📥 Excel (CSV) मा Export गर्ने फंक्सन
+  // 📥 Excel (CSV) मा Export गर्ने सही फंक्सन
   window.exportExpenseExcel = async function() {
     let startDate = document.getElementById("expenseStartDate").value;
     let endDate = document.getElementById("expenseEndDate").value;
 
-    let query = supabaseClient.from('expenses').select('*');
-    if (startDate && endDate) {
-        query = query.gte('date', startDate).lte('date', endDate);
+    let { data, error } = await supabaseClient.from('expenses').select('*');
+    if (error || !data || data.length === 0) {
+        alert("⚠️ कुनै खर्च डेटा भेटिएन!");
+        return;
     }
 
-    let { data, error } = await query;
-    if (error || !data || data.length === 0) {
+    // यदि मिति छानिएको छ भने फिल्टर गर्ने
+    let filteredData = data.filter(item => {
+        if (!startDate || !endDate) return true;
+        let itemDateOnly = String(item.date).split(',')[0].trim(); // "7/26/2026" निकाल्ने
+        let itemDt = new Date(itemDateOnly);
+        let startDt = new Date(startDate);
+        let endDt = new Date(endDate);
+        return itemDt >= startDt && itemDt <= endDt;
+    });
+
+    if (filteredData.length === 0) {
         alert("⚠️ यो मितिभित्र कुनै खर्च भेटिएन!");
         return;
     }
 
     let csv = ["Date,Category,Amount (RM),Description"];
-    data.forEach(item => {
+    filteredData.forEach(item => {
         csv.push(`"${item.date}","${item.category}",${item.amount},"${item.description || ''}"`);
     });
 
     let csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
     let downloadLink = document.createElement("a");
-    downloadLink.download = "Expense_Report_" + (startDate || "All") + "_to_" + (endDate || "All") + ".csv";
+    downloadLink.download = "Expense_Report.csv";
     downloadLink.href = window.URL.createObjectURL(csvFile);
-    downloadLink.style.display = "none";
-    document.body.appendChild(downloadLink);
     downloadLink.click();
-    document.body.removeChild(downloadLink);
   };
 
-  // 🖨️ केवल Expense Report Statement मात्र प्रिन्ट गर्ने फंक्सन
+  // 🖨️ केवल Expense Report Statement मात्र प्रिन्ट गर्ने सही फंक्सन
   window.printExpensePDF = async function() {
     let startDate = document.getElementById("expenseStartDate").value;
     let endDate = document.getElementById("expenseEndDate").value;
 
-    let query = supabaseClient.from('expenses').select('*');
-    if (startDate && endDate) {
-        query = query.gte('date', startDate).lte('date', endDate);
+    let { data, error } = await supabaseClient.from('expenses').select('*');
+    if (error || !data || data.length === 0) {
+        alert("⚠️ प्रिन्ट गर्न कुनै खर्च डेटा भेटिएन!");
+        return;
     }
 
-    let { data, error } = await query;
-    if (error || !data || data.length === 0) {
+    // मिति फिल्टर गर्ने
+    let filteredData = data.filter(item => {
+        if (!startDate || !endDate) return true;
+        let itemDateOnly = String(item.date).split(',')[0].trim();
+        let itemDt = new Date(itemDateOnly);
+        let startDt = new Date(startDate);
+        let endDt = new Date(endDate);
+        return itemDt >= startDt && itemDt <= endDt;
+    });
+
+    if (filteredData.length === 0) {
         alert("⚠️ यो मितिभित्र प्रिन्ट गर्न कुनै खर्च भेटिएन!");
         return;
     }
@@ -813,7 +830,7 @@
     let totalExp = 0;
     let tableRows = "";
 
-    data.forEach((item, index) => {
+    filteredData.forEach((item, index) => {
         let amt = parseFloat(item.amount) || 0;
         totalExp += amt;
         tableRows += `
@@ -873,6 +890,3 @@
     `);
     printWindow.document.close();
   };
-</script>
-</body>
-</html>
