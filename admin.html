@@ -700,6 +700,8 @@
     document.getElementById("adminContent").style.display = "block";
     document.getElementById("userRoleBadge").innerText = myRole.toUpperCase();
     
+    window.myRole = String(localStorage.getItem("adminRole") || "").toLowerCase();
+    
     if (myRole === "admin" || myRole === "manager") {
       document.getElementById("salesDashboardBox").style.display = "flex";
       document.getElementById("menuManagementBox").style.display = "block";
