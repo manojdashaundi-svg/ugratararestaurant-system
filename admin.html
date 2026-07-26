@@ -267,11 +267,17 @@
     if(activeOrdersCache.length === 0) {
       html = `<tr><td colspan="9" style="padding:20px;">No Active Orders Found.</td></tr>`;
     } else {
-      activeOrdersCache.forEach(function(o){
-        let status = o.status ? String(o.status).toLowerCase() : "pending";
-        let slipHtml = o.payment_slip ? `<img src="${o.payment_slip}" class="proof-thumb" onclick="window.openImageViewer('${o.payment_slip}')">` : `None`;
-        let delivHtml = o.proof_img ? `<img src="${o.proof_img}" class="proof-thumb" onclick="window.openImageViewer('${o.proof_img}')">` : `None`;
+      activeOrdersCache.forEach(function(o, index){
+        let rawStatus = o.status ? String(o.status).trim() : "Pending";
+        let status = rawStatus.toLowerCase();
         
+        let slipHtml = (o.payment_slip && o.payment_slip !== "None" && o.payment_slip !== "") ?  
+          `<img src="${o.payment_slip}" class="proof-thumb" onclick="window.openImageViewer('${o.payment_slip}')">` : `None`;
+        
+        let delivHtml = (o.proof_img && o.proof_img !== "None" && o.proof_img !== "") ?  
+          `<img src="${o.proof_img}" class="proof-thumb" onclick="window.openImageViewer('${o.proof_img}')">` : `None`;
+        
+        // पुरानै जस्तो ड्रपडाउन र गो बटन
         let statusSelect = `<select id="status_${o.order_no || o.id}">
           <option value="Pending" ${status==="pending"?"selected":""}>Pending</option>
           <option value="Preparing" ${status==="preparing"?"selected":""}>Preparing</option>
@@ -281,21 +287,34 @@
         </select> 
         <button class="updateBtn" onclick="window.manualUpdate('${o.order_no || o.id}')">Go</button>`;
 
+        // अर्डरको स्थिति अनुसार मिल्ने इन्स्ट्यान्ट बटनहरू
+        let actionButtons = "";
+        if (status === "pending" || status === "order received" || status === "") {
+            actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
+        } else if (status === "preparing") {
+            actionButtons = `<button class="rdyBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Ready', 'bill')">🍳 Ready & Bill</button>`;
+        } else if (status === "ready") {
+            actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no || o.id}', 'Out for Delivery')">🚚 Dispatch</button>`;
+        } else if (status === "out for delivery") {
+            actionButtons = `Upload Proof:<br><input type="file" accept="image/*" capture="environment" onchange="window.uploadDeliveryProof('${o.order_no || o.id}', this)" style="width:110px;">`;
+        } else if (status === "delivered") {
+            actionButtons = `<span style="color:green; font-weight:bold;">✅ Delivered</span>`;
+        }
+
         html += `<tr>
-          <td>${o.time || '-'}</td>
+          <td style="font-size:12px; color:#555;">${o.time || '-'}</td>
           <td><b>${o.order_no || o.id}</b></td>
-          <td>${o.customer_name || '-'}<br><small>${o.phone || ''}</small></td>
+          <td>${o.customer_name || '-'}<br><small style="color:#666;">${o.phone || ''}</small></td>
           <td style="color:#e91e63; font-weight:bold;">RM ${o.total || '0'}</td>
           <td>${slipHtml}</td>
-          <td>${o.delivery_time || 'N/A'}</td>
+          <td style="font-size:12px; color:#555; font-weight:bold;">${o.delivery_time || 'N/A'}</td>
           <td>${delivHtml}</td>
           <td>${statusSelect}</td>
-          <td><button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Preparing', 'kot')">KOT/Bill</button></td>
+          <td>${actionButtons}</td>
         </tr>`;
       });
     }
     tableBody.innerHTML = html;
-  };
 
   window.calculateDashboardStats = function(orders) {
     let totalOrders = orders.length;
