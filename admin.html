@@ -29,7 +29,7 @@
     .addBtn { background:#e91e63; color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; }
     .editBtn { background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
     .removeBtn { background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
-    .staff-section, .menu-section { background:#fff; padding:20px; border-radius:10px; margin-top:40px; border:1px solid #ddd; display:block; }
+    .staff-section, .menu-section { background:#fff; padding:20px; border-radius:10px; margin-top:40px; border:1px solid #ddd; display:none; }
     .excelBtn { background:#1F7246; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
     .pdfBtn { background:#E01A22; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
     .login-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f5f5f5; display:flex; justify-content:center; align-items:center; z-index:99999; }
@@ -47,7 +47,7 @@
     .print-box { background:#fff; padding:25px; border-radius:12px; width:320px; max-height:85vh; overflow-y:auto; box-shadow:0 5px 20px rgba(0,0,0,0.3); }
     .print-area { font-family: 'Courier New', Courier, monospace; font-size:14px; color:#000; line-height:1.4; }
 
-    .chart-container { background:#fff; padding:15px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin:20px 0; border:1px solid #ddd; width:100%; height: 280px; display:block; }
+    .chart-container { background:#fff; padding:15px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin:20px 0; border:1px solid #ddd; width:100%; height: 280px; display:none; }
     .inStockBtn { background:#4CAF50; color:white; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; display: inline-flex; align-items: center; gap: 5px; }
     .outStockBtn { background:#ff9800; color:white; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
     .menu-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
@@ -70,11 +70,11 @@
   
   <h2>
     🍴 UGRATARA Admin Panel (<span id="userRoleBadge" style="color:#e91e63;">...</span>)
-    <span id="emailAutomationStatusBadge" class="automation-badge" style="display: inline-block;">Supabase: 🟢 Active</span>
+    <span id="emailAutomationStatusBadge" class="automation-badge" style="display: none;">Supabase: 🟢 Active</span>
   </h2>
 
   <!-- 📊 ड्यासबोर्ड कार्डहरू -->
-  <div id="salesDashboardBox" style="display: flex; gap: 12px; margin: 20px 0; flex-wrap: wrap;">
+  <div id="salesDashboardBox" style="display: none; gap: 12px; margin: 20px 0; flex-wrap: wrap;">
     <div style="flex: 1; min-width: 140px; background: #fff; padding: 15px; border-radius: 10px; border-left: 5px solid #2196F3; text-align: center;">
       <span style="font-size: 13px; color: #777; font-weight: bold;">Total Orders</span>
       <h2 id="dashTotalOrders" style="margin: 5px 0 0 0; color: #2196F3; font-size: 24px;">0</h2>
@@ -98,13 +98,13 @@
   </div>
 
   <!-- 📈 Monthly Sales Insights & Chart Section -->
-  <div class="chart-container" id="monthlySalesChartDiv" style="width: 100%; height: 320px; background: #fff; padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <div class="chart-container" id="monthlySalesChartDiv" style="display: block; width: 100%; height: 320px; background: #fff; padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
     <h3 style="color: #e91e63; margin-bottom: 10px; font-size: 16px;">Monthly Sales Insights & Growth (RM)</h3>
     <div id="monthlySalesChart" style="width: 100%; height: 250px;"></div>
   </div>
   
   <!-- 📈 Today's Hourly Sales Trend Chart Section -->
-  <div class="chart-container" id="hourlySalesChartDiv" style="width: 100%; height: 320px; background: #fff; padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <div class="chart-container" id="hourlySalesChartDiv" style="display: block; width: 100%; height: 320px; background: #fff; padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
     <h3 style="color: #e91e63; margin-bottom: 10px; font-size: 16px;">Today's Hourly Sales Trend (RM)</h3>
     <div id="hourlySalesChart" style="width: 100%; height: 250px;"></div>
   </div>
@@ -195,7 +195,7 @@
 </div>
 
   <!-- 👥 Staff & Access Management Section -->
-  <div id="staffManagementBox" class="staff-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <div id="staffManagementBox" class="staff-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: block;">
     <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">👥 Staff & Access Management</h3>
     
     <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd;">
@@ -715,7 +715,7 @@
     }
   };
 
-  // ➕ नयाँ खर्च Supabase मा सेभ गर्ने फंक्सन
+  // ➕ नयाँ खर्च Supabase मा सेभ गर्ने (मिति सहितको एकमात्र सही फंक्सन)
   window.addExpense = async function() {
     let dateVal = document.getElementById("expenseDateInput").value;
     let category = document.getElementById("expenseCategory").value.trim();
@@ -763,64 +763,49 @@
     }
   };
 
-  // 📥 Excel (CSV) मा Export गर्ने सही फंक्सन (मिति फिल्टर सहित)
+  // 📥 Excel (CSV) मा Export गर्ने फंक्सन
   window.exportExpenseExcel = async function() {
     let startDate = document.getElementById("expenseStartDate").value;
     let endDate = document.getElementById("expenseEndDate").value;
 
-    let { data, error } = await supabaseClient.from('expenses').select('*');
-    if (error || !data || data.length === 0) {
-        alert("⚠️ कुनै खर्च डेटा भेटिएन!");
-        return;
+    let query = supabaseClient.from('expenses').select('*');
+    if (startDate && endDate) {
+        query = query.gte('date', startDate).lte('date', endDate);
     }
 
-    let filteredData = data.filter(item => {
-        if (!startDate || !endDate) return true;
-        let itemDateOnly = String(item.date).split(',')[0].trim();
-        let itemDt = new Date(itemDateOnly);
-        let startDt = new Date(startDate);
-        let endDt = new Date(endDate);
-        return itemDt >= startDt && itemDt <= endDt;
-    });
-
-    if (filteredData.length === 0) {
+    let { data, error } = await query;
+    if (error || !data || data.length === 0) {
         alert("⚠️ यो मितिभित्र कुनै खर्च भेटिएन!");
         return;
     }
 
     let csv = ["Date,Category,Amount (RM),Description"];
-    filteredData.forEach(item => {
+    data.forEach(item => {
         csv.push(`"${item.date}","${item.category}",${item.amount},"${item.description || ''}"`);
     });
 
     let csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
     let downloadLink = document.createElement("a");
-    downloadLink.download = "Expense_Report.csv";
+    downloadLink.download = "Expense_Report_" + (startDate || "All") + "_to_" + (endDate || "All") + ".csv";
     downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
     downloadLink.click();
+    document.body.removeChild(downloadLink);
   };
 
-  // 🖨️ केवल Expense Report Statement मात्र प्रिन्ट गर्ने सही फंक्सन (मिति फिल्टर सहित)
+  // 🖨️ केवल Expense Report Statement मात्र प्रिन्ट गर्ने फंक्सन
   window.printExpensePDF = async function() {
     let startDate = document.getElementById("expenseStartDate").value;
     let endDate = document.getElementById("expenseEndDate").value;
 
-    let { data, error } = await supabaseClient.from('expenses').select('*');
-    if (error || !data || data.length === 0) {
-        alert("⚠️ प्रिन्ट गर्न कुनै खर्च डेटा भेटिएन!");
-        return;
+    let query = supabaseClient.from('expenses').select('*');
+    if (startDate && endDate) {
+        query = query.gte('date', startDate).lte('date', endDate);
     }
 
-    let filteredData = data.filter(item => {
-        if (!startDate || !endDate) return true;
-        let itemDateOnly = String(item.date).split(',')[0].trim();
-        let itemDt = new Date(itemDateOnly);
-        let startDt = new Date(startDate);
-        let endDt = new Date(endDate);
-        return itemDt >= startDt && itemDt <= endDt;
-    });
-
-    if (filteredData.length === 0) {
+    let { data, error } = await query;
+    if (error || !data || data.length === 0) {
         alert("⚠️ यो मितिभित्र प्रिन्ट गर्न कुनै खर्च भेटिएन!");
         return;
     }
@@ -828,7 +813,7 @@
     let totalExp = 0;
     let tableRows = "";
 
-    filteredData.forEach((item, index) => {
+    data.forEach((item, index) => {
         let amt = parseFloat(item.amount) || 0;
         totalExp += amt;
         tableRows += `
