@@ -996,40 +996,28 @@
     printWindow.document.close();
   };
 
-  // 👥 स्टाफहरूको सूची लोड गर्ने र रोल अनुसार कन्ट्रोल गर्ने सुरक्षित फंक्सन
+  // 👥 स्टाफहरूको सूची सुरक्षित र फास्ट लोड गर्ने फंक्सन
   window.loadStaffList = async function() {
-    let { data, error } = await supabaseClient
-      .from('admins')
-      .select('*')
-      .order('id', { ascending: true });
-
-    if (error) {
-      console.log("Error loading staff:", error);
-      return;
-    }
-
-    let roleSelect = document.getElementById("staffRoleSelect");
-    if (roleSelect) {
-      if (typeof myRole !== 'undefined' && myRole === "manager") {
-        roleSelect.innerHTML = `
-          <option value="ORDER_TAKER">Order Taker</option>
-          <option value="DELIVERY">Delivery Boy</option>
-        `;
-      } else {
-        roleSelect.innerHTML = `
-          <option value="MANAGER">Hotel Manager</option>
-          <option value="ORDER_TAKER">Order Taker</option>
-          <option value="DELIVERY">Delivery Boy</option>
-          <option value="ADMIN">Full Admin</option>
-        `;
-      }
-    }
-
     let staffTable = document.getElementById("staffTableList");
     if (!staffTable) return;
 
+    let { data, error } = await supabaseClient
+      .from('admins')
+      .select('*');
+
+    if (error) {
+      console.log("Error loading staff:", error);
+      staffTable.innerHTML = `<tr><td colspan="4" style="color:red; padding:15px;">Error loading staff: ${error.message}</td></tr>`;
+      return;
+    }
+
+    if (!data || data.length === 0) {
+      staffTable.innerHTML = `<tr><td colspan="4" style="padding:15px; color:#666;">No staff members found.</td></tr>`;
+      return;
+    }
+
     let html = "";
-    (data || []).forEach(staff => {
+    data.forEach(staff => {
       let staffRoleUpper = String(staff.role || "").toUpperCase();
       let isTargetAdminOrManager = (staffRoleUpper === "ADMIN" || staffRoleUpper === "MANAGER");
       
