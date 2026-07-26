@@ -1004,6 +1004,7 @@ if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
   };
 
   // 👥 स्टाफहरूको सूची लोड गर्ने (Custom Role र Access Status सहित)
+// 👥 स्टाफहरूको सूची लोड गर्ने (Custom Role, Access Status र Admin लाई पनि Edit/Delete मिल्ने)
 window.loadStaffList = async function() {
     let staffTable = document.getElementById("staffTableList");
     if (!staffTable) return;
@@ -1027,16 +1028,15 @@ window.loadStaffList = async function() {
                 return;
             }
 
-            let isMainAdmin = (uName.toLowerCase() === "manoj" || uRole.toUpperCase() === "ADMIN" && staff.id === 1);
-            
             let statusBtnClass = uStatus === 'Active' ? 'inStockBtn' : 'outStockBtn';
             let statusText = uStatus === 'Active' ? '🟢 Active' : '🔴 Inactive';
 
-            let actionHtml = isMainAdmin ? 
-                `<span style="color:#e91e63; font-weight:bold;">👑 Admin</span>` : 
-                `<button class="${statusBtnClass}" onclick="window.toggleStaffStatus(${staff.id}, '${uStatus}')" style="padding:5px 8px; font-size:12px;">${statusText}</button>
-                 <button class="editBtn" onclick="window.editStaff(${staff.id}, '${uName}', '${uPass}', '${uRole}')" style="background:#2196F3; color:white; border:none; padding:5px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
-                 <button class="removeBtn" onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">❌ Delete</button>`;
+            // अब एडमिन सहित सबैको लागि Status, Edit र Delete बटन देखा पर्नेछ
+            let actionHtml = `
+                <button class="${statusBtnClass}" onclick="window.toggleStaffStatus(${staff.id}, '${uStatus}')" style="padding:5px 8px; font-size:12px;">${statusText}</button>
+                <button class="editBtn" onclick="window.editStaff(${staff.id}, '${uName}', '${uPass}', '${uRole}')" style="background:#2196F3; color:white; border:none; padding:5px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
+                <button class="removeBtn" onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">❌ Delete</button>
+            `;
 
             html += `
                 <tr>
