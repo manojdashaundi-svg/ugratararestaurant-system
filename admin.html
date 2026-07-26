@@ -221,17 +221,28 @@
   var activeOrdersCache = [];
 
   window.handleLogin = async function() {
-    var u = document.getElementById("username").value.trim();
-    var p = document.getElementById("password").value.trim();
-    if(u === "" || p === "") { alert("Enter credentials."); return; }
+  var u = document.getElementById("username").value.trim();
+  var p = document.getElementById("password").value.trim();
+  if(u === "" || p === "") { alert("Enter credentials."); return; }
+  
+  document.getElementById("loginBtn").innerText = "Verifying...";
+  
+  try {
+    let { data, error } = await supabaseClient
+      .from('admins')
+      .select('*')
+      .eq('email', u)
+      .eq('password', p)
+      .maybeSingle();
     
-    document.getElementById("loginBtn").innerText = "Verifying...";
-    
-    let client = window.supabaseClient || window.supabase || supabaseClient;
-    let { data, error } = await client.from('admins').select('*').eq('email', u).eq('password', p).maybeSingle();
     document.getElementById("loginBtn").innerText = "Login";
 
-    if (error || !data) {
+    if (error) {
+      alert("Database Error: " + error.message);
+      return;
+    }
+
+    if (!data) {
       alert("Wrong Email or Password.");
       return;
     }
@@ -245,8 +256,12 @@
     window.myRole = userRole;
     currentLoggedInUser = u.toLowerCase();
     window.showAdminPanel();
-  };
 
+  } catch (err) {
+    document.getElementById("loginBtn").innerText = "Login";
+    alert("Login Error: " + err.message);
+  }
+};
   window.loadOrders = async function() {
     let { data, error } = await supabaseClient.from('orders').select('*');
     if (error) {
