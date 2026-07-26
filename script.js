@@ -4,6 +4,12 @@ window.cart = [];
 window.selectedCategory = "All";
 window.base64SlipData = ""; 
 
+// 🔒 सुरक्षित रूपमा Supabase क्लाइन्ट तान्ने ग्लोबल फंक्सन
+function getSupabaseClient() {
+    let client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+    return client;
+}
+
 // पेज लोड हुनेबित्तिकै Supabase कनेक्सन चेक गरेर मात्र मेनु र स्टाफ लोड गर्ने
 document.addEventListener("DOMContentLoaded", function () {
     if (typeof loadMenu === 'function') loadMenu();
@@ -16,10 +22,9 @@ document.addEventListener("DOMContentLoaded", function () {
 async function loadMenu() {
     console.log("Loading menu...");
     
-    // Supabase क्लाइन्ट सुरक्षित रूपमा तान्ने
-    let client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
-    if (!client) {
-        console.error("Supabase client not found for menu!");
+    let client = getSupabaseClient();
+    if (!client || typeof client.from !== 'function') {
+        console.error("Supabase client not initialized for menu!");
         return;
     }
 
@@ -185,7 +190,14 @@ window.placeOrder = async function() {
     const subtotal = window.cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
     const grandTotal = subtotal + deliveryCharge;
     
-    let client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+    let client = getSupabaseClient();
+    if (!client) {
+        alert("Supabase client not initialized!");
+        orderBtn.disabled = false;
+        orderBtn.innerText = "🚀 Place Order";
+        return;
+    }
+
     let { data: existingOrders } = await client.from('orders').select('order_no');
     let nextSerialNo = 1001;
 
@@ -249,7 +261,9 @@ window.trackMyOrder = async function() {
 
     document.getElementById("trackResult").innerHTML = "Searching...";
 
-    let client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+    let client = getSupabaseClient();
+    if (!client) return;
+
     const { data, error } = await client
         .from("orders")
         .select("*")
@@ -323,8 +337,7 @@ window.loadStaffList = async function() {
     let staffTable = document.getElementById("staffTableList");
     if (!staffTable) return;
 
-    let client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
-    
+    let client = getSupabaseClient();
     if (!client || typeof client.from !== 'function') {
         staffTable.innerHTML = `<tr><td colspan="4" style="color:red; padding:10px;">Supabase client not initialized! Please check script tags.</td></tr>`;
         return;
@@ -366,7 +379,9 @@ window.loadStaffList = async function() {
 window.deleteStaff = async function(id) {
     if (!confirm("के तपाईं यो स्टाफलाई हटाउन चाहनुहुन्छ?")) return;
 
-    let client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+    let client = getSupabaseClient();
+    if (!client) return;
+
     let { error } = await client.from('admins').delete().eq('id', id);
     if (error) {
         alert("डिलिट गर्न असफल भयो: " + error.message);
