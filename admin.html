@@ -260,30 +260,43 @@
     
     document.getElementById("loginBtn").innerText = "Verifying...";
     
-    let client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
-    if (!client) {
-        alert("Supabase client not initialized!");
-        document.getElementById("loginBtn").innerText = "Login";
+    try {
+      let client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+      if (!client) {
+          alert("Supabase client not initialized!");
+          document.getElementById("loginBtn").innerText = "Login";
+          return;
+      }
+
+      let { data, error } = await client.from('admins').select('*').eq('email', u).eq('password', p);
+      
+      document.getElementById("loginBtn").innerText = "Login";
+
+      if (error) {
+        alert("Database Error: " + error.message);
         return;
+      }
+
+      if (!data || data.length === 0) {
+        alert("Wrong Email or Password.");
+        return;
+      }
+
+      let adminUser = data[0];
+      sessionStorage.setItem("ADMIN_LOGIN", "true");
+      let userRole = adminUser.role ? adminUser.role.toLowerCase() : "admin";
+      sessionStorage.setItem("USER_ROLE", userRole);
+      localStorage.setItem("adminRole", userRole);
+      sessionStorage.setItem("LOGGED_USER", u.toLowerCase());
+      
+      window.myRole = userRole;
+      currentLoggedInUser = u.toLowerCase();
+      window.showAdminPanel();
+
+    } catch (err) {
+      document.getElementById("loginBtn").innerText = "Login";
+      alert("Login Exception: " + err.message);
     }
-
-    let { data, error } = await client.from('admins').select('*').eq('email', u).eq('password', p).maybeSingle();
-    document.getElementById("loginBtn").innerText = "Login";
-
-    if (error || !data) {
-      alert("Wrong Email or Password.");
-      return;
-    }
-
-    sessionStorage.setItem("ADMIN_LOGIN", "true");
-    let userRole = data.role ? data.role.toLowerCase() : "admin";
-    sessionStorage.setItem("USER_ROLE", userRole);
-    localStorage.setItem("adminRole", userRole);
-    sessionStorage.setItem("LOGGED_USER", u.toLowerCase());
-    
-    window.myRole = userRole;
-    currentLoggedInUser = u.toLowerCase();
-    window.showAdminPanel();
   };
   
   // १. अर्डर लोड गर्ने र सिरियल वाइज क्रम मिलाएर देखाउने सही फंक्सन
