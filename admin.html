@@ -227,7 +227,11 @@
     
     document.getElementById("loginBtn").innerText = "Verifying...";
     
-    let client = window.supabaseClient || window.supabase || supabaseClient;
+    let client = window.supabaseClient || window.supabase;
+    if (!client || typeof client.from !== 'function') {
+        client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    }
+
     let { data, error } = await client.from('admins').select('*').eq('email', u).eq('password', p).maybeSingle();
     document.getElementById("loginBtn").innerText = "Login";
 
