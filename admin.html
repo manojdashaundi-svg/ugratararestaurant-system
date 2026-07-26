@@ -229,18 +229,19 @@
     </div>
   </div>
 
-  <div style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
+<div style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
     <h3 style="margin-bottom: 15px; color: #333;">💰 Expense & Profit Tracker</h3>
     
-    <!-- खर्च थप्ने इनपुट बक्सहरू र '+ Add Expense' बटन -->
-    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px;">
+    <!-- खर्च थप्ने इनपुट बक्सहरू (मिति सहित) र '+ Add Expense' बटन -->
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center;">
+        <input type="date" id="expenseDateInput" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
         <input type="text" id="expenseCategory" placeholder="Category (e.g. Rent, Salary)" style="padding: 8px; flex: 1; border: 1px solid #ccc; border-radius: 4px;">
         <input type="number" id="expenseAmount" placeholder="Amount (RM)" style="padding: 8px; width: 130px; border: 1px solid #ccc; border-radius: 4px;">
         <input type="text" id="expenseDescription" placeholder="Description" style="padding: 8px; flex: 2; border: 1px solid #ccc; border-radius: 4px;">
         <button onclick="window.addExpense()" style="background: #e91e63; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer;">+ Add Expense</button>
     </div>
 
-    <!-- 📊 Start Date, End Date र Report & Export सेक्सन (माथिको रातो टेबल हटाइएको छ) -->
+    <!-- 📊 Start Date, End Date र Report & Export सेक्सन -->
     <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center; background: #f9f9f9; padding: 12px; border-radius: 6px; flex-wrap: wrap;">
         <span style="font-weight: bold; color: #555;">📊 Report Filter:</span>
         <label style="font-size: 13px; color: #333;">Start Date:</label>
