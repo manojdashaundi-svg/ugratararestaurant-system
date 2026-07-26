@@ -705,7 +705,7 @@
     if(modal) modal.style.display = "none";
   };
 
- window.showAdminPanel = function() {
+window.showAdminPanel = function() {
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("adminContent").style.display = "block";
     window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
@@ -713,7 +713,7 @@
     let roleBadge = document.getElementById("userRoleBadge");
     if(roleBadge) roleBadge.innerText = myRole.toUpperCase();
 
-    // 🔒 म्यानेजरको लागि एडमिन/म्यानेजर अप्सन लुकाउने लजिक
+    // 🔒 सुरक्षित तरिकाले स्टाफ रोलको ड्रपडाउन कन्ट्रोल गर्ने
     let roleSelect = document.getElementById("staffRoleSelect");
     if (roleSelect) {
       if (myRole === "manager") {
@@ -721,6 +721,26 @@
           <option value="ORDER_TAKER">Order Taker</option>
           <option value="DELIVERY">Delivery Boy</option>
         `;
+      } else {
+        roleSelect.innerHTML = `
+          <option value="MANAGER">Hotel Manager</option>
+          <option value="ORDER_TAKER">Order Taker</option>
+          <option value="DELIVERY">Delivery Boy</option>
+          <option value="ADMIN">Full Admin</option>
+        `;
+      }
+    }
+
+    if (myRole === "admin" || myRole === "manager") {
+      let dashBox = document.getElementById("salesDashboardBox");
+      if(dashBox) dashBox.style.display = "flex";
+      let menuBox = document.getElementById("menuManagementBox");
+      if(menuBox) menuBox.style.display = "block";
+      if(typeof window.loadMenuList === 'function') window.loadMenuList();
+    }
+    if(typeof window.loadOrders === 'function') window.loadOrders();
+    if(typeof window.loadStaffList === 'function') window.loadStaffList();
+};
       } else {
         roleSelect.innerHTML = `
           <option value="MANAGER">Hotel Manager</option>
