@@ -229,21 +229,48 @@
     </div>
   </div>
 
-  <div style="margin-top: 20px; overflow-x: auto;">
-  <table style="width: 100%; border-collapse: collapse; background: #fff; border-radius: 8px; overflow: hidden;">
-    <thead>
-      <tr style="background: #e91e63; color: white; text-align: left;">
-        <th style="padding: 10px;">Date</th>
-        <th style="padding: 10px;">Category</th>
-        <th style="padding: 10px;">Amount (RM)</th>
-        <th style="padding: 10px;">Description</th>
-        <th style="padding: 10px;">Action</th>
-      </tr>
-    </thead>
-    <tbody id="expenseTableList">
-      <tr><td colspan="5" style="padding: 15px; text-align: center;">Loading expenses...</td></tr>
-    </tbody>
-  </table>
+  <div style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
+    <h3 style="margin-bottom: 15px; color: #333;">💰 Expense & Profit Tracker</h3>
+    
+    <!-- खर्च थप्ने इनपुट बक्सहरू र '+ Add Expense' बटन -->
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+        <input type="text" id="expenseCategory" placeholder="Category (e.g. Rent, Salary)" style="padding: 8px; flex: 1; border: 1px solid #ccc; border-radius: 4px;">
+        <input type="number" id="expenseAmount" placeholder="Amount (RM)" style="padding: 8px; width: 130px; border: 1px solid #ccc; border-radius: 4px;">
+        <input type="text" id="expenseDescription" placeholder="Description" style="padding: 8px; flex: 2; border: 1px solid #ccc; border-radius: 4px;">
+        <button onclick="window.addExpense()" style="background: #e91e63; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer;">+ Add Expense</button>
+    </div>
+
+    <!-- खर्चहरूको सूची देखाउने टेबल -->
+    <div style="overflow-x: auto; margin-bottom: 15px;">
+        <table style="width: 100%; border-collapse: collapse; background: #fff;">
+            <thead>
+                <tr style="background: #e91e63; color: white; text-align: left;">
+                    <th style="padding: 10px;">Date</th>
+                    <th style="padding: 10px;">Category</th>
+                    <th style="padding: 10px;">Amount (RM)</th>
+                    <th style="padding: 10px;">Description</th>
+                    <th style="padding: 10px;">Action</th>
+                </tr>
+            </thead>
+            <tbody id="expenseTableList">
+                <tr><td colspan="5" style="padding: 15px; text-align: center;">Loading expenses...</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <!-- 📊 Sales Report Generator & Export जस्तै डाटा डाउनलोड गर्ने बटनहरू -->
+    <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center; background: #f9f9f9; padding: 10px; border-radius: 6px;">
+        <span style="font-weight: bold; color: #555;">📊 Report & Export:</span>
+        <button onclick="window.exportExpenseCSV()" style="background: #4CAF50; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px;">📥 Export to CSV</button>
+        <button onclick="window.print()" style="background: #2196F3; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px;">🖨️ Print / Save PDF</button>
+    </div>
+
+    <!-- Total Summary (जम्मा Revenue, Total Expense, Net Profit) देखाउने सेक्सन -->
+    <div style="border-top: 2px solid #eee; padding-top: 15px; font-size: 16px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="color: #1976D2; font-weight: bold;">जम्मा Total Revenue: <span id="summaryRevenue">RM 147.00</span></div>
+        <div style="color: #D32F2F; font-weight: bold;">जम्मा Total Expense: <span id="summaryExpense">RM 0.00</span></div>
+        <div style="color: #388E3C; font-weight: bold; font-size: 18px;">जम्मा Net Profit: <span id="summaryNetProfit">RM 0.00</span></div>
+    </div>
 </div>
 
 <!-- 🎯 KOT र Bill प्रिन्ट मोडल बक्स -->
