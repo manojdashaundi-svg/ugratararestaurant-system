@@ -4,11 +4,13 @@ window.cart = [];
 window.selectedCategory = "All";
 window.base64SlipData = ""; 
 
-// पेज लोड हुनेबित्तिकै मेनु लोड गर्ने
+// पेज लोड हुनेबित्तिकै मेनु र स्टाफ लिस्ट लोड गर्ने
 document.addEventListener("DOMContentLoaded", function () {
     loadMenu();
+    if (typeof window.loadStaffList === 'function') {
+        window.loadStaffList();
+    }
 });
-
 // Supabase बाट मेनु लोड गर्ने फंक्सन
 async function loadMenu() {
     console.log("Loading menu...");
