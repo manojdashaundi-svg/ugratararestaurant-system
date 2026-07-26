@@ -1083,7 +1083,7 @@
     }
   };
 
-  // 👥 एडमिन प्यानलको लागि स्टाफ लिस्ट लोड गर्ने फंक्सन
+ // 👥 एडमिन प्यानलको लागि स्टाफ लिस्ट लोड गर्ने (सुरक्षासहित)
   window.loadStaffList = async function() {
     let staffTable = document.getElementById("staffTableList");
     if (!staffTable) return;
@@ -1113,18 +1113,33 @@
         let uPass = staff.password || '';
         let uRole = staff.role || 'STAFF';
 
+        // 🔒 सुरक्षाको नियम: यदि लगइन गर्ने मान्छे "manager" हो भने, 'admin' रोल भएको व्यक्तिको विवरण यो लिस्टमा देखाउने छैन!
+        if (window.myRole === 'manager' && uRole.toLowerCase() === 'admin') {
+            return; // एडमिनलाई लुकाउने
+        }
+
+        // 🔑 यदि म्यानेजर हो भने एडमिन बाहेक अरूलाई एडिट/डिलिट गर्न दिने, र एडमिन लगइन भए सबैलाई गर्न दिने
+        let actionButtons = `
+            <button class="editBtn" onclick="window.editStaff(${staff.id}, '${uName}', '${uPass}', '${uRole}')" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
+            <button class="removeBtn" onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">Delete</button>
+        `;
+
+        // यदि म्यानेजरले अर्को म्यानेजर वा आफैलाई हेर्दैछ भने सुरक्षाको लागि कन्ट्रोल थप्न सकिन्छ
+
         html += `
             <tr>
                 <td><b>${uName}</b></td>
                 <td>${uPass}</td>
                 <td><b>${uRole}</b></td>
-                <td>
-                    <button class="editBtn" onclick="window.editStaff(${staff.id}, '${uName}', '${uPass}', '${uRole}')" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
-                    <button class="removeBtn" onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">Delete</button>
-                </td>
+                <td>${actionButtons}</td>
             </tr>
         `;
     });
+    
+    if (html === "") {
+        html = `<tr><td colspan="4" style="padding:10px; color:#666;">No staff members to display.</td></tr>`;
+    }
+
     staffTable.innerHTML = html;
   };
 </script>
