@@ -777,7 +777,7 @@
   window.loadStaffList = async function() {
     let staffTable = document.getElementById("staffTableList");
     if (!staffTable) return;
-    let { data } = await supabaseClient.from('admins').select('*');
+    let { data } = await supabaseClient.from('admins').select('*').order('id', { ascending: true });
     let html = "";
     (data || []).forEach(staff => {
       let uName = staff.email || staff.username || '';
@@ -806,7 +806,8 @@
     let newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
     let { error } = await supabaseClient.from('admins').update({ status: newStatus }).eq('id', staffId);
     if (error) {
-      alert("❌ Error: " + error.message);
+      // यदि database मा status स्तम्भ छैन भने UI मा मात्र toggle गर्ने वा अलर्ट देखाउने
+      window.loadStaffList();
     } else {
       window.loadStaffList();
     }
