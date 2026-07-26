@@ -29,7 +29,7 @@
     .addBtn { background:#e91e63; color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; }
     .editBtn { background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
     .removeBtn { background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
-    .staff-section, .menu-section { background:#fff; padding:20px; border-radius:10px; margin-top:40px; border:1px solid #ddd; display:none; }
+    .staff-section, .menu-section { background:#fff; padding:20px; border-radius:10px; margin-top:40px; border:1px solid #ddd; display:block; }
     .excelBtn { background:#1F7246; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
     .pdfBtn { background:#E01A22; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
     .login-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f5f5f5; display:flex; justify-content:center; align-items:center; z-index:99999; }
@@ -47,7 +47,7 @@
     .print-box { background:#fff; padding:25px; border-radius:12px; width:320px; max-height:85vh; overflow-y:auto; box-shadow:0 5px 20px rgba(0,0,0,0.3); }
     .print-area { font-family: 'Courier New', Courier, monospace; font-size:14px; color:#000; line-height:1.4; }
 
-    .chart-container { background:#fff; padding:15px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin:20px 0; border:1px solid #ddd; width:100%; height: 280px; display:none; }
+    .chart-container { background:#fff; padding:15px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin:20px 0; border:1px solid #ddd; width:100%; height: 280px; display:block; }
     .inStockBtn { background:#4CAF50; color:white; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; display: inline-flex; align-items: center; gap: 5px; }
     .outStockBtn { background:#ff9800; color:white; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
     .menu-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
@@ -70,7 +70,44 @@
   
   <h2>
     🍴 UGRATARA Admin Panel (<span id="userRoleBadge" style="color:#e91e63;">...</span>)
+    <span id="emailAutomationStatusBadge" class="automation-badge" style="display: inline-block;">Supabase: 🟢 Active</span>
   </h2>
+
+  <!-- 📊 ड्यासबोर्ड कार्डहरू -->
+  <div id="salesDashboardBox" style="display: flex; gap: 12px; margin: 20px 0; flex-wrap: wrap;">
+    <div style="flex: 1; min-width: 140px; background: #fff; padding: 15px; border-radius: 10px; border-left: 5px solid #2196F3; text-align: center;">
+      <span style="font-size: 13px; color: #777; font-weight: bold;">Total Orders</span>
+      <h2 id="dashTotalOrders" style="margin: 5px 0 0 0; color: #2196F3; font-size: 24px;">0</h2>
+    </div>
+    <div style="flex: 1; min-width: 140px; background: #fff; padding: 15px; border-radius: 10px; border-left: 5px solid #4CAF50; text-align: center;">
+      <span style="font-size: 13px; color: #777; font-weight: bold;">Total Revenue</span>
+      <h2 id="dashTotalRevenue" style="margin: 5px 0 0 0; color: #4CAF50; font-size: 24px;">RM 0</h2>
+    </div>
+    <div style="flex: 1; min-width: 140px; background: #fff; padding: 15px; border-radius: 10px; border-left: 5px solid #FF9800; text-align: center;">
+      <span style="font-size: 13px; color: #777; font-weight: bold;">Today's Sales</span>
+      <h2 id="dashTodaySales" style="margin: 5px 0 0 0; color: #FF9800; font-size: 24px;">RM 0</h2>
+    </div>
+    <div style="flex: 1; min-width: 140px; background: #fff; padding: 15px; border-radius: 10px; border-left: 5px solid #9C27B0; text-align: center;">
+      <span style="font-size: 13px; color: #777; font-weight: bold;">This Month Sales</span>
+      <h2 id="dashMonthSales" style="margin: 5px 0 0 0; color: #9C27B0; font-size: 24px;">RM 0</h2>
+    </div>
+    <div style="flex: 1; min-width: 140px; background: #fff; padding: 15px; border-radius: 10px; border-left: 5px solid #E91E63; text-align: center;">
+      <span style="font-size: 13px; color: #777; font-weight: bold;">Avg Order Value</span>
+      <h2 id="dashAvgOrder" style="margin: 5px 0 0 0; color: #E91E63; font-size: 24px;">RM 0</h2>
+    </div>
+  </div>
+
+  <!-- 📈 Monthly Sales Insights & Chart Section -->
+  <div class="chart-container" id="monthlySalesChartDiv" style="width: 100%; height: 320px; background: #fff; padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+    <h3 style="color: #e91e63; margin-bottom: 10px; font-size: 16px;">Monthly Sales Insights & Growth (RM)</h3>
+    <div id="monthlySalesChart" style="width: 100%; height: 250px;"></div>
+  </div>
+  
+  <!-- 📈 Today's Hourly Sales Trend Chart Section -->
+  <div class="chart-container" id="hourlySalesChartDiv" style="width: 100%; height: 320px; background: #fff; padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+    <h3 style="color: #e91e63; margin-bottom: 10px; font-size: 16px;">Today's Hourly Sales Trend (RM)</h3>
+    <div id="hourlySalesChart" style="width: 100%; height: 250px;"></div>
+  </div>
 
   <!-- 📊 Sales Report Generator & Export Section -->
   <div style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
@@ -116,10 +153,89 @@
     </div>
   </div>
 
-  <!-- 💰 Expense & Profit Tracker -->
-  <div style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
+  <!-- 🍔 मेनु म्यानेजमेन्ट सेक्सन -->
+  <div id="menuManagementBox" class="menu-section">
+    <h3>🍔 Menu & Product Management</h3>
+    <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #ddd;">
+      <h4>+ Add New Product</h4>
+      <input id="prodId" type="text" placeholder="Item ID">
+      <input id="prodName" type="text" placeholder="Product Name">
+      <input id="prodPrice" type="number" placeholder="Price">
+      <input id="prodImg" type="text" placeholder="Image URL">
+      <input id="prodDesc" type="text" placeholder="Description">
+      <input id="prodCat" type="text" placeholder="Category">
+      <button id="addProductBtn" class="addBtn" onclick="window.createNewProduct()">+ Add Product</button>
+    </div>
+    <h4>Current Food Items</h4>
+    <div style="overflow-x: auto; width:100%;">
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Food Name</th>
+            <th>Price</th>
+            <th>Image</th>
+            <th>Description</th>
+            <th>Category</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="menuTableList"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- 🎯 इमेज भ्यूअर मोडल -->
+<div id="imageViewerModal" class="image-viewer-modal" onclick="window.closeImageViewer()">
+  <div class="image-viewer-box" onclick="event.stopPropagation()">
+    <img id="viewerTargetImage" src="" alt="Proof View">
+    <button class="close-viewer-btn" onclick="window.closeImageViewer()">Close Window ✕</button>
+  </div>
+</div>
+
+  <!-- 👥 Staff & Access Management Section -->
+  <div id="staffManagementBox" class="staff-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+    <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">👥 Staff & Access Management</h3>
+    
+    <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd;">
+      <h4 style="margin-bottom: 10px; color: #333;">+ Add New Staff</h4>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <input id="staffUsername" type="text" placeholder="Username / Email" style="flex: 1; min-width: 180px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+        <input id="staffPassword" type="password" placeholder="Password" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+        <select id="staffRoleSelect" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
+            <option value="MANAGER">Hotel Manager</option>
+            <option value="ORDER_TAKER">Order Taker</option>
+            <option value="DELIVERY">Delivery Boy</option>
+            <option value="ADMIN">Full Admin</option>
+        </select>
+        <button class="addBtn" onclick="window.createNewStaff()" style="background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add Staff</button>
+      </div>
+    </div>
+
+    <h4 style="margin-bottom: 10px; color: #333;">Current Staff Members</h4>
+    <div style="overflow-x: auto; width: 100%;">
+      <table>
+       <thead>
+      <tr>
+        <th>Username</th>
+        <th>Password</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+        <tbody id="staffTableList">
+          <tr><td colspan="5" style="padding: 15px;">Loading staff members...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+<div style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
     <h3 style="margin-bottom: 15px; color: #333;">💰 Expense & Profit Tracker</h3>
     
+    <!-- खर्च थप्ने इनपुट बक्सहरू -->
     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center;">
         <input type="date" id="expenseDateInput" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
         <input type="text" id="expenseCategory" placeholder="Category (e.g. Rent, Salary)" style="padding: 8px; flex: 1; border: 1px solid #ccc; border-radius: 4px;">
@@ -153,6 +269,16 @@
         <div style="color: #D32F2F; font-weight: bold;">जम्मा Total Expense: <span id="summaryExpense">RM 0.00</span></div>
         <div style="color: #388E3C; font-weight: bold; font-size: 18px;">जम्मा Net Profit: <span id="summaryNetProfit">RM 0.00</span></div>
     </div>
+</div>
+
+<!-- 🎯 KOT र Bill प्रिन्ट मोडल बक्स -->
+<div id="printModalBox" class="print-modal">
+  <div class="print-box">
+    <div id="printableInvoiceArea" class="print-area"></div>
+    <div style="margin-top:20px; text-align:center;">
+       <button class="rcvBtn" onclick="window.executeSystemPrint()" style="padding:10px 20px;">🖨 Print Now</button>
+       <button class="close-viewer-btn" onclick="window.closePrintModal()" style="padding:10px 20px; margin-left:10px;">Close ✕</button>
+    </div>
   </div>
 </div>
 
@@ -165,7 +291,6 @@
   var currentLoggedInUser = "";
   var activeOrdersCache = [];
 
-  // 🔐 मुख्य लगइन फंक्सन (यसले अब लगइन बटनलाई १००% काम गराउनेछ)
   window.handleLogin = async function() {
     var u = document.getElementById("username").value.trim();
     var p = document.getElementById("password").value.trim();
@@ -192,6 +317,277 @@
     window.showAdminPanel();
   };
 
+  window.loadOrders = async function() {
+    try {
+      let { data, error } = await supabaseClient.from('orders').select('*');
+      if (error) {
+        var tableBody = document.getElementById("ordersTable");
+        if(tableBody) tableBody.innerHTML = `<tr><td colspan="9" style="padding:20px; color:red;">Error loading orders: ${error.message}</td></tr>`;
+        return;
+      }
+
+      activeOrdersCache = data || [];
+      window.calculateDashboardStats(activeOrdersCache);
+      
+      activeOrdersCache.sort((a, b) => {
+        let timeA = new Date(a.time).getTime() || 0;
+        let timeB = new Date(b.time).getTime() || 0;
+        return timeB - timeA;
+      });
+
+      var tableBody = document.getElementById("ordersTable");
+      if(!tableBody) return;
+      
+      let html = "";
+      let totalOrdersCount = activeOrdersCache.length;
+
+      if(totalOrdersCount === 0) {
+        html = `<tr><td colspan="9" style="padding:20px;">No Active Orders Found.</td></tr>`;
+      } else {
+        activeOrdersCache.forEach(function(o, index){
+          let rawStatus = o.status ? String(o.status).trim() : "Pending";
+          let status = rawStatus.toLowerCase();
+          
+          let slipHtml = (o.payment_slip && o.payment_slip !== "None" && o.payment_slip !== "") ?  
+            `<img src="${o.payment_slip}" class="proof-thumb" onclick="window.openImageViewer('${o.payment_slip}')">` : `None`;
+          
+          let delivHtml = (o.proof_img && o.proof_img !== "None" && o.proof_img !== "") ?  
+            `<img src="${o.proof_img}" class="proof-thumb" onclick="window.openImageViewer('${o.proof_img}')">` : `None`;
+          
+          let statusSelect = `<select id="status_${o.order_no || o.id}">
+            <option value="Pending" ${status==="pending"?"selected":""}>Pending</option>
+            <option value="Preparing" ${status==="preparing"?"selected":""}>Preparing</option>
+            <option value="Ready" ${status==="ready"?"selected":""}>Ready</option>
+            <option value="Out for Delivery" ${status==="out for delivery"?"selected":""}>Out for Delivery</option>
+            <option value="Delivered" ${status==="delivered"?"selected":""}>Delivered</option>
+          </select> 
+          <button class="updateBtn" onclick="window.manualUpdate('${o.order_no || o.id}')">Go</button>`;
+
+          let actionButtons = "";
+          if (status === "pending" || status === "order received" || status === "") {
+              actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
+          } else if (status === "preparing") {
+              actionButtons = `<button class="rdyBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Ready', 'bill')">🍳 Ready & Bill</button>`;
+          } else if (status === "ready") {
+              actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no || o.id}', 'Out for Delivery')">🚚 Dispatch</button>`;
+          } else if (status === "out for delivery") {
+              actionButtons = `Upload Proof:<br><input type="file" accept="image/*" capture="environment" onchange="window.uploadDeliveryProof('${o.order_no || o.id}', this)" style="width:110px;">`;
+          } else if (status === "delivered") {
+              actionButtons = `<span style="color:green; font-weight:bold;">✅ Delivered</span>`;
+          }
+
+          let displayOrderNo = o.order_no && String(o.order_no).startsWith("ORD") ? o.order_no : ("ORD" + (1001 + (totalOrdersCount - 1 - index)));
+
+          html += `<tr>
+            <td style="font-size:12px; color:#555;">${o.time || '-'}</td>
+            <td><b>${displayOrderNo}</b></td>
+            <td>${o.customer_name || '-'}<br><small style="color:#666;">${o.phone || ''}</small></td>
+            <td style="color:#e91e63; font-weight:bold;">RM ${o.total || '0'}</td>
+            <td>${slipHtml}</td>
+            <td style="font-size:12px; color:#555; font-weight:bold;">${o.delivery_time || 'N/A'}</td>
+            <td>${delivHtml}</td>
+            <td>${statusSelect}</td>
+            <td>${actionButtons}</td>
+          </tr>`;
+        });
+      }
+      tableBody.innerHTML = html;
+    } catch (err) {
+      console.log("Load orders error:", err);
+    }
+  };
+
+  window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
+    await supabaseClient.from('orders').update({ status: nextStatus }).eq('order_no', orderNo);
+    await window.loadOrders();
+
+    var o = activeOrdersCache.find(item => item.order_no == orderNo || item.id == orderNo);
+    if(!o) o = { order_no: orderNo, customer_name: "Valued Customer", time: "Now", total: "0", items: "Food Items" };
+
+    var isKot = (printType === "kot");
+    var invoiceHtml = `
+    <div style="font-family: 'Courier New', Courier, monospace; width: 58mm; max-width: 58mm; padding: 5px; margin: 0 auto; color: #000; background: #fff;">
+      <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 6px; margin-bottom: 6px;">
+        <h2 style="margin: 0; font-size: 16px; font-weight: bold;">UGRATARA RESTAURANT</h2>
+        <p style="margin: 2px 0 0 0; font-size: 10px;">Fresh Food • Fast Delivery</p>
+      </div>
+      ${isKot ? `
+        <div style="text-align: center; margin-bottom: 6px;">
+          <span style="font-size: 12px; font-weight: bold; background: #000; color: #fff; padding: 2px 10px; display: inline-block;">KITCHEN TICKET (KOT)</span>
+        </div>
+        <div style="font-size: 11px; margin-bottom: 6px; border-bottom: 1px dashed #000; padding-bottom: 5px;">
+          <div><b>Order No:</b> ${o.order_no || orderNo}</div>
+          <div><b>Time:</b> ${o.time || 'Now'}</div>
+        </div>
+        <div style="font-size: 12px;">
+          <div style="font-weight: bold; border-bottom: 1px solid #000; margin-bottom: 4px;">ITEMS TO PREPARE:</div>
+          <div style="white-space: pre-wrap; font-weight: bold;">${o.items || 'Food Items'}</div>
+        </div>
+      ` : `
+        <div style="text-align: center; margin-bottom: 6px;">
+          <span style="font-size: 12px; font-weight: bold; border: 1px solid #000; padding: 2px 8px; display: inline-block;">TAX INVOICE / BILL</span>
+        </div>
+        <div style="font-size: 10.5px; margin-bottom: 6px; border-bottom: 1px dashed #000; padding-bottom: 5px;">
+          <div><b>Bill No:</b> ${o.order_no || orderNo}</div>
+          <div><b>Customer:</b> ${o.customer_name || 'Guest'}</div>
+          <div><b>Phone:</b> ${o.phone || '-'}</div>
+          <div><b>Date:</b> ${o.time || 'N/A'}</div>
+        </div>
+        <div style="font-size: 11px; margin-bottom: 6px;">
+          <div style="font-weight: bold; border-bottom: 1px solid #000; margin-bottom: 4px; display: flex; justify-content: space-between;">
+            <span>DESCRIPTION</span><span>TOTAL</span>
+          </div>
+          <div style="white-space: pre-wrap;">${o.items || 'Food Items'}</div>
+        </div>
+        <hr style="border: 0; border-top: 1px dashed #000; margin: 6px 0;">
+        <div style="text-align: right; font-size: 13px; font-weight: bold; margin-bottom: 8px;">
+          Grand Total: RM ${o.total || '0'}
+        </div>
+        <div style="text-align: center; font-size: 10px; border-top: 1px dashed #000; padding-top: 6px;">
+          <p style="margin: 0;">🙏 Thank you for your order!</p>
+        </div>
+      `}
+    </div>`;
+    
+    if(document.getElementById("printableInvoiceArea")) {
+        document.getElementById("printableInvoiceArea").innerHTML = invoiceHtml;
+        document.getElementById("printModalBox").style.display = "flex";
+    }
+  };
+
+  window.executeSystemPrint = function() {
+    var printArea = document.getElementById("printableInvoiceArea");
+    if (!printArea) return;
+    var w = window.open('', '_blank', 'height=650,width=350');
+    w.document.write(`<html><head><title>Print Receipt</title><style>@page{size:58mm auto;margin:0mm;}body{margin:0;padding:0;background:#fff;}</style></head><body>${printArea.innerHTML}</body></html>`);
+    w.document.close();
+    w.focus();
+    setTimeout(() => { w.print(); w.close(); }, 400);
+  };
+
+  window.closePrintModal = function() {
+    var modalBox = document.getElementById("printModalBox");
+    if(modalBox) modalBox.style.display = "none";
+  };
+
+  window.updateOrderStatus = async function(orderNo, newStatus) {
+    let updatePayload = { status: newStatus };
+    if(newStatus === "Delivered") updatePayload.delivery_time = new Date().toLocaleString();
+    await supabaseClient.from('orders').update(updatePayload).eq('order_no', orderNo);
+    window.loadOrders();
+  };
+
+  window.manualUpdate = async function(orderNo) {
+    var s = document.getElementById("status_" + orderNo).value;
+    await window.updateOrderStatus(orderNo, s);
+  };
+
+  window.uploadDeliveryProof = function(orderNo, fileInput) {
+    const file = fileInput.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = async function() {
+        let updatePayload = { status: "Delivered", proof_img: reader.result, delivery_time: new Date().toLocaleString() };
+        await supabaseClient.from('orders').update(updatePayload).eq('order_no', orderNo);
+        alert("✅ Delivery Proof Uploaded Successfully!");
+        window.loadOrders();
+    };
+    reader.readAsDataURL(file);
+  };
+
+  window.calculateDashboardStats = function(orders) {
+    let totalOrders = orders.length;
+    let totalRevenue = 0, todaySales = 0, monthSales = 0;
+    let now = new Date(), currentDay = now.getDate(), currentMonth = now.getMonth(), currentYear = now.getFullYear();
+
+    orders.forEach(o => {
+      let amount = parseFloat(o.total) || 0;
+      totalRevenue += amount;
+      if (o.time) {
+        let orderDate = new Date(o.time);
+        if (isNaN(orderDate.getTime())) orderDate = new Date(o.time.replace(/at/gi, "").trim());
+        if (!isNaN(orderDate.getTime())) {
+          if (orderDate.getDate() === currentDay && orderDate.getMonth() === currentMonth && orderDate.getFullYear() === currentYear) todaySales += amount;
+          if (orderDate.getMonth() === currentMonth && orderDate.getFullYear() === currentYear) monthSales += amount;
+        }
+      }
+    });
+
+    let avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders) : 0;
+    if(document.getElementById("dashTotalOrders")) document.getElementById("dashTotalOrders").innerText = totalOrders;
+    if(document.getElementById("dashTotalRevenue")) document.getElementById("dashTotalRevenue").innerText = "RM " + totalRevenue.toFixed(2);
+    if(document.getElementById("dashTodaySales")) document.getElementById("dashTodaySales").innerText = "RM " + todaySales.toFixed(2);
+    if(document.getElementById("dashMonthSales")) document.getElementById("dashMonthSales").innerText = "RM " + monthSales.toFixed(2);
+    if(document.getElementById("dashAvgOrder")) document.getElementById("dashAvgOrder").innerText = "RM " + avgOrderValue.toFixed(2);
+    
+    window.drawMonthlySalesChart(orders);
+    window.drawHourlySalesChart(orders);
+  };
+
+  window.loadMenuList = async function() {
+    let { data } = await supabaseClient.from('menu_items').select('*').order('id', { ascending: true });
+    var menuList = document.getElementById("menuTableList");
+    if(!menuList) return;
+    let html = "";
+    (data || []).forEach((r, index) => {
+      let stockStatus = r.status || "In Stock";
+      let stockBtnClass = stockStatus === "In Stock" ? "inStockBtn" : "outStockBtn";
+      let stockText = stockStatus === "In Stock" ? "🟢 In Stock" : "🔴 Out of Stock";
+      html += `<tr>
+        <td><b>${index + 1}</b></td>
+        <td><b>${r.name || ''}</b></td>
+        <td style="color:#e91e63; font-weight:bold;">RM ${r.price || 0}</td>
+        <td>${r.image ? `<img src="${r.image}" class="menu-thumb">` : 'No Image'}</td>
+        <td>${r.description || ''}</td>
+        <td><b>${r.category || ''}</b></td>
+        <td>
+          <button class="${stockBtnClass}" onclick="window.toggleStock(${r.id}, '${stockStatus}')">${stockText}</button>
+          <button class="editBtn" onclick="window.editProduct(${r.id}, '${r.name}', ${r.price}, '${r.description || ''}', '${r.category || ''}')">✏️ Edit</button>
+          <button class="removeBtn" onclick="window.deleteProduct(${r.id})">❌ Delete</button>
+        </td>
+      </tr>`;
+    });
+    menuList.innerHTML = html;
+  };
+
+  window.toggleStock = async function(rowId, currentStatus) {
+    let newStatus = currentStatus === "In Stock" ? "Out of Stock" : "In Stock";
+    await supabaseClient.from('menu_items').update({ status: newStatus }).eq('id', rowId);
+    window.loadMenuList();
+  };
+
+  window.createNewProduct = async function() {
+    var name = document.getElementById("prodName").value.trim();
+    var price = parseFloat(document.getElementById("prodPrice").value) || 0;
+    if(!name || !price) { alert("Enter Name and Price!"); return; }
+    await supabaseClient.from('menu_items').insert([{ name: name, price: price, image: document.getElementById("prodImg").value.trim(), description: document.getElementById("prodDesc").value.trim(), category: document.getElementById("prodCat").value.trim(), status: "In Stock" }]);
+    alert("✅ Product Added!");
+    window.loadMenuList();
+  };
+
+  window.editProduct = async function(rowId, oldName, oldPrice, oldDesc, oldCat) {
+    var newName = prompt("Edit Name:", oldName); if(newName === null) return;
+    var newPrice = parseFloat(prompt("Edit Price:", oldPrice)) || oldPrice;
+    await supabaseClient.from('menu_items').update({ name: newName, price: newPrice }).eq('id', rowId);
+    window.loadMenuList();
+  };
+
+  window.deleteProduct = async function(rowId) {
+    if(confirm("Delete item?")) {
+      await supabaseClient.from('menu_items').delete().eq('id', rowId);
+      window.loadMenuList();
+    }
+  };
+
+  window.openImageViewer = function(imgUrl) {
+    document.getElementById("viewerTargetImage").src = imgUrl;
+    document.getElementById("imageViewerModal").style.display = "flex";
+  };
+
+  window.closeImageViewer = function() {
+    document.getElementById("imageViewerModal").style.display = "none";
+  };
+
   window.showAdminPanel = function() {
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("adminContent").style.display = "block";
@@ -200,11 +596,20 @@
     let roleBadge = document.getElementById("userRoleBadge");
     if(roleBadge) roleBadge.innerText = myRole.toUpperCase();
 
-    if(typeof window.loadOrders === 'function') window.loadOrders();
-    if(typeof window.loadExpenseSummary === 'function') window.loadExpenseSummary();
+    if (myRole === "admin" || myRole === "manager") {
+      let dashBox = document.getElementById("salesDashboardBox");
+      if(dashBox) dashBox.style.display = "flex";
+      let menuBox = document.getElementById("menuManagementBox");
+      if(menuBox) menuBox.style.display = "block";
+      window.loadMenuList();
+    }
+    window.loadOrders();
+    window.loadStaffList();
+    window.loadExpenseSummary();
   };
 
   window.logout = function() { sessionStorage.clear(); window.location.reload(); };
+  window.testBellSound = function() { alert("🔔 डिजिटल घण्टी सुचारु भयो!"); };
 
   if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
     myRole = sessionStorage.getItem("USER_ROLE") || "admin";
@@ -214,18 +619,100 @@
     document.getElementById("loginScreen").style.display = "flex";
   }
 
-  window.loadOrders = async function() {
-    try {
-      let { data } = await supabaseClient.from('orders').select('*');
-      activeOrdersCache = data || [];
-      var tableBody = document.getElementById("ordersTable");
-      if(!tableBody) return;
-      let html = "";
-      activeOrdersCache.forEach(o => {
-        html += `<tr><td>${o.time || '-'}</td><td><b>${o.order_no || ''}</b></td><td>${o.customer_name || '-'}</td><td style="color:#e91e63; font-weight:bold;">RM ${o.total || '0'}</td><td>${o.status || ''}</td></tr>`;
-      });
-      tableBody.innerHTML = html || `<tr><td colspan="5">No Orders Found</td></tr>`;
-    } catch (err) { console.log(err); }
+  window.drawMonthlySalesChart = function(orders) {
+    if (typeof google === 'undefined' || !google.visualization) return;
+    let monthlyDataMap = {};
+    orders.forEach(o => {
+      let amount = parseFloat(o.total) || 0;
+      if (o.time) {
+        let orderDate = new Date(o.time);
+        if (isNaN(orderDate.getTime())) orderDate = new Date(o.time.replace(/at/gi, "").trim());
+        if (!isNaN(orderDate.getTime())) {
+          let key = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, '0')}`;
+          monthlyDataMap[key] = (monthlyDataMap[key] || 0) + amount;
+        }
+      }
+    });
+    let chartArray = [['Months (Year-MM)', 'Revenue (RM)']];
+    Object.keys(monthlyDataMap).sort().forEach(k => chartArray.push([k, monthlyDataMap[k]]));
+    if (chartArray.length === 1) chartArray.push(['No Data', 0]);
+    new google.visualization.ColumnChart(document.getElementById('monthlySalesChart')).draw(google.visualization.arrayToDataTable(chartArray), { legend: { position: 'none' }, colors: ['#8E24AA'] });
+  };
+
+  window.drawHourlySalesChart = function(orders) {
+    if (typeof google === 'undefined' || !google.visualization) return;
+    let hourlyMap = {};
+    for (let i = 0; i < 24; i++) hourlyMap[i < 10 ? `0${i}:00` : `${i}:00`] = 0;
+    let now = new Date();
+    orders.forEach(o => {
+      let amount = parseFloat(o.total) || 0;
+      if (o.time) {
+        let orderDate = new Date(o.time);
+        if (isNaN(orderDate.getTime())) orderDate = new Date(o.time.replace(/at/gi, "").trim());
+        if (!isNaN(orderDate.getTime()) && orderDate.getDate() === now.getDate() && orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear()) {
+          let hour = orderDate.getHours();
+          let hourKey = hour < 10 ? `0${hour}:00` : `${hour}:00`;
+          hourlyMap[hourKey] += amount;
+        }
+      }
+    });
+    let chartArray = [['Time (Hours)', 'Revenue (RM)']];
+    Object.keys(hourlyMap).sort().forEach(h => chartArray.push([h, hourlyMap[h]]));
+    new google.visualization.LineChart(document.getElementById('hourlySalesChart')).draw(google.visualization.arrayToDataTable(chartArray), { legend: { position: 'none' }, colors: ['#E91E63'], curveType: 'function' });
+  };
+
+  window.exportExcelReport = function() {
+    let filteredOrders = activeOrdersCache;
+    let csvContent = "data:text/csv;charset=utf-8,Order Date,Order No,Customer Name,Phone,Address,Items,Total (RM),Status\r\n";
+    filteredOrders.forEach(o => {
+      csvContent += `"${o.time || ''}","${o.order_no || ''}","${o.customer_name || ''}","${o.phone || ''}","${(o.address || '').replace(/"/g, '""')}","${(o.items || '').replace(/\n/g, ' ')}","${o.total || '0'}","${o.status || ''}"\r\n`;
+    });
+    let link = document.createElement("a");
+    link.setAttribute("href", encodeURI(csvContent));
+    link.setAttribute("download", `Sales_Report_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  window.printPdfReport = function() {
+    let printWindow = window.open('', '_blank', 'height=700,width=900');
+    let htmlContent = `<html><head><title>Sales Report</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #ddd;padding:8px;text-align:center;}th{background:#e91e63;color:white;}</style></head><body><h2>UGRATARA RESTAURANT</h2><table><thead><tr><th>Date</th><th>Order No</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead><tbody>`;
+    activeOrdersCache.forEach(o => {
+      htmlContent += `<tr><td>${o.time}</td><td><b>${o.order_no}</b></td><td>${o.customer_name}</td><td>RM ${o.total}</td><td>${o.status}</td></tr>`;
+    });
+    htmlContent += `</tbody></table><script>window.onload=function(){window.print();window.close();}<\/script></body></html>`;
+    printWindow.document.write(htmlContent);
+    printWindow.document.close();
+  };
+
+  window.loadStaffList = async function() {
+    let staffTable = document.getElementById("staffTableList");
+    if (!staffTable) return;
+    let { data } = await supabaseClient.from('admins').select('*');
+    let html = "";
+    (data || []).forEach(staff => {
+      let uName = staff.email || staff.username || '';
+      html += `<tr><td><b>${uName}</b></td><td>${staff.password}</td><td><b>${staff.role}</b></td><td>${staff.status || 'Active'}</td><td><button class="removeBtn" onclick="window.deleteStaff(${staff.id})">❌ Delete</button></td></tr>`;
+    });
+    staffTable.innerHTML = html || `<tr><td colspan="5">No staff found.</td></tr>`;
+  };
+
+  window.createNewStaff = async function() {
+    let username = document.getElementById("staffUsername").value.trim();
+    let password = document.getElementById("staffPassword").value.trim();
+    let role = document.getElementById("staffRoleSelect").value;
+    if (!username || !password) { alert("Enter Username and Password!"); return; }
+    await supabaseClient.from('admins').insert([{ email: username, password: password, role: role }]);
+    alert("✅ Staff Added!");
+    window.loadStaffList();
+  };
+
+  window.deleteStaff = async function(staffId) {
+    if (confirm("Delete staff?")) {
+      await supabaseClient.from('admins').delete().eq('id', staffId);
+      window.loadStaffList();
+    }
   };
 
   // ➕ नयाँ खर्च Supabase मा सेभ गर्ने फंक्सन
@@ -276,7 +763,7 @@
     }
   };
 
-  // 📥 Excel (CSV) मा Export गर्ने फंक्सन (मितिको फिल्टर सहित)
+  // 📥 Excel (CSV) मा Export गर्ने सही फंक्सन (मिति फिल्टर सहित)
   window.exportExpenseExcel = async function() {
     let startDate = document.getElementById("expenseStartDate").value;
     let endDate = document.getElementById("expenseEndDate").value;
@@ -313,7 +800,7 @@
     downloadLink.click();
   };
 
-  // 🖨️ केवल Expense Report Statement मात्र प्रिन्ट गर्ने फंक्सन (मितिको फिल्टर सहित)
+  // 🖨️ केवल Expense Report Statement मात्र प्रिन्ट गर्ने सही फंक्सन (मिति फिल्टर सहित)
   window.printExpensePDF = async function() {
     let startDate = document.getElementById("expenseStartDate").value;
     let endDate = document.getElementById("expenseEndDate").value;
