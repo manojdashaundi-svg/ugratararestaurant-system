@@ -204,11 +204,7 @@
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
         <input id="staffUsername" type="text" placeholder="Username / Email" style="flex: 1; min-width: 180px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
         <input id="staffPassword" type="password" placeholder="Password" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-        <select id="staffRoleSelect" style="padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
-          <option value="MANAGER">Hotel Manager</option>
-          <option value="ORDER_TAKER">Order Taker</option>
-          <option value="DELIVERY">Delivery Boy</option>
-          <option value="ADMIN">Full Admin</option>
+        <input id="staffRoleInput" type="text" placeholder="Role (e.g. Driver, Cook, Salesman)" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
         </select>
         <button class="addBtn" onclick="window.createNewStaff()" style="background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add Staff</button>
       </div>
