@@ -301,3 +301,53 @@ function indexOfStatus(st) {
     if (st.includes("Delivered")) return 4;
     return 0;
 }
+
+// 👥 एडमिन प्यानलको लागि स्टाफ लिस्ट लोड गर्ने फंक्सन
+window.loadStaffList = async function() {
+    let staffTable = document.getElementById("staffTableList");
+    if (!staffTable) return;
+
+    let { data, error } = await window.supabaseClient.from('admins').select('*');
+
+    if (error) {
+        staffTable.innerHTML = `<tr><td colspan="4" style="color:red; padding:10px;">Error: ${error.message}</td></tr>`;
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        staffTable.innerHTML = `<tr><td colspan="4" style="padding:10px; color:#666;">No staff found.</td></tr>`;
+        return;
+    }
+
+    let html = "";
+    data.forEach(staff => {
+        let uName = staff.email || staff.full_name || staff.username || '';
+        let uPass = staff.password || '';
+        let uRole = staff.role || 'STAFF';
+
+        html += `
+            <tr>
+                <td><b>${uName}</b></td>
+                <td>${uPass}</td>
+                <td><b>${uRole}</b></td>
+                <td>
+                    <button onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">Delete</button>
+                </td>
+            </tr>
+        `;
+    });
+    staffTable.innerHTML = html;
+};
+
+// ❌ स्टाफ डिलिट गर्ने फंक्सन
+window.deleteStaff = async function(id) {
+    if (!confirm("के तपाईं यो स्टाफलाई हटाउन चाहनुहुन्छ?")) return;
+
+    let { error } = await window.supabaseClient.from('admins').delete().eq('id', id);
+    if (error) {
+        alert("डिलिट गर्न असफल भयो: " + error.message);
+        return;
+    }
+    alert("स्टاف सफलतापूर्वक हटाइयो!");
+    window.loadStaffList();
+};
