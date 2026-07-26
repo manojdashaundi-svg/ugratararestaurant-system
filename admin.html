@@ -968,7 +968,7 @@
     printWindow.document.close();
   };
 
-  // 👥 स्टाफहरूको सूची लोड गर्ने फंक्सन
+  // 👥 स्टाफहरूको सूची लोड गर्ने र रोल अनुसार कन्ट्रोल गर्ने सुरक्षित फंक्सन
   window.loadStaffList = async function() {
     let { data, error } = await supabaseClient
       .from('admins')
@@ -980,16 +980,48 @@
       return;
     }
 
+    let roleSelect = document.getElementById("staffRoleSelect");
+    if (roleSelect) {
+      if (typeof myRole !== 'undefined' && myRole === "manager") {
+        roleSelect.innerHTML = `
+          <option value="ORDER_TAKER">Order Taker</option>
+          <option value="DELIVERY">Delivery Boy</option>
+        `;
+      } else {
+        roleSelect.innerHTML = `
+          <option value="MANAGER">Hotel Manager</option>
+          <option value="ORDER_TAKER">Order Taker</option>
+          <option value="DELIVERY">Delivery Boy</option>
+          <option value="ADMIN">Full Admin</option>
+        `;
+      }
+    }
+
     let staffTable = document.getElementById("staffTableList");
     if (!staffTable) return;
 
     let html = "";
     (data || []).forEach(staff => {
-      let isMainAdmin = (staff.email === "Manoj" || staff.role === "ADMIN" && staff.id === 1);
-      let actionHtml = isMainAdmin ? 
-        `<span style="color:#e91e63; font-weight:bold;">👑 Admin</span>` : 
-        `<button class="editBtn" onclick="window.editStaff(${staff.id}, '${staff.email}', '${staff.password}', '${staff.role}')" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
-         <button class="removeBtn" onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">❌ Delete</button>`;
+      let staffRoleUpper = String(staff.role || "").toUpperCase();
+      let isTargetAdminOrManager = (staffRoleUpper === "ADMIN" || staffRoleUpper === "MANAGER");
+      
+      let actionHtml = "";
+      if (typeof myRole !== 'undefined' && myRole === "manager") {
+        if (isTargetAdminOrManager) {
+          actionHtml = `<span style="color:#888; font-size:12px;">🔒 Restricted</span>`;
+        } else {
+          actionHtml = `
+            <button class="editBtn" onclick="window.editStaff(${staff.id}, '${staff.email}', '${staff.password}', '${staff.role}')" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
+            <button class="removeBtn" onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">❌ Delete</button>
+          `;
+        }
+      } else {
+        let isMainAdmin = (staff.email === "Manoj" || staffRoleUpper === "ADMIN" && staff.id === 1);
+        actionHtml = isMainAdmin ? 
+          `<span style="color:#e91e63; font-weight:bold;">👑 Admin</span>` : 
+          `<button class="editBtn" onclick="window.editStaff(${staff.id}, '${staff.email}', '${staff.password}', '${staff.role}')" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
+           <button class="removeBtn" onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">❌ Delete</button>`;
+      }
 
       html += `
         <tr>
@@ -1003,7 +1035,6 @@
 
     staffTable.innerHTML = html;
   };
-
   // ➕ नयाँ स्टाफ थप्ने फंक्सन
   window.createNewStaff = async function() {
     let username = document.getElementById("staffUsername").value.trim();
