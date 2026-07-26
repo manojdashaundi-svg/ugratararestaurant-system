@@ -537,7 +537,7 @@
         <td><b>${r.category || ''}</b></td>
         <td>
           <button class="${stockBtnClass}" onclick="window.toggleStock(${r.id}, '${stockStatus}')">${stockText}</button>
-          <button class="editBtn" onclick="window.editProduct(${r.id}, '${r.name}', ${r.price}, '${r.description || ''}', '${r.category || ''}')">✏️ Edit</button>
+          <button class="editBtn" onclick="window.editProduct(${r.id}, '${r.name}', ${r.price}, '${r.image || ''}', '${r.description || ''}', '${r.category || ''}')">✏️ Edit</button>
           <button class="removeBtn" onclick="window.deleteProduct(${r.id})">❌ Delete</button>
         </td>
       </tr>`;
@@ -560,11 +560,27 @@
     window.loadMenuList();
   };
 
-  window.editProduct = async function(rowId, oldName, oldPrice, oldDesc, oldCat) {
-    var newName = prompt("Edit Name:", oldName); if(newName === null) return;
-    var newPrice = parseFloat(prompt("Edit Price:", oldPrice)) || oldPrice;
-    await supabaseClient.from('menu_items').update({ name: newName, price: newPrice }).eq('id', rowId);
-    window.loadMenuList();
+  window.editProduct = async function(rowId, oldName, oldPrice, oldImg, oldDesc, oldCat) {
+    var newName = prompt("Edit Food Name:", oldName); if(newName === null) return;
+    var newPrice = parseFloat(prompt("Edit Price (RM):", oldPrice)); if(isNaN(newPrice)) newPrice = oldPrice;
+    var newImg = prompt("Edit Image URL:", oldImg); if(newImg === null) newImg = oldImg;
+    var newDesc = prompt("Edit Description:", oldDesc); if(newDesc === null) newDesc = oldDesc;
+    var newCat = prompt("Edit Category:", oldCat); if(newCat === null) newCat = oldCat;
+
+    let { error } = await supabaseClient.from('menu_items').update({ 
+      name: newName, 
+      price: newPrice, 
+      image: newImg, 
+      description: newDesc, 
+      category: newCat 
+    }).eq('id', rowId);
+
+    if (error) {
+      alert("❌ Error updating product: " + error.message);
+    } else {
+      alert("✅ Product Updated Successfully!");
+      window.loadMenuList();
+    }
   };
 
   window.deleteProduct = async function(rowId) {
@@ -608,7 +624,7 @@
 
   if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
     myRole = sessionStorage.getItem("USER_ROLE") || "admin";
-    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
+    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER"] || "";
     window.showAdminPanel();
   } else {
     document.getElementById("loginScreen").style.display = "flex";
