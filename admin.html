@@ -227,28 +227,30 @@
     
     document.getElementById("loginBtn").innerText = "Verifying...";
     
-    let client = window.supabaseClient || window.supabase;
-    if (!client || typeof client.from !== 'function') {
-        client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    try {
+      let { data, error } = await supabaseClient.from('admins').select('*').eq('email', u).eq('password', p).maybeSingle();
+      
+      document.getElementById("loginBtn").innerText = "Login";
+
+      if (error || !data) {
+        alert("Wrong Email or Password.");
+        return;
+      }
+
+      sessionStorage.setItem("ADMIN_LOGIN", "true");
+      let userRole = data.role ? data.role.toLowerCase() : "admin";
+      sessionStorage.setItem("USER_ROLE", userRole);
+      localStorage.setItem("adminRole", userRole);
+      sessionStorage.setItem("LOGGED_USER", u.toLowerCase());
+      
+      window.myRole = userRole;
+      currentLoggedInUser = u.toLowerCase();
+      window.showAdminPanel();
+
+    } catch (err) {
+      document.getElementById("loginBtn").innerText = "Login";
+      alert("Login Error: " + err.message);
     }
-
-    let { data, error } = await client.from('admins').select('*').eq('email', u).eq('password', p).maybeSingle();
-    document.getElementById("loginBtn").innerText = "Login";
-
-    if (error || !data) {
-      alert("Wrong Email or Password.");
-      return;
-    }
-
-    sessionStorage.setItem("ADMIN_LOGIN", "true");
-    let userRole = data.role ? data.role.toLowerCase() : "admin";
-    sessionStorage.setItem("USER_ROLE", userRole);
-    localStorage.setItem("adminRole", userRole);
-    sessionStorage.setItem("LOGGED_USER", u.toLowerCase());
-    
-    window.myRole = userRole;
-    currentLoggedInUser = u.toLowerCase();
-    window.showAdminPanel();
   };
 
   window.loadOrders = async function() {
