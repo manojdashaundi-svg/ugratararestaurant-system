@@ -996,7 +996,6 @@
     printWindow.document.close();
   };
 
-  // 👥 स्टाफहरूको सूची सुरक्षित र फास्ट लोड गर्ने फंक्सन
   window.loadStaffList = async function() {
     let staffTable = document.getElementById("staffTableList");
     if (!staffTable) return;
@@ -1007,7 +1006,7 @@
 
     if (error) {
       console.log("Error loading staff:", error);
-      staffTable.innerHTML = `<tr><td colspan="4" style="color:red; padding:15px;">Error loading staff: ${error.message}</td></tr>`;
+      staffTable.innerHTML = `<tr><td colspan="4" style="color:red; padding:15px;">Error: ${error.message}</td></tr>`;
       return;
     }
 
@@ -1018,7 +1017,12 @@
 
     let html = "";
     data.forEach(staff => {
-      let staffRoleUpper = String(staff.role || "").toUpperCase();
+      // Supabase मा भएको नाम (email वा full_name जुन भए पनि चल्ने गरी)
+      let usernameVal = staff.email || staff.full_name || staff.username || '';
+      let passwordVal = staff.password || '';
+      let roleVal = staff.role || 'STAFF';
+
+      let staffRoleUpper = String(roleVal).toUpperCase();
       let isTargetAdminOrManager = (staffRoleUpper === "ADMIN" || staffRoleUpper === "MANAGER");
       
       let actionHtml = "";
@@ -1027,23 +1031,23 @@
           actionHtml = `<span style="color:#888; font-size:12px;">🔒 Restricted</span>`;
         } else {
           actionHtml = `
-            <button class="editBtn" onclick="window.editStaff(${staff.id}, '${staff.email}', '${staff.password}', '${staff.role}')" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
+            <button class="editBtn" onclick="window.editStaff(${staff.id}, '${usernameVal}', '${passwordVal}', '${roleVal}')" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
             <button class="removeBtn" onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">❌ Delete</button>
           `;
         }
       } else {
-        let isMainAdmin = (staff.email === "Manoj" || staffRoleUpper === "ADMIN" && staff.id === 1);
+        let isMainAdmin = (usernameVal === "Manoj" || staffRoleUpper === "ADMIN" && staff.id === 1);
         actionHtml = isMainAdmin ? 
           `<span style="color:#e91e63; font-weight:bold;">👑 Admin</span>` : 
-          `<button class="editBtn" onclick="window.editStaff(${staff.id}, '${staff.email}', '${staff.password}', '${staff.role}')" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
+          `<button class="editBtn" onclick="window.editStaff(${staff.id}, '${usernameVal}', '${passwordVal}', '${roleVal}')" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
            <button class="removeBtn" onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">❌ Delete</button>`;
       }
 
       html += `
         <tr>
-          <td><b>${staff.email || ''}</b></td>
-          <td>${staff.password || ''}</td>
-          <td><b>${staff.role || 'STAFF'}</b></td>
+          <td><b>${usernameVal}</b></td>
+          <td>${passwordVal}</td>
+          <td><b>${roleVal}</b></td>
           <td>${actionHtml}</td>
         </tr>
       `;
@@ -1051,6 +1055,7 @@
 
     staffTable.innerHTML = html;
   };
+  
   // ➕ नयाँ स्टाफ थप्ने फंक्सन
   window.createNewStaff = async function() {
     let username = document.getElementById("staffUsername").value.trim();
