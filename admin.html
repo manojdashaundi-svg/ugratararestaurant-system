@@ -232,7 +232,7 @@
 <div style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
     <h3 style="margin-bottom: 15px; color: #333;">💰 Expense & Profit Tracker</h3>
     
-    <!-- खर्च थप्ने इनपुट बक्सहरू (मिति सहित) र '+ Add Expense' बटन -->
+    <!-- खर्च थप्ने इनपुट बक्सहरू -->
     <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center;">
         <input type="date" id="expenseDateInput" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
         <input type="text" id="expenseCategory" placeholder="Category (e.g. Rent, Salary)" style="padding: 8px; flex: 1; border: 1px solid #ccc; border-radius: 4px;">
@@ -241,19 +241,23 @@
         <button onclick="window.addExpense()" style="background: #e91e63; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer;">+ Add Expense</button>
     </div>
 
-    <!-- 📊 Start Date, End Date र Report & Export सेक्सन -->
-    <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center; background: #f9f9f9; padding: 12px; border-radius: 6px; flex-wrap: wrap;">
-        <span style="font-weight: bold; color: #555;">📊 Report Filter:</span>
-        <label style="font-size: 13px; color: #333;">Start Date:</label>
-        <input type="date" id="reportStartDate" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px;">
-        
-        <label style="font-size: 13px; color: #333;">End Date:</label>
-        <input type="date" id="reportEndDate" style="padding: 6px; border: 1px solid #ccc; border-radius: 4px;">
-        
-        <button onclick="window.filterExpenseReport()" style="background: #ff9800; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px; font-weight: bold;">🔍 Filter</button>
-        
-        <button onclick="window.exportExpenseCSV()" style="background: #4CAF50; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px;">📥 Export CSV</button>
-        <button onclick="window.print()" style="background: #2196F3; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px;">🖨️ Print PDF</button>
+    <!-- 📊 Expense Report Generator & Export सेक्सन (Sales Report जस्तै) -->
+    <div style="margin-bottom: 20px;">
+        <h4 style="color: #333; margin-bottom: 10px;">📊 Expense Report Generator & Export</h4>
+        <div style="display: flex; gap: 15px; align-items: center; background: #f9f9f9; padding: 15px; border-radius: 6px; flex-wrap: wrap;">
+            <div>
+                <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">Start Date:</label>
+                <input type="date" id="expenseStartDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div>
+                <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">End Date:</label>
+                <input type="date" id="expenseEndDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div style="display: flex; gap: 10px; align-items: flex-end; margin-top: 20px;">
+                <button onclick="window.exportExpenseExcel()" style="background: #2e7d32; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📥 Export Excel (.CSV)</button>
+                <button onclick="window.print()" style="background: #d32f2f; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">🖨️ Print / Download PDF</button>
+            </div>
+        </div>
     </div>
 
     <!-- Total Summary (जम्मा Revenue, Total Expense, Net Profit) देखाउने सेक्सन -->
