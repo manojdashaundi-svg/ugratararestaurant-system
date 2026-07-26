@@ -260,27 +260,32 @@
     
     document.getElementById("loginBtn").innerText = "Verifying...";
     
-    let { data } = await supabaseClient.from('admins').select('*').eq('email', u).eq('password', p).single();
+    let client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+    if (!client) {
+        alert("Supabase client not initialized!");
+        document.getElementById("loginBtn").innerText = "Login";
+        return;
+    }
+
+    let { data, error } = await client.from('admins').select('*').eq('email', u).eq('password', p).single();
     document.getElementById("loginBtn").innerText = "Login";
 
-    if (data) {
-      sessionStorage.setItem("ADMIN_LOGIN", "true");
-      
-      // 🟢 डेटाबेसमा भएको सहि रोल (admin, manager, आदि) लिने
-      let userRole = data.role ? data.role.toLowerCase() : "admin";
-      
-      sessionStorage.setItem("USER_ROLE", userRole);
-      localStorage.setItem("adminRole", userRole); // यो थप्नुहोस्
-      sessionStorage.setItem("LOGGED_USER", u.toLowerCase());
-      
-      myRole = userRole;
-      currentLoggedInUser = u.toLowerCase();
-      window.showAdminPanel();
-    } else {
+    if (error || !data) {
       alert("Wrong Email or Password.");
+      return;
     }
-  };
 
+    sessionStorage.setItem("ADMIN_LOGIN", "true");
+    let userRole = data.role ? data.role.toLowerCase() : "admin";
+    sessionStorage.setItem("USER_ROLE", userRole);
+    localStorage.setItem("adminRole", userRole);
+    sessionStorage.setItem("LOGGED_USER", u.toLowerCase());
+    
+    window.myRole = userRole;
+    currentLoggedInUser = u.toLowerCase();
+    window.showAdminPanel();
+  };
+  
   // १. अर्डर लोड गर्ने र सिरियल वाइज क्रम मिलाएर देखाउने सही फंक्सन
  window.loadOrders = async function() {
     let { data, error } = await supabaseClient
