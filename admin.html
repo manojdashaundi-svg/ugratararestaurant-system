@@ -738,62 +738,27 @@ window.showAdminPanel = function() {
       if(menuBox) menuBox.style.display = "block";
       if(typeof window.loadMenuList === 'function') window.loadMenuList();
     }
-    if(typeof window.loadOrders === 'function') window.loadOrders();
-    if(typeof window.loadStaffList === 'function') window.loadStaffList();
-};
-      } else {
-        roleSelect.innerHTML = `
-          <option value="MANAGER">Hotel Manager</option>
-          <option value="ORDER_TAKER">Order Taker</option>
-          <option value="DELIVERY">Delivery Boy</option>
-          <option value="ADMIN">Full Admin</option>
-        `;
-      }
-    }
-
-    if (myRole === "admin" || myRole === "manager") {
-      let dashBox = document.getElementById("salesDashboardBox");
-      if(dashBox) dashBox.style.display = "flex";
-      let menuBox = document.getElementById("menuManagementBox");
-      if(menuBox) menuBox.style.display = "block";
-      window.loadMenuList();
-    }
-    window.loadOrders();
-    window.loadStaffList();
-};
-      } else {
-        roleSelect.innerHTML = `
-          <option value="MANAGER">Hotel Manager</option>
-          <option value="ORDER_TAKER">Order Taker</option>
-          <option value="DELIVERY">Delivery Boy</option>
-          <option value="ADMIN">Full Admin</option>
-        `;
-      }
-    }
-
-    if (myRole === "admin" || myRole === "manager") {
-      let dashBox = document.getElementById("salesDashboardBox");
-      if(dashBox) dashBox.style.display = "flex";
-      let menuBox = document.getElementById("menuManagementBox");
-      if(menuBox) menuBox.style.display = "block";
-      window.loadMenuList();
-    }
 
     if(typeof window.loadOrders === 'function') window.loadOrders();
     if(typeof window.loadStaffList === 'function') window.loadStaffList();
-  };
+};
 
-  window.logout = function() { sessionStorage.clear(); window.location.reload(); };
-  window.testBellSound = function() { alert("🔔 डिजिटल घण्टी सुचारु भयो!"); };
+window.logout = function() { 
+    sessionStorage.clear(); 
+    window.location.reload(); 
+};
 
-  if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
+window.testBellSound = function() { 
+    alert("🔔 डिजिटल घण्टी सुचारु भयो!"); 
+};
+
+if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
     myRole = sessionStorage.getItem("USER_ROLE") || "admin";
     currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
     window.showAdminPanel();
-  } else {
+} else {
     document.getElementById("loginScreen").style.display = "flex";
-  }
-
+}
   // 📊 मासिक बिक्रीको चार्ट (Monthly Sales Insights & Growth) देखाउने फंक्सन
   window.drawMonthlySalesChart = function(orders) {
     if (typeof google === 'undefined' || !google.visualization) return;
