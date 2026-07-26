@@ -310,10 +310,11 @@ window.loadStaffList = async function() {
     let staffTable = document.getElementById("staffTableList");
     if (!staffTable) return;
 
-    // सही Supabase क्लाइन्ट फेला पार्ने लजिक
-    let client = window.supabaseClient || window.supabase;
+    // सबै सम्भावित Supabase भेरिएबल नेमहरू चेक गर्ने लजिक
+    let client = window.supabaseClient || window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+    
     if (!client || typeof client.from !== 'function') {
-        staffTable.innerHTML = `<tr><td colspan="4" style="color:red; padding:10px;">Supabase client not initialized!</td></tr>`;
+        staffTable.innerHTML = `<tr><td colspan="4" style="color:red; padding:10px;">Supabase client not initialized! Please check script tags.</td></tr>`;
         return;
     }
 
@@ -348,7 +349,6 @@ window.loadStaffList = async function() {
     });
     staffTable.innerHTML = html;
 };
-
 // ❌ स्टाफ डिलिट गर्ने फंक्सन
 window.deleteStaff = async function(id) {
     if (!confirm("के तपाईं यो स्टाफलाई हटाउन चाहनुहुन्छ?")) return;
