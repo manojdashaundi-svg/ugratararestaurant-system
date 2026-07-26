@@ -30,7 +30,6 @@
     .editBtn { background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
     .removeBtn { background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
     .staff-section, .menu-section { background:#fff; padding:20px; border-radius:10px; margin-top:40px; border:1px solid #ddd; display:none; }
-    .report-section { background:#fff; padding:20px; border-radius:10px; margin-top:20px; border:1px solid #ddd; display:none; }
     .excelBtn { background:#1F7246; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
     .pdfBtn { background:#E01A22; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
     .login-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f5f5f5; display:flex; justify-content:center; align-items:center; z-index:99999; }
@@ -71,10 +70,9 @@
   
   <h2>
     🍴 UGRATARA Admin Panel (<span id="userRoleBadge" style="color:#e91e63;">...</span>)
-    <span id="emailAutomationStatusBadge" class="automation-badge" style="display: none;">Supabase: 🟢 Active</span>
   </h2>
 
-  <!-- 📊 ड्यासबोर्ड कार्डहरू (५ वटा) -->
+  <!-- 📊 ड्यासबोर्ड कार्डहरू -->
   <div id="salesDashboardBox" style="display: none; gap: 12px; margin: 20px 0; flex-wrap: wrap;">
     <div style="flex: 1; min-width: 140px; background: #fff; padding: 15px; border-radius: 10px; border-left: 5px solid #2196F3; text-align: center;">
       <span style="font-size: 13px; color: #777; font-weight: bold;">Total Orders</span>
@@ -98,20 +96,20 @@
     </div>
   </div>
 
-  <!-- 📈 Monthly Sales Insights & Chart Section -->
-  <div class="chart-container" id="monthlySalesChartDiv" style="display: block; width: 100%; height: 320px; background: #fff; padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <!-- 📈 Monthly Sales Chart -->
+  <div class="chart-container" id="monthlySalesChartDiv" style="display: block; width: 100%; height: 320px; background: #fff; padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd;">
     <h3 style="color: #e91e63; margin-bottom: 10px; font-size: 16px;">Monthly Sales Insights & Growth (RM)</h3>
     <div id="monthlySalesChart" style="width: 100%; height: 250px;"></div>
   </div>
   
-  <!-- 📈 Today's Hourly Sales Trend Chart Section -->
-  <div class="chart-container" id="hourlySalesChartDiv" style="display: block; width: 100%; height: 320px; background: #fff; padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <!-- 📈 Hourly Sales Chart -->
+  <div class="chart-container" id="hourlySalesChartDiv" style="display: block; width: 100%; height: 320px; background: #fff; padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd;">
     <h3 style="color: #e91e63; margin-bottom: 10px; font-size: 16px;">Today's Hourly Sales Trend (RM)</h3>
     <div id="hourlySalesChart" style="width: 100%; height: 250px;"></div>
   </div>
 
-  <!-- 📊 Sales Report Generator & Export Section -->
-  <div style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <!-- 📊 Report Generator -->
+  <div style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd;">
     <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">📊 Sales Report Generator & Export</h3>
     <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
       <div>
@@ -123,13 +121,13 @@
         <input type="date" id="reportEndDate" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px;">
       </div>
       <div style="display: flex; gap: 10px; margin-top: 5px;">
-        <button class="excelBtn" onclick="window.exportExcelReport()" style="background: #1F7246; color: white; border: none; padding: 11px 18px; border-radius: 8px; font-weight: bold; cursor: pointer;">📥 Export Excel (.CSV)</button>
-        <button class="pdfBtn" onclick="window.printPdfReport()" style="background: #E01A22; color: white; border: none; padding: 11px 18px; border-radius: 8px; font-weight: bold; cursor: pointer;">🖨️ Print / Download PDF</button>
+        <button class="excelBtn" onclick="window.exportExcelReport()">📥 Export Excel (.CSV)</button>
+        <button class="pdfBtn" onclick="window.printPdfReport()">🖨️ Print / Download PDF</button>
       </div>
     </div>
   </div>
 
-  <!-- 🛒 मुख्य अर्डर तालिका -->
+  <!-- 🛒 Active Orders -->
   <div id="mainOrdersTableSection">
     <h3>🛒 Active Orders</h3>
     <div style="overflow-x: auto; width:100%;">
@@ -154,7 +152,7 @@
     </div>
   </div>
 
-  <!-- 🍔 मेनु म्यानेजमेन्ट सेक्सन -->
+  <!-- 🍔 Menu Management -->
   <div id="menuManagementBox" class="menu-section">
     <h3>🍔 Menu & Product Management</h3>
     <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #ddd;">
@@ -185,20 +183,10 @@
       </table>
     </div>
   </div>
-</div>
 
-<!-- 🎯 इमेज भ्यूअर मोडल -->
-<div id="imageViewerModal" class="image-viewer-modal" onclick="window.closeImageViewer()">
-  <div class="image-viewer-box" onclick="event.stopPropagation()">
-    <img id="viewerTargetImage" src="" alt="Proof View">
-    <button class="close-viewer-btn" onclick="window.closeImageViewer()">Close Window ✕</button>
-  </div>
-</div>
-
-  <!-- 👥 Staff & Access Management Section -->
-  <div id="staffManagementBox" class="staff-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: block;">
+  <!-- 👥 Staff Management -->
+  <div id="staffManagementBox" class="staff-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; display: block;">
     <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">👥 Staff & Access Management</h3>
-    
     <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd;">
       <h4 style="margin-bottom: 10px; color: #333;">+ Add New Staff</h4>
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
@@ -210,10 +198,9 @@
           <option value="DELIVERY">Delivery Boy</option>
           <option value="ADMIN">Full Admin</option>
         </select>
-        <button class="addBtn" onclick="window.createNewStaff()" style="background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add Staff</button>
+        <button class="addBtn" onclick="window.createNewStaff()">+ Add Staff</button>
       </div>
     </div>
-
     <h4 style="margin-bottom: 10px; color: #333;">Current Staff Members</h4>
     <div style="overflow-x: auto; width: 100%;">
       <table>
@@ -231,8 +218,17 @@
       </table>
     </div>
   </div>
+</div>
 
-<!-- 🎯 KOT र Bill प्रिन्ट मोडल बक्स -->
+<!-- 🎯 Image Viewer Modal -->
+<div id="imageViewerModal" class="image-viewer-modal" onclick="window.closeImageViewer()">
+  <div class="image-viewer-box" onclick="event.stopPropagation()">
+    <img id="viewerTargetImage" src="" alt="Proof View">
+    <button class="close-viewer-btn" onclick="window.closeImageViewer()">Close Window ✕</button>
+  </div>
+</div>
+
+<!-- 🎯 Print Modal -->
 <div id="printModalBox" class="print-modal">
   <div class="print-box">
     <div id="printableInvoiceArea" class="print-area"></div>
@@ -278,8 +274,7 @@
     window.showAdminPanel();
   };
 
-  // १. अर्डर लोड गर्ने र सिरियल वाइज क्रम मिलाएर देखाउने सही फंक्सन
- window.loadOrders = async function() {
+  window.loadOrders = async function() {
     try {
       let { data, error } = await supabaseClient.from('orders').select('*');
       
@@ -353,7 +348,7 @@
       if(tableBody) tableBody.innerHTML = `<tr><td colspan="9" style="padding:20px; color:red;">Error: ${err.message}</td></tr>`;
     }
   };
-  // २. KOT वा Bill प्रिन्ट गर्ने र ५८मिमी प्रिन्टरको लागि सुन्दर डिजाइन बनाउने फंक्सन
+
   window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
     let res = await supabaseClient.from('orders').update({ status: nextStatus }).eq('order_no', orderNo);
     if (res.error) {
@@ -362,21 +357,18 @@
 
     await window.loadOrders();
 
-    var o = activeOrdersCache.find(item => item.order_no == orderNo || item.id == orderNo || item.orderno == orderNo);
+    var o = activeOrdersCache.find(item => item.order_no == orderNo || item.id == orderNo);
     if(!o) {
       o = { order_no: orderNo, customer_name: "Valued Customer", phone: "", time: "Now", total: "0", items: "Food Items" };
     }
 
     var isKot = (printType === "kot");
-    
     var invoiceHtml = `
     <div style="font-family: 'Courier New', Courier, monospace; width: 58mm; max-width: 58mm; padding: 5px; margin: 0 auto; color: #000; background: #fff; box-sizing: border-box;">
-      
       <div style="text-align: center; border-bottom: 2px dashed #000; padding-bottom: 6px; margin-bottom: 6px;">
-        <h2 style="margin: 0; font-size: 16px; font-weight: bold; letter-spacing: 0.5px;">UGRATARA RESTAURANT</h2>
+        <h2 style="margin: 0; font-size: 16px; font-weight: bold;">UGRATARA RESTAURANT</h2>
         <p style="margin: 2px 0 0 0; font-size: 10px;">Fresh Food • Fast Delivery</p>
       </div>
-
       ${isKot ? `
         <div style="text-align: center; margin-bottom: 6px;">
           <span style="font-size: 12px; font-weight: bold; background: #000; color: #fff; padding: 2px 10px; display: inline-block; border-radius: 3px;">KITCHEN TICKET (KOT)</span>
@@ -412,10 +404,8 @@
         </div>
         <div style="text-align: center; font-size: 10px; border-top: 1px dashed #000; padding-top: 6px; margin-top: 5px;">
           <p style="margin: 0;">🙏 Thank you for your order!</p>
-          <p style="margin: 2px 0 0 0;">Please visit again.</p>
         </div>
       `}
-      
     </div>`;
     
     if(document.getElementById("printableInvoiceArea")) {
@@ -424,48 +414,19 @@
     }
   };
 
-  // 🖨️ ५८मिमी प्रिन्टरको पेपर साइज फिक्स गर्ने फंक्सन
   window.executeSystemPrint = function() {
     var printArea = document.getElementById("printableInvoiceArea");
     if (!printArea) return;
-    
     var w = window.open('', '_blank', 'height=650,width=350');
-    w.document.write(`
-      <html>
-        <head>
-          <title>Print Receipt</title>
-          <style>
-            @page {
-              size: 58mm auto;
-              margin: 0mm;
-            }
-            body {
-              margin: 0;
-              padding: 0;
-              background: #fff;
-              -webkit-print-color-adjust: exact;
-            }
-          </style>
-        </head>
-        <body>
-          ${printArea.innerHTML}
-        </body>
-      </html>
-    `);
+    w.document.write(`<html><head><title>Print Receipt</title><style>@page { size: 58mm auto; margin: 0mm; } body { margin: 0; padding: 0; background: #fff; }</style></head><body>${printArea.innerHTML}</body></html>`);
     w.document.close();
     w.focus();
-    
-    setTimeout(() => {
-      w.print();
-      w.close();
-    }, 400);
+    setTimeout(() => { w.print(); w.close(); }, 400);
   };
 
   window.closePrintModal = function() {
     var modalBox = document.getElementById("printModalBox");
-    if(modalBox) {
-      modalBox.style.display = "none";
-    }
+    if(modalBox) modalBox.style.display = "none";
   };
 
   window.updateOrderStatus = async function(orderNo, newStatus) {
@@ -473,7 +434,6 @@
     if(newStatus === "Delivered") {
         updatePayload.delivery_time = new Date().toLocaleString();
     }
-
     let res = await supabaseClient.from('orders').update(updatePayload).eq('order_no', orderNo);
     if (res.error) {
       await supabaseClient.from('orders').update(updatePayload).eq('id', orderNo);
@@ -489,69 +449,39 @@
   window.uploadDeliveryProof = function(orderNo, fileInput) {
     const file = fileInput.files[0];
     if(!file) return;
-
     const reader = new FileReader();
     reader.onload = async function() {
         const base64Img = reader.result;
-        let currentTime = new Date().toLocaleString();
-        
-        let updatePayload = { 
-          status: "Delivered", 
-          proof_img: base64Img, 
-          delivery_time: currentTime 
-        };
-
+        let updatePayload = { status: "Delivered", proof_img: base64Img, delivery_time: new Date().toLocaleString() };
         let res = await supabaseClient.from('orders').update(updatePayload).eq('order_no', orderNo);
         if (res.error) {
-          let res2 = await supabaseClient.from('orders').update(updatePayload).eq('id', orderNo);
-          if (res2.error) {
-            alert("❌ Failed to save proof: " + res2.error.message);
-            return;
-          }
+          await supabaseClient.from('orders').update(updatePayload).eq('id', orderNo);
         }
-
-        alert("✅ Delivery Proof Uploaded & Order Delivered Successfully!");
+        alert("✅ Proof Uploaded & Delivered!");
         await window.loadOrders();
     };
     reader.readAsDataURL(file);
   };
 
-  // 📊 सबै ड्यासबोर्ड तथ्याङ्कहरू गणना गर्ने फंक्सन
   window.calculateDashboardStats = function(orders) {
     let totalOrders = orders.length;
-    let totalRevenue = 0;
+    let totalRevenue = orders.reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0);
     let todaySales = 0;
     let monthSales = 0;
-
     let now = new Date();
-    let currentDay = now.getDate();
-    let currentMonth = now.getMonth();
-    let currentYear = now.getFullYear();
 
     orders.forEach(o => {
       let amount = parseFloat(o.total) || 0;
-      totalRevenue += amount;
-
       if (o.time) {
         let orderDate = new Date(o.time);
         if (isNaN(orderDate.getTime())) {
-          let cleanTime = o.time.replace(/at/gi, "").trim();
-          orderDate = new Date(cleanTime);
+          orderDate = new Date(o.time.replace(/at/gi, "").trim());
         }
-
         if (!isNaN(orderDate.getTime())) {
-          if (
-            orderDate.getDate() === currentDay &&
-            orderDate.getMonth() === currentMonth &&
-            orderDate.getFullYear() === currentYear
-          ) {
+          if (orderDate.getDate() === now.getDate() && orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear()) {
             todaySales += amount;
           }
-          
-          if (
-            orderDate.getMonth() === currentMonth &&
-            orderDate.getFullYear() === currentYear
-          ) {
+          if (orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear()) {
             monthSales += amount;
           }
         }
@@ -560,56 +490,87 @@
 
     let avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders) : 0;
 
-    if(document.getElementById("dashTotalOrders")) 
-      document.getElementById("dashTotalOrders").innerText = totalOrders;
-    
-    if(document.getElementById("dashTotalRevenue")) 
-      document.getElementById("dashTotalRevenue").innerText = "RM " + totalRevenue.toFixed(2);
-    
-    if(document.getElementById("dashTodaySales")) 
-      document.getElementById("dashTodaySales").innerText = "RM " + todaySales.toFixed(2);
-
-    if(document.getElementById("dashMonthSales")) 
-      document.getElementById("dashMonthSales").innerText = "RM " + monthSales.toFixed(2);
-
-    if(document.getElementById("dashAvgOrder")) 
-      document.getElementById("dashAvgOrder").innerText = "RM " + avgOrderValue.toFixed(2);
+    if(document.getElementById("dashTotalOrders")) document.getElementById("dashTotalOrders").innerText = totalOrders;
+    if(document.getElementById("dashTotalRevenue")) document.getElementById("dashTotalRevenue").innerText = "RM " + totalRevenue.toFixed(2);
+    if(document.getElementById("dashTodaySales")) document.getElementById("dashTodaySales").innerText = "RM " + todaySales.toFixed(2);
+    if(document.getElementById("dashMonthSales")) document.getElementById("dashMonthSales").innerText = "RM " + monthSales.toFixed(2);
+    if(document.getElementById("dashAvgOrder")) document.getElementById("dashAvgOrder").innerText = "RM " + avgOrderValue.toFixed(2);
     
     window.drawMonthlySalesChart(orders);
     window.drawHourlySalesChart(orders);
   };
 
+  window.drawMonthlySalesChart = function(orders) {
+    if (typeof google === 'undefined' || !google.visualization) return;
+    let monthlyDataMap = {};
+    orders.forEach(o => {
+      let amount = parseFloat(o.total) || 0;
+      if (o.time) {
+        let orderDate = new Date(o.time);
+        if (isNaN(orderDate.getTime())) {
+          orderDate = new Date(o.time.replace(/at/gi, "").trim());
+        }
+        if (!isNaN(orderDate.getTime())) {
+          let key = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, '0')}`;
+          monthlyDataMap[key] = (monthlyDataMap[key] || 0) + amount;
+        }
+      }
+    });
+    let chartArray = [['Months', 'Revenue (RM)']];
+    Object.keys(monthlyDataMap).sort().forEach(k => chartArray.push([k, monthlyDataMap[k]]));
+    if (chartArray.length === 1) chartArray.push(['No Data', 0]);
+    let data = google.visualization.arrayToDataTable(chartArray);
+    let chart = new google.visualization.ColumnChart(document.getElementById('monthlySalesChart'));
+    chart.draw(data, { legend: { position: 'none' }, colors: ['#8E24AA'] });
+  };
+
+  window.drawHourlySalesChart = function(orders) {
+    if (typeof google === 'undefined' || !google.visualization) return;
+    let hourlyMap = {};
+    for (let i = 0; i < 24; i++) hourlyMap[i < 10 ? `0${i}:00` : `${i}:00`] = 0;
+    let now = new Date();
+    orders.forEach(o => {
+      let amount = parseFloat(o.total) || 0;
+      if (o.time) {
+        let orderDate = new Date(o.time);
+        if (isNaN(orderDate.getTime())) {
+          orderDate = new Date(o.time.replace(/at/gi, "").trim());
+        }
+        if (!isNaN(orderDate.getTime()) && orderDate.getDate() === now.getDate() && orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear()) {
+          let h = orderDate.getHours();
+          let key = h < 10 ? `0${h}:00` : `${h}:00`;
+          hourlyMap[key] += amount;
+        }
+      }
+    });
+    let chartArray = [['Time', 'Revenue (RM)']];
+    Object.keys(hourlyMap).sort().forEach(k => chartArray.push([k, hourlyMap[k]]));
+    let data = google.visualization.arrayToDataTable(chartArray);
+    let chart = new google.visualization.LineChart(document.getElementById('hourlySalesChart'));
+    chart.draw(data, { legend: { position: 'none' }, colors: ['#E91E63'], curveType: 'function' });
+  };
+
   window.loadMenuList = async function() {
-    let { data, error } = await supabaseClient
-      .from('menu_items')
-      .select('*')
-      .order('id', { ascending: true });
-
-    if(error) { console.log("Menu error:", error); return; }
-
+    let { data, error } = await supabaseClient.from('menu_items').select('*').order('id', { ascending: true });
+    if(error) return;
     var menuList = document.getElementById("menuTableList");
     if(!menuList) return;
     let html = "";
-    
     (data || []).forEach((r, index) => {
-      let rowRealId = r.id; 
-      let displaySerial = index + 1; 
-      let imgTag = r.image ? `<img src="${r.image}" class="menu-thumb">` : `No Image`;
       let stockStatus = r.status || "In Stock";
       let stockBtnClass = stockStatus === "In Stock" ? "inStockBtn" : "outStockBtn";
       let stockText = stockStatus === "In Stock" ? "🟢 In Stock" : "🔴 Out of Stock";
-
       html += `<tr>
-        <td><b>${displaySerial}</b></td>
+        <td><b>${index + 1}</b></td>
         <td><b>${r.name || ''}</b></td>
         <td style="color:#e91e63; font-weight:bold;">RM ${r.price || 0}</td>
-        <td>${imgTag}</td>
+        <td>${r.image ? `<img src="${r.image}" class="menu-thumb">` : 'No Image'}</td>
         <td>${r.description || ''}</td>
         <td><b>${r.category || ''}</b></td>
         <td>
-          <button class="${stockBtnClass}" onclick="window.toggleStock(${rowRealId}, '${stockStatus}')">${stockText}</button>
-          <button class="editBtn" onclick="window.editProduct(${rowRealId}, '${r.name}', ${r.price}, '${r.description || ''}', '${r.category || ''}')">✏️ Edit</button>
-          <button class="removeBtn" onclick="window.deleteProduct(${rowRealId})">❌ Delete</button>
+          <button class="${stockBtnClass}" onclick="window.toggleStock(${r.id}, '${stockStatus}')">${stockText}</button>
+          <button class="editBtn" onclick="window.editProduct(${r.id}, '${r.name}', ${r.price}, '${r.description || ''}', '${r.category || ''}')">✏️ Edit</button>
+          <button class="removeBtn" onclick="window.deleteProduct(${r.id})">❌ Delete</button>
         </td>
       </tr>`;
     });
@@ -618,34 +579,17 @@
 
   window.toggleStock = async function(rowId, currentStatus) {
     let newStatus = currentStatus === "In Stock" ? "Out of Stock" : "In Stock";
-    let { error } = await supabaseClient.from('menu_items').update({ status: newStatus }).eq('id', rowId);
-    if(error) { alert("Error: " + error.message); } else { window.loadMenuList(); }
+    await supabaseClient.from('menu_items').update({ status: newStatus }).eq('id', rowId);
+    window.loadMenuList();
   };
 
   window.createNewProduct = async function() {
     var name = document.getElementById("prodName").value.trim();
     var price = parseFloat(document.getElementById("prodPrice").value) || 0;
-    var img = document.getElementById("prodImg").value.trim();
-    var desc = document.getElementById("prodDesc").value.trim();
-    var cat = document.getElementById("prodCat").value.trim();
-
     if(!name || !price) { alert("Enter Name and Price!"); return; }
-
-    let { error } = await supabaseClient.from('menu_items').insert([
-      { name: name, price: price, image: img, description: desc, category: cat, status: "In Stock" }
-    ]);
-
-    if(error) {
-      alert("Error adding product: " + error.message);
-    } else {
-      alert("✅ Product Added & Saved!");
-      document.getElementById("prodName").value = "";
-      document.getElementById("prodPrice").value = "";
-      document.getElementById("prodImg").value = "";
-      document.getElementById("prodDesc").value = "";
-      document.getElementById("prodCat").value = "";
-      window.loadMenuList();
-    }
+    await supabaseClient.from('menu_items').insert([{ name: name, price: price, image: document.getElementById("prodImg").value.trim(), description: document.getElementById("prodDesc").value.trim(), category: document.getElementById("prodCat").value.trim(), status: "In Stock" }]);
+    alert("✅ Product Added!");
+    window.loadMenuList();
   };
 
   window.editProduct = async function(rowId, oldName, oldPrice, oldDesc, oldCat) {
@@ -653,206 +597,103 @@
     var newPrice = parseFloat(prompt("Edit Price:", oldPrice)) || oldPrice;
     var newDesc = prompt("Edit Description:", oldDesc); if(newDesc === null) return;
     var newCat = prompt("Edit Category:", oldCat); if(newCat === null) return;
-
-    let { error } = await supabaseClient.from('menu_items')
-      .update({ name: newName, price: newPrice, description: newDesc, category: newCat })
-      .eq('id', rowId);
-
-    if(error) { alert("Error updating: " + error.message); } else { alert("✅ Updated Successfully!"); window.loadMenuList(); }
+    await supabaseClient.from('menu_items').update({ name: newName, price: newPrice, description: newDesc, category: newCat }).eq('id', rowId);
+    window.loadMenuList();
   };
 
   window.deleteProduct = async function(rowId) {
     if(confirm("Delete this item?")) {
-      let { error } = await supabaseClient.from('menu_items').delete().eq('id', rowId);
-      if(error) { alert("Error deleting: " + error.message); } else { alert("✅ Deleted!"); window.loadMenuList(); }
-    }
-  };
-
-  window.openImageViewer = function(imgUrl) {
-    var modalImg = document.getElementById("viewerTargetImage");
-    var modal = document.getElementById("imageViewerModal");
-    if(modalImg && modal) {
-      modalImg.src = imgUrl;
-      modal.style.display = "flex";
-    }
-  };
-
-  window.closeImageViewer = function() {
-    var modal = document.getElementById("imageViewerModal");
-    if(modal) modal.style.display = "none";
-  };
-
-  window.showAdminPanel = function() {
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("adminContent").style.display = "block";
-    document.getElementById("userRoleBadge").innerText = myRole.toUpperCase();
-    
-    if (myRole === "admin" || myRole === "manager") {
-      document.getElementById("salesDashboardBox").style.display = "flex";
-      document.getElementById("menuManagementBox").style.display = "block";
+      await supabaseClient.from('menu_items').delete().eq('id', rowId);
       window.loadMenuList();
     }
-    window.loadOrders();
-    window.loadStaffList();
   };
 
-  window.logout = function() { sessionStorage.clear(); window.location.reload(); };
-  window.testBellSound = function() { alert("🔔 डिजिटल घण्टी सुचारु भयो!"); };
+  window.loadStaffList = async function() {
+    let staffTable = document.getElementById("staffTableList");
+    if (!staffTable) return;
 
-  if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
-    myRole = sessionStorage.getItem("USER_ROLE") || "admin";
-    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
-    window.showAdminPanel();
-  } else {
-    document.getElementById("loginScreen").style.display = "flex";
-  }
-
-  // 📊 मासिक बिक्रीको चार्ट देखाउने फंक्सन
-  window.drawMonthlySalesChart = function(orders) {
-    if (typeof google === 'undefined' || !google.visualization) return;
-
-    let monthlyDataMap = {};
-
-    orders.forEach(o => {
-      let amount = parseFloat(o.total) || 0;
-      if (o.time) {
-        let orderDate = new Date(o.time);
-        if (isNaN(orderDate.getTime())) {
-          let cleanTime = o.time.replace(/at/gi, "").trim();
-          orderDate = new Date(cleanTime);
-        }
-
-        if (!isNaN(orderDate.getTime())) {
-          let year = orderDate.getFullYear();
-          let month = String(orderDate.getMonth() + 1).padStart(2, '0');
-          let key = `${year}-${month}`;
-
-          if (!monthlyDataMap[key]) {
-            monthlyDataMap[key] = 0;
-          }
-          monthlyDataMap[key] += amount;
-        }
-      }
-    });
-
-    let sortedKeys = Object.keys(monthlyDataMap).sort();
-    let chartArray = [['Months (Year-MM)', 'Revenue (RM)']];
-    sortedKeys.forEach(key => {
-      chartArray.push([key, monthlyDataMap[key]]);
-    });
-
-    if (sortedKeys.length === 0) {
-      chartArray.push(['No Data', 0]);
+    let { data, error } = await supabaseClient.from('admins').select('*');
+    if (error) {
+        staffTable.innerHTML = `<tr><td colspan="4" style="color:red; padding:10px;">Error: ${error.message}</td></tr>`;
+        return;
     }
 
-    let data = google.visualization.arrayToDataTable(chartArray);
-    let options = {
-      legend: { position: 'none' },
-      colors: ['#8E24AA'],
-      hAxis: { title: 'Months (Year-MM)' },
-      vAxis: { title: 'Revenue (RM)', minValue: 0 },
-      animation: { startup: true, duration: 1000, easing: 'out' }
-    };
+    let html = "";
+    (data || []).forEach(staff => {
+        let uName = staff.email || staff.username || '';
+        let uPass = staff.password || '';
+        let uRole = staff.role || 'STAFF';
 
-    let chart = new google.visualization.ColumnChart(document.getElementById('monthlySalesChart'));
-    chart.draw(data, options);
+        if (window.myRole === 'manager' && uRole.toLowerCase() === 'admin') {
+            return;
+        }
+
+        let isMainAdmin = (uName.toLowerCase() === "manoj" || uRole === "ADMIN" && staff.id === 1);
+        let actionHtml = isMainAdmin ? 
+            `<span style="color:#e91e63; font-weight:bold;">👑 Admin</span>` : 
+            `<button class="editBtn" onclick="window.editStaff(${staff.id}, '${uName}', '${uPass}', '${uRole}')">✏️ Edit</button>
+             <button class="removeBtn" onclick="window.deleteStaff(${staff.id})">Delete</button>`;
+
+        html += `
+            <tr>
+                <td><b>${uName}</b></td>
+                <td>${uPass}</td>
+                <td><b>${uRole}</b></td>
+                <td>${actionHtml}</td>
+            </tr>
+        `;
+    });
+    staffTable.innerHTML = html;
   };
 
-  // 📊 आजको प्रतिघण्टा बिक्रीको ट्रेन्ड देखाउने फंक्सन
-  window.drawHourlySalesChart = function(orders) {
-    if (typeof google === 'undefined' || !google.visualization) return;
+  window.createNewStaff = async function() {
+    let username = document.getElementById("staffUsername").value.trim();
+    let password = document.getElementById("staffPassword").value.trim();
+    let role = document.getElementById("staffRoleSelect").value;
+    if (!username || !password) { alert("Enter Username and Password!"); return; }
 
-    let hourlyMap = {};
-    for (let i = 0; i < 24; i++) {
-      let hourKey = i < 10 ? `0${i}:00` : `${i}:00`;
-      hourlyMap[hourKey] = 0;
+    let { error } = await supabaseClient.from('admins').insert([{ email: username, password: password, role: role }]);
+    if (error) { alert("Error: " + error.message); } else { alert("✅ Staff Added!"); window.loadStaffList(); }
+  };
+
+  window.deleteStaff = async function(staffId) {
+    if (confirm("Delete this staff?")) {
+      let { error } = await supabaseClient.from('admins').delete().eq('id', staffId);
+      if (error) { alert("Error: " + error.message); } else { alert("✅ Deleted!"); window.loadStaffList(); }
     }
-
-    let now = new Date();
-    let currentDay = now.getDate();
-    let currentMonth = now.getMonth();
-    let currentYear = now.getFullYear();
-
-    orders.forEach(o => {
-      let amount = parseFloat(o.total) || 0;
-      if (o.time) {
-        let orderDate = new Date(o.time);
-        if (isNaN(orderDate.getTime())) {
-          let cleanTime = o.time.replace(/at/gi, "").trim();
-          orderDate = new Date(cleanTime);
-        }
-
-        if (!isNaN(orderDate.getTime())) {
-          if (
-            orderDate.getDate() === currentDay &&
-            orderDate.getMonth() === currentMonth &&
-            orderDate.getFullYear() === currentYear
-          ) {
-            let hour = orderDate.getHours();
-            let hourKey = hour < 10 ? `0${hour}:00` : `${hour}:00`;
-            hourlyMap[hourKey] += amount;
-          }
-        }
-      }
-    });
-
-    let chartArray = [['Time (Hours)', 'Revenue (RM)']];
-    Object.keys(hourlyMap).sort().forEach(hour => {
-      chartArray.push([hour, hourlyMap[hour]]);
-    });
-
-    let data = google.visualization.arrayToDataTable(chartArray);
-    let options = {
-      legend: { position: 'none' },
-      colors: ['#E91E63'],
-      hAxis: { title: 'Time (Hours)', slantedText: true },
-      vAxis: { title: 'Revenue (RM)', minValue: 0 },
-      curveType: 'function',
-      animation: { startup: true, duration: 1000, easing: 'out' }
-    };
-
-    let chart = new google.visualization.LineChart(document.getElementById('hourlySalesChart'));
-    chart.draw(data, options);
   };
 
-  // 📥 Excel (.CSV) मा रिपोर्ट एक्सपोर्ट गर्ने फंक्सन
+  window.editStaff = async function(staffId, oldEmail, oldPass, oldRole) {
+    let newEmail = prompt("Edit Username / Email:", oldEmail); if (newEmail === null) return;
+    let newPass = prompt("Edit Password:", oldPass); if (newPass === null) return;
+    let newRole = prompt("Edit Role (MANAGER, ORDER_TAKER, DELIVERY, ADMIN):", oldRole); if (newRole === null) return;
+
+    let { error } = await supabaseClient.from('admins')
+      .update({ email: newEmail, password: newPass, role: newRole.toUpperCase() })
+      .eq('id', staffId);
+
+    if (error) { alert("Error: " + error.message); } else { alert("✅ Updated Successfully!"); window.loadStaffList(); }
+  };
+
   window.exportExcelReport = function() {
     let startDate = document.getElementById("reportStartDate").value;
     let endDate = document.getElementById("reportEndDate").value;
-
     let filteredOrders = activeOrdersCache;
     if (startDate && endDate) {
       let start = new Date(startDate);
       let end = new Date(endDate);
       end.setHours(23, 59, 59);
-
       filteredOrders = activeOrdersCache.filter(o => {
         let oDate = new Date(o.time);
         return oDate >= start && oDate <= end;
       });
     }
-
-    if (filteredOrders.length === 0) {
-      alert("⚠️ No orders found for the selected date range!");
-      return;
-    }
-
+    if (filteredOrders.length === 0) { alert("⚠️ No orders found!"); return; }
     let csvContent = "data:text/csv;charset=utf-8,Order Date,Order No,Customer Name,Phone,Address,Items,Total (RM),Status\r\n";
-
     filteredOrders.forEach(o => {
-      let row = [
-        `"${o.time || ''}"`,
-        `"${o.order_no || ''}"`,
-        `"${o.customer_name || ''}"`,
-        `"${o.phone || ''}"`,
-        `"${(o.address || '').replace(/"/g, '""')}"`,
-        `"${(o.items || '').replace(/\n/g, ' ').replace(/"/g, '""')}"`,
-        `"${o.total || '0'}"`,
-        `"${o.status || ''}"`
-      ];
+      let row = [`"${o.time || ''}"`, `"${o.order_no || ''}"`, `"${o.customer_name || ''}"`, `"${o.phone || ''}"`, `"${(o.address || '').replace(/"/g, '""')}"`, `"${(o.items || '').replace(/\n/g, ' ').replace(/"/g, '""')}"`, `"${o.total || '0'}"`, `"${o.status || ''}"`];
       csvContent += row.join(",") + "\r\n";
     });
-
     let encodedUri = encodeURI(csvContent);
     let link = document.createElement("a");
     link.setAttribute("href", encodedUri);
@@ -862,196 +703,69 @@
     document.body.removeChild(link);
   };
 
-  // 🖨️ PDF वा प्रिन्ट रिपोर्ट तयार पार्ने फंक्सन
   window.printPdfReport = function() {
     let startDate = document.getElementById("reportStartDate").value;
     let endDate = document.getElementById("reportEndDate").value;
-
     let filteredOrders = activeOrdersCache;
     if (startDate && endDate) {
       let start = new Date(startDate);
       let end = new Date(endDate);
       end.setHours(23, 59, 59);
-
       filteredOrders = activeOrdersCache.filter(o => {
         let oDate = new Date(o.time);
         return oDate >= start && oDate <= end;
       });
     }
-
-    if (filteredOrders.length === 0) {
-      alert("⚠️ No orders found for the selected date range!");
-      return;
-    }
-
+    if (filteredOrders.length === 0) { alert("⚠️ No orders found!"); return; }
     let totalRev = 0;
     filteredOrders.forEach(o => { totalRev += parseFloat(o.total) || 0; });
-
     let printWindow = window.open('', '_blank', 'height=700,width=900');
-    let htmlContent = `
-      <html>
-        <head>
-          <title>Ugratara Sales Report</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
-            h2 { color: #e91e63; text-align: center; margin-bottom: 5px; }
-            p { text-align: center; color: #666; font-size: 14px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th, td { border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 13px; }
-            th { background: #e91e63; color: white; }
-            .summary { margin-top: 20px; font-size: 16px; font-weight: bold; text-align: right; }
-          </style>
-        </head>
-        <body>
-          <h2>🍽 UGRATARA RESTAURANT - SALES REPORT</h2>
-          <p>Report Period: ${startDate || 'All Time'} To ${endDate || 'Present'}</p>
-          <table>
-            <thead>
-              <tr>
-                <th>Date & Time</th>
-                <th>Order No</th>
-                <th>Customer</th>
-                <th>Phone</th>
-                <th>Items</th>
-                <th>Total (RM)</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody>
-    `;
-
+    let htmlContent = `<html><head><title>Sales Report</title><style>body{font-family:Arial,sans-serif;padding:20px;}h2{color:#e91e63;text-align:center;}table{width:100%;border-collapse:collapse;margin-top:20px;}th,td{border:1px solid #ddd;padding:10px;text-align:center;font-size:13px;}th{background:#e91e63;color:white;}.summary{margin-top:20px;font-size:16px;font-weight:bold;text-align:right;}</style></head><body><h2>🍽 UGRATARA RESTAURANT - SALES REPORT</h2><table><thead><tr><th>Date & Time</th><th>Order No</th><th>Customer</th><th>Phone</th><th>Items</th><th>Total (RM)</th><th>Status</th></tr></thead><tbody>`;
     filteredOrders.forEach(o => {
-      htmlContent += `
-        <tr>
-          <td>${o.time || ''}</td>
-          <td><b>${o.order_no || ''}</b></td>
-          <td>${o.customer_name || ''}</td>
-          <td>${o.phone || ''}</td>
-          <td style="text-align: left; white-space: pre-wrap; font-size: 11px;">${o.items || ''}</td>
-          <td><b>RM ${o.total || '0'}</b></td>
-          <td>${o.status || ''}</td>
-        </tr>
-      `;
+      htmlContent += `<tr><td>${o.time || ''}</td><td><b>${o.order_no || ''}</b></td><td>${o.customer_name || ''}</td><td>${o.phone || ''}</td><td style="text-align:left;white-space:pre-wrap;font-size:11px;">${o.items || ''}</td><td><b>RM ${o.total || '0'}</b></td><td>${o.status || ''}</td></tr>`;
     });
-
-    htmlContent += `
-            </tbody>
-          </table>
-          <div class="summary">
-            Total Orders: ${filteredOrders.length} | Grand Revenue: RM ${totalRev.toFixed(2)}
-          </div>
-          <script>
-            window.onload = function() { window.print(); window.close(); }
-          <\/script>
-        </body>
-      </html>
-    `;
-
+    htmlContent += `</tbody></table><div class="summary">Total Orders: ${filteredOrders.length} | Grand Revenue: RM ${totalRev.toFixed(2)}</div><script>window.onload=function(){window.print();window.close();}<\/script></body></html>`;
     printWindow.document.write(htmlContent);
     printWindow.document.close();
   };
 
-  // 👥 स्टाफहरूको सूची लोड गर्ने (सुरक्षासहित: म्यानेजरले एडमिन लुकाउने)
-  window.loadStaffList = async function() {
-    let { data, error } = await supabaseClient
-      .from('admins')
-      .select('*')
-      .order('id', { ascending: true });
+  window.showAdminPanel = function() {
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("adminContent").style.display = "block";
+    window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
+    
+    let roleBadge = document.getElementById("userRoleBadge");
+    if(roleBadge) roleBadge.innerText = myRole.toUpperCase();
 
-    if (error) {
-      console.log("Error loading staff:", error);
-      return;
+    if (myRole === "admin" || myRole === "manager") {
+      let dashBox = document.getElementById("salesDashboardBox");
+      if(dashBox) dashBox.style.display = "flex";
+      let menuBox = document.getElementById("menuManagementBox");
+      if(menuBox) menuBox.style.display = "block";
+      window.loadMenuList();
     }
 
-    let staffTable = document.getElementById("staffTableList");
-    if (!staffTable) return;
-
-    let html = "";
-    (data || []).forEach(staff => {
-      let uRole = staff.role || 'STAFF';
-
-      // 🔒 सुरक्षा: यदि लगइन गर्ने व्यक्ति 'manager' हो भने, 'admin' रोल भएकोलाई लुकाउने
-      if (window.myRole === 'manager' && uRole.toLowerCase() === 'admin') {
-          return;
-      }
-
-      let isMainAdmin = (staff.email === "Manoj" || uRole === "ADMIN" && staff.id === 1);
-      let actionHtml = isMainAdmin ? 
-        `<span style="color:#e91e63; font-weight:bold;">👑 Admin</span>` : 
-        `<button class="editBtn" onclick="window.editStaff(${staff.id}, '${staff.email}', '${staff.password}', '${uRole}')" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
-         <button class="removeBtn" onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">❌ Delete</button>`;
-
-      html += `
-        <tr>
-          <td><b>${staff.email || ''}</b></td>
-          <td>${staff.password || ''}</td>
-          <td><b>${uRole}</b></td>
-          <td>${actionHtml}</td>
-        </tr>
-      `;
-    });
-
-    staffTable.innerHTML = html;
+    if(typeof window.loadOrders === 'function') window.loadOrders();
+    if(typeof window.loadStaffList === 'function') window.loadStaffList();
   };
 
-  // ➕ नयाँ स्टाफ थप्ने फंक्सन
-  window.createNewStaff = async function() {
-    let username = document.getElementById("staffUsername").value.trim();
-    let password = document.getElementById("staffPassword").value.trim();
-    let role = document.getElementById("staffRoleSelect").value;
+  window.logout = function() { sessionStorage.clear(); window.location.reload(); };
+  window.testBellSound = function() { alert("🔔 डिजिटल घण्टी सुचारु भयो!"); };
 
-    if (!username || !password) {
-      alert("⚠️ Please enter both Username and Password!");
-      return;
-    }
-
-    let { error } = await supabaseClient.from('admins').insert([
-      { email: username, password: password, role: role }
-    ]);
-
-    if (error) {
-      alert("❌ Error adding staff: " + error.message);
-    } else {
-      alert("✅ Staff Added Successfully!");
-      document.getElementById("staffUsername").value = "";
-      document.getElementById("staffPassword").value = "";
-      window.loadStaffList();
-    }
+  window.openImageViewer = function(url) {
+    document.getElementById("viewerTargetImage").src = url;
+    document.getElementById("imageViewerModal").style.display = "flex";
+  };
+  window.closeImageViewer = function() {
+    document.getElementById("imageViewerModal").style.display = "none";
   };
 
-  // ❌ स्टाफ मेटाउने फंक्सन
-  window.deleteStaff = async function(staffId) {
-    if (confirm("Are you sure you want to delete this staff member?")) {
-      let { error } = await supabaseClient.from('admins').delete().eq('id', staffId);
-      if (error) {
-        alert("❌ Error deleting staff: " + error.message);
-      } else {
-        alert("✅ Staff Deleted Successfully!");
-        window.loadStaffList();
-      }
-    }
-  };
-
-  // ✏️ स्टाफको विवरण एडिट गर्ने फंक्सन
-  window.editStaff = async function(staffId, oldEmail, oldPass, oldRole) {
-    let newEmail = prompt("Edit Username / Email:", oldEmail);
-    if (newEmail === null) return;
-    let newPass = prompt("Edit Password:", oldPass);
-    if (newPass === null) return;
-    let newRole = prompt("Edit Role (MANAGER, ORDER_TAKER, DELIVERY, ADMIN):", oldRole);
-    if (newRole === null) return;
-
-    let { error } = await supabaseClient.from('admins')
-      .update({ email: newEmail, password: newPass, role: newRole.toUpperCase() })
-      .eq('id', staffId);
-
-    if (error) {
-      alert("❌ Error updating staff: " + error.message);
-    } else {
-      alert("✅ Staff Updated Successfully!");
-      window.loadStaffList();
-    }
-  };
+  if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
+    myRole = sessionStorage.getItem("USER_ROLE") || "admin";
+    window.showAdminPanel();
+  } else {
+    document.getElementById("loginScreen").style.display = "flex";
+  }
 </script>
 </body>
 </html>
