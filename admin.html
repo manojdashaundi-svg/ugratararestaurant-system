@@ -4,7 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>UGRATARA Admin Panel - Supabase Powered</title>
+  <!-- Google Charts Loader -->
   <script src="https://www.gstatic.com/charts/loader.js"></script>
+  <!-- Supabase JS Client Library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     try {
@@ -16,7 +18,6 @@
     h2{ color:#e91e63; }
     .logout{ position:fixed; top:15px; right:15px; background:#f44336; color:#fff; border:none; padding:10px 18px; border-radius:8px; cursor:pointer; font-weight: bold; z-index: 1000; }
     .bell-btn { position:fixed; top:12px; right:125px; background:#fff; border:2px solid #e91e63; font-size:22px; padding:6px 10px; border-radius:50%; cursor:pointer; z-index: 1000; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
-    .automation-badge { display: inline-block; background: #fff; border: 1px solid #4CAF50; color: #4CAF50; font-size: 12px; font-weight: bold; padding: 4px 10px; border-radius: 20px; margin-left: 12px; vertical-align: middle; }
     table { width:100%; border-collapse:collapse; background:#fff; margin-top:20px; box-shadow:0 2px 5px rgba(0,0,0,0.05); }
     th{ background:#e91e63; color:#fff; padding:12px; font-size:14px; }
     td{ padding:10px; border:1px solid #ddd; text-align:center; font-size:14px; }
@@ -65,7 +66,8 @@
     🍴 UGRATARA Admin Panel (<span id="userRoleBadge" style="color:#e91e63;">...</span>)
   </h2>
 
-  <div id="salesDashboardBox" style="display: none; gap: 12px; margin: 20px 0; flex-wrap: wrap;">
+  <!-- 📊 ड्यासबोर्ड कार्डहरू -->
+  <div id="salesDashboardBox" style="display: flex; gap: 12px; margin: 20px 0; flex-wrap: wrap;">
     <div style="flex: 1; min-width: 140px; background: #fff; padding: 15px; border-radius: 10px; border-left: 5px solid #2196F3; text-align: center;">
       <span style="font-size: 13px; color: #777; font-weight: bold;">Total Orders</span>
       <h2 id="dashTotalOrders" style="margin: 5px 0 0 0; color: #2196F3; font-size: 24px;">0</h2>
@@ -122,7 +124,8 @@
     </div>
   </div>
 
-  <div id="menuManagementBox" class="menu-section">
+  <!-- 🍔 मेनु म्यानेजमेन्ट सेक्सन -->
+  <div id="menuManagementBox" class="menu-section" style="display: block;">
     <h3>🍔 Menu & Product Management</h3>
     <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #ddd;">
       <h4>+ Add New Product</h4>
@@ -161,6 +164,7 @@
   </div>
 </div>
 
+<!-- 👥 स्टाफ म्यानेजमेन्ट सेक्सन -->
 <div id="staffManagementBox" class="staff-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; display: block;">
   <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">👥 Staff & Access Management</h3>
   
@@ -245,9 +249,48 @@
 
   window.loadOrders = async function() {
     let { data, error } = await supabaseClient.from('orders').select('*');
-    if (error) return;
+    if (error) {
+      console.log("Error loading orders: ", error);
+      return;
+    }
     activeOrdersCache = data || [];
     window.calculateDashboardStats(activeOrdersCache);
+    
+    var tableBody = document.getElementById("ordersTable");
+    if(!tableBody) return;
+    
+    let html = "";
+    if(activeOrdersCache.length === 0) {
+      html = `<tr><td colspan="9" style="padding:20px;">No Active Orders Found.</td></tr>`;
+    } else {
+      activeOrdersCache.forEach(function(o){
+        let status = o.status ? String(o.status).toLowerCase() : "pending";
+        let slipHtml = o.payment_slip ? `<img src="${o.payment_slip}" class="proof-thumb" onclick="window.openImageViewer('${o.payment_slip}')">` : `None`;
+        let delivHtml = o.proof_img ? `<img src="${o.proof_img}" class="proof-thumb" onclick="window.openImageViewer('${o.proof_img}')">` : `None`;
+        
+        let statusSelect = `<select id="status_${o.order_no || o.id}">
+          <option value="Pending" ${status==="pending"?"selected":""}>Pending</option>
+          <option value="Preparing" ${status==="preparing"?"selected":""}>Preparing</option>
+          <option value="Ready" ${status==="ready"?"selected":""}>Ready</option>
+          <option value="Out for Delivery" ${status==="out for delivery"?"selected":""}>Out for Delivery</option>
+          <option value="Delivered" ${status==="delivered"?"selected":""}>Delivered</option>
+        </select> 
+        <button class="updateBtn" onclick="window.manualUpdate('${o.order_no || o.id}')">Go</button>`;
+
+        html += `<tr>
+          <td>${o.time || '-'}</td>
+          <td><b>${o.order_no || o.id}</b></td>
+          <td>${o.customer_name || '-'}<br><small>${o.phone || ''}</small></td>
+          <td style="color:#e91e63; font-weight:bold;">RM ${o.total || '0'}</td>
+          <td>${slipHtml}</td>
+          <td>${o.delivery_time || 'N/A'}</td>
+          <td>${delivHtml}</td>
+          <td>${statusSelect}</td>
+          <td><button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Preparing', 'kot')">KOT/Bill</button></td>
+        </tr>`;
+      });
+    }
+    tableBody.innerHTML = html;
   };
 
   window.calculateDashboardStats = function(orders) {
@@ -255,8 +298,114 @@
     let totalRevenue = orders.reduce((sum, o) => sum + (parseFloat(o.total) || 0), 0);
     if(document.getElementById("dashTotalOrders")) document.getElementById("dashTotalOrders").innerText = totalOrders;
     if(document.getElementById("dashTotalRevenue")) document.getElementById("dashTotalRevenue").innerText = "RM " + totalRevenue.toFixed(2);
+    
+    window.drawMonthlySalesChart(orders);
+    window.drawHourlySalesChart(orders);
   };
 
+  window.drawMonthlySalesChart = function(orders) {
+    if (typeof google === 'undefined' || !google.visualization) return;
+    let monthlyDataMap = {};
+    orders.forEach(o => {
+      let amount = parseFloat(o.total) || 0;
+      if (o.time) {
+        let orderDate = new Date(o.time);
+        if (!isNaN(orderDate.getTime())) {
+          let key = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, '0')}`;
+          monthlyDataMap[key] = (monthlyDataMap[key] || 0) + amount;
+        }
+      }
+    });
+    let chartArray = [['Months', 'Revenue (RM)']];
+    Object.keys(monthlyDataMap).sort().forEach(k => chartArray.push([k, monthlyDataMap[k]]));
+    if (chartArray.length === 1) chartArray.push(['No Data', 0]);
+    let data = google.visualization.arrayToDataTable(chartArray);
+    let chart = new google.visualization.ColumnChart(document.getElementById('monthlySalesChart'));
+    chart.draw(data, { legend: { position: 'none' }, colors: ['#8E24AA'] });
+  };
+
+  window.drawHourlySalesChart = function(orders) {
+    if (typeof google === 'undefined' || !google.visualization) return;
+    let hourlyMap = {};
+    for (let i = 0; i < 24; i++) hourlyMap[i < 10 ? `0${i}:00` : `${i}:00`] = 0;
+    let now = new Date();
+    orders.forEach(o => {
+      let amount = parseFloat(o.total) || 0;
+      if (o.time) {
+        let orderDate = new Date(o.time);
+        if (!isNaN(orderDate.getTime()) && orderDate.getDate() === now.getDate() && orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear()) {
+          let h = orderDate.getHours();
+          let key = h < 10 ? `0${h}:00` : `${h}:00`;
+          hourlyMap[key] += amount;
+        }
+      }
+    });
+    let chartArray = [['Time', 'Revenue (RM)']];
+    Object.keys(hourlyMap).sort().forEach(k => chartArray.push([k, hourlyMap[k]]));
+    let data = google.visualization.arrayToDataTable(chartArray);
+    let chart = new google.visualization.LineChart(document.getElementById('hourlySalesChart'));
+    chart.draw(data, { legend: { position: 'none' }, colors: ['#E91E63'], curveType: 'function' });
+  };
+
+  window.loadMenuList = async function() {
+    let { data, error } = await supabaseClient.from('menu_items').select('*').order('id', { ascending: true });
+    if(error) return;
+    var menuList = document.getElementById("menuTableList");
+    if(!menuList) return;
+    let html = "";
+    (data || []).forEach((r, index) => {
+      let stockStatus = r.status || "In Stock";
+      let stockBtnClass = stockStatus === "In Stock" ? "inStockBtn" : "outStockBtn";
+      let stockText = stockStatus === "In Stock" ? "🟢 In Stock" : "🔴 Out of Stock";
+      html += `<tr>
+        <td><b>${index + 1}</b></td>
+        <td><b>${r.name || ''}</b></td>
+        <td style="color:#e91e63; font-weight:bold;">RM ${r.price || 0}</td>
+        <td>${r.image ? `<img src="${r.image}" class="menu-thumb">` : 'No Image'}</td>
+        <td>${r.description || ''}</td>
+        <td><b>${r.category || ''}</b></td>
+        <td>
+          <button class="${stockBtnClass}" onclick="window.toggleStock(${r.id}, '${stockStatus}')">${stockText}</button>
+          <button class="editBtn" onclick="window.editProduct(${r.id}, '${r.name}', ${r.price}, '${r.description || ''}', '${r.category || ''}')">✏️ Edit</button>
+          <button class="removeBtn" onclick="window.deleteProduct(${r.id})">❌ Delete</button>
+        </td>
+      </tr>`;
+    });
+    menuList.innerHTML = html;
+  };
+
+  window.toggleStock = async function(rowId, currentStatus) {
+    let newStatus = currentStatus === "In Stock" ? "Out of Stock" : "In Stock";
+    await supabaseClient.from('menu_items').update({ status: newStatus }).eq('id', rowId);
+    window.loadMenuList();
+  };
+
+  window.createNewProduct = async function() {
+    var name = document.getElementById("prodName").value.trim();
+    var price = parseFloat(document.getElementById("prodPrice").value) || 0;
+    if(!name || !price) { alert("Enter Name and Price!"); return; }
+    await supabaseClient.from('menu_items').insert([{ name: name, price: price, image: document.getElementById("prodImg").value.trim(), description: document.getElementById("prodDesc").value.trim(), category: document.getElementById("prodCat").value.trim(), status: "In Stock" }]);
+    alert("✅ Product Added!");
+    window.loadMenuList();
+  };
+
+  window.editProduct = async function(rowId, oldName, oldPrice, oldDesc, oldCat) {
+    var newName = prompt("Edit Name:", oldName); if(newName === null) return;
+    var newPrice = parseFloat(prompt("Edit Price:", oldPrice)) || oldPrice;
+    var newDesc = prompt("Edit Description:", oldDesc); if(newDesc === null) return;
+    var newCat = prompt("Edit Category:", oldCat); if(newCat === null) return;
+    await supabaseClient.from('menu_items').update({ name: newName, price: newPrice, description: newDesc, category: newCat }).eq('id', rowId);
+    window.loadMenuList();
+  };
+
+  window.deleteProduct = async function(rowId) {
+    if(confirm("Delete this item?")) {
+      await supabaseClient.from('menu_items').delete().eq('id', rowId);
+      window.loadMenuList();
+    }
+  };
+
+  // 👥 स्टाफ लिस्ट लोड गर्ने (सुरक्षासहित: म्यानेजरले एडमिन देख्दैन)
   window.loadStaffList = async function() {
     let staffTable = document.getElementById("staffTableList");
     if (!staffTable) return;
@@ -273,7 +422,7 @@
         let uPass = staff.password || '';
         let uRole = staff.role || 'STAFF';
 
-        // 🔒 सुरक्षा: यदि म्यानेजर हो भने एडमिनको विवरण लुकाउने
+        // 🔒 सुरक्षा: यदि लगइन गर्ने व्यक्ति "manager" हो भने, 'admin' रोल भएकोलाई लुकाउने
         if (window.myRole === 'manager' && uRole.toLowerCase() === 'admin') {
             return;
         }
@@ -332,9 +481,19 @@
 
     if(typeof window.loadOrders === 'function') window.loadOrders();
     if(typeof window.loadStaffList === 'function') window.loadStaffList();
+    if(typeof window.loadMenuList === 'function') window.loadMenuList();
   };
 
   window.logout = function() { sessionStorage.clear(); window.location.reload(); };
+  window.testBellSound = function() { alert("🔔 डिजिटल घण्टी सुचारु भयो!"); };
+
+  window.openImageViewer = function(url) {
+    document.getElementById("viewerTargetImage").src = url;
+    document.getElementById("imageViewerModal").style.display = "flex";
+  };
+  window.closeImageViewer = function() {
+    document.getElementById("imageViewerModal").style.display = "none";
+  };
 
   if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
     myRole = sessionStorage.getItem("USER_ROLE") || "admin";
