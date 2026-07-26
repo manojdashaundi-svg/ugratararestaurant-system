@@ -670,14 +670,91 @@
     document.body.removeChild(link);
   };
 
+  // 🖨️ Sales Report लाई Expense Report जस्तै सुन्दर र व्यवस्थित प्रिन्ट गर्ने फंक्सन
   window.printPdfReport = function() {
-    let printWindow = window.open('', '_blank', 'height=700,width=900');
-    let htmlContent = `<html><head><title>Sales Report</title><style>body{font-family:Arial;padding:20px;}table{width:100%;border-collapse:collapse;}th,td{border:1px solid #ddd;padding:8px;text-align:center;}th{background:#e91e63;color:white;}</style></head><body><h2>UGRATARA RESTAURANT</h2><table><thead><tr><th>Date</th><th>Order No</th><th>Customer</th><th>Total</th><th>Status</th></tr></thead><tbody>`;
-    activeOrdersCache.forEach(o => {
-      htmlContent += `<tr><td>${o.time}</td><td><b>${o.order_no}</b></td><td>${o.customer_name}</td><td>RM ${o.total}</td><td>${o.status}</td></tr>`;
+    let startDate = document.getElementById("reportStartDate").value;
+    let endDate = document.getElementById("reportEndDate").value;
+
+    let filteredOrders = activeOrdersCache;
+    if (startDate && endDate) {
+      let start = new Date(startDate);
+      let end = new Date(endDate);
+      end.setHours(23, 59, 59);
+
+      filteredOrders = activeOrdersCache.filter(o => {
+        let oDate = new Date(o.time);
+        return oDate >= start && oDate <= end;
+      });
+    }
+
+    if (filteredOrders.length === 0) {
+      alert("⚠️ प्रिन्ट गर्न कुनै Sales डेटा भेटिएन!");
+      return;
+    }
+
+    let totalRev = 0;
+    let tableRows = "";
+
+    filteredOrders.forEach((o, index) => {
+      let amt = parseFloat(o.total) || 0;
+      totalRev += amt;
+      tableRows += `
+        <tr>
+          <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${index + 1}</td>
+          <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${o.time || ''}</td>
+          <td style="padding: 8px; border: 1px solid #ddd; text-align: center;"><b>${o.order_no || ''}</b></td>
+          <td style="padding: 8px; border: 1px solid #ddd;">${o.customer_name || ''}</td>
+          <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${o.status || ''}</td>
+          <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #1976D2;"><b>RM ${amt.toFixed(2)}</b></td>
+        </tr>
+      `;
     });
-    htmlContent += `</tbody></table><script>window.onload=function(){window.print();window.close();}<\/script></body></html>`;
-    printWindow.document.write(htmlContent);
+
+    let printWindow = window.open('', '_blank', 'height=700,width=900');
+    printWindow.document.write(`
+      <html>
+      <head>
+          <title>Sales Report Statement</title>
+          <style>
+              body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+              .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e91e63; padding-bottom: 10px; }
+              .header h2 { margin: 0; color: #e91e63; font-size: 24px; }
+              .header p { margin: 5px 0 0 0; color: #666; font-size: 14px; }
+              table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+              th { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; text-align: left; }
+              td { border: 1px solid #ddd; padding: 8px; }
+              .summary-box { margin-top: 20px; text-align: right; font-size: 16px; background: #f0f7ff; padding: 12px; border-radius: 6px; border: 1px solid #cce5ff; }
+          </style>
+      </head>
+      <body>
+          <div class="header">
+              <h2>UGRATARA RESTAURANT</h2>
+              <p>📊 <b>Sales Report Statement</b> (${startDate || 'All Time'} to ${endDate || 'All Time'})</p>
+          </div>
+          <table>
+              <thead>
+                  <tr>
+                      <th style="width: 40px; text-align: center;">S.N.</th>
+                      <th style="text-align: center;">Date & Time</th>
+                      <th style="text-align: center;">Order No</th>
+                      <th>Customer Name</th>
+                      <th style="text-align: center;">Status</th>
+                      <th style="text-align: right;">Total Amount</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  ${tableRows}
+              </tbody>
+          </table>
+          <div class="summary-box">
+              <span style="color: #1976D2; font-weight: bold;">Total Revenue: RM ${totalRev.toFixed(2)}</span>
+          </div>
+          <script>
+              window.onload = function() { window.print(); window.close(); }
+          <\/script>
+      </body>
+      </html>
+    `);
     printWindow.document.close();
   };
 
