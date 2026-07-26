@@ -698,19 +698,45 @@
   window.showAdminPanel = function() {
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("adminContent").style.display = "block";
-    document.getElementById("userRoleBadge").innerText = myRole.toUpperCase();
     
-    window.myRole = String(localStorage.getItem("adminRole") || "").toLowerCase();
+    // 🔑 सुरक्षित रूपमा रोल सेट गर्ने
+    window.myRole = String(localStorage.getItem("adminRole") || "manager").toLowerCase();
     
-    if (myRole === "admin" || myRole === "manager") {
-      document.getElementById("salesDashboardBox").style.display = "flex";
-      document.getElementById("menuManagementBox").style.display = "block";
-      window.loadMenuList();
-    }
-    window.loadOrders();
-    window.loadStaffList();
-  };
+    let roleBadge = document.getElementById("userRoleBadge");
+    if(roleBadge) roleBadge.innerText = myRole.toUpperCase();
 
+    // 🔒 यदि म्यानेजर हो भने एडमिन-मात्र देखिने सेक्सनहरू लुकाउने वा कन्ट्रोल गर्ने
+    let staffRoleSelect = document.getElementById("staffRoleSelect");
+    if (staffRoleSelect) {
+      if (myRole === "manager") {
+        staffRoleSelect.innerHTML = `
+          <option value="ORDER_TAKER">Order Taker</option>
+          <option value="DELIVERY">Delivery Boy</option>
+        `;
+      } else {
+        staffRoleSelect.innerHTML = `
+          <option value="MANAGER">Hotel Manager</option>
+          <option value="ORDER_TAKER">Order Taker</option>
+          <option value="DELIVERY">Delivery Boy</option>
+          <option value="ADMIN">Full Admin</option>
+        `;
+      }
+    }
+
+    if (myRole === "admin" || myRole === "manager") {
+      let dashBox = document.getElementById("salesDashboardBox");
+      if(dashBox) dashBox.style.display = "flex";
+      
+      let menuBox = document.getElementById("menuManagementBox");
+      if(menuBox) menuBox.style.display = "block";
+      
+      if(typeof window.loadMenuList === 'function') window.loadMenuList();
+    }
+
+    // डेटा सुरक्षित रूपमा लोड गर्ने
+    if(typeof window.loadOrders === 'function') window.loadOrders();
+    if(typeof window.loadStaffList === 'function') window.loadStaffList();
+  };
   window.logout = function() { sessionStorage.clear(); window.location.reload(); };
   window.testBellSound = function() { alert("🔔 डिजिटल घण्टी सुचारु भयो!"); };
 
