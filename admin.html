@@ -229,40 +229,35 @@
     </div>
   </div>
 
-  <div style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
+<div style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
     <h3 style="margin-bottom: 15px; color: #333;">💰 Expense & Profit Tracker</h3>
     
-    <!-- खर्च थप्ने इनपुट बक्सहरू र '+ Add Expense' बटन -->
-    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 15px;">
+    <!-- खर्च थप्ने इनपुट बक्सहरू -->
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center;">
+        <input type="date" id="expenseDateInput" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
         <input type="text" id="expenseCategory" placeholder="Category (e.g. Rent, Salary)" style="padding: 8px; flex: 1; border: 1px solid #ccc; border-radius: 4px;">
         <input type="number" id="expenseAmount" placeholder="Amount (RM)" style="padding: 8px; width: 130px; border: 1px solid #ccc; border-radius: 4px;">
         <input type="text" id="expenseDescription" placeholder="Description" style="padding: 8px; flex: 2; border: 1px solid #ccc; border-radius: 4px;">
         <button onclick="window.addExpense()" style="background: #e91e63; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer;">+ Add Expense</button>
     </div>
 
-    <!-- खर्चहरूको सूची देखाउने टेबल -->
-    <div style="overflow-x: auto; margin-bottom: 15px;">
-        <table style="width: 100%; border-collapse: collapse; background: #fff;">
-            <thead>
-                <tr style="background: #e91e63; color: white; text-align: left;">
-                    <th style="padding: 10px;">Date</th>
-                    <th style="padding: 10px;">Category</th>
-                    <th style="padding: 10px;">Amount (RM)</th>
-                    <th style="padding: 10px;">Description</th>
-                    <th style="padding: 10px;">Action</th>
-                </tr>
-            </thead>
-            <tbody id="expenseTableList">
-                <tr><td colspan="5" style="padding: 15px; text-align: center;">Loading expenses...</td></tr>
-            </tbody>
-        </table>
-    </div>
-
-    <!-- 📊 Sales Report Generator & Export जस्तै डाटा डाउनलोड गर्ने बटनहरू -->
-    <div style="display: flex; gap: 10px; margin-bottom: 20px; align-items: center; background: #f9f9f9; padding: 10px; border-radius: 6px;">
-        <span style="font-weight: bold; color: #555;">📊 Report & Export:</span>
-        <button onclick="window.exportExpenseCSV()" style="background: #4CAF50; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px;">📥 Export to CSV</button>
-        <button onclick="window.print()" style="background: #2196F3; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 13px;">🖨️ Print / Save PDF</button>
+    <!-- 📊 Expense Report Generator & Export सेक्सन (Sales Report जस्तै) -->
+    <div style="margin-bottom: 20px;">
+        <h4 style="color: #333; margin-bottom: 10px;">📊 Expense Report Generator & Export</h4>
+        <div style="display: flex; gap: 15px; align-items: center; background: #f9f9f9; padding: 15px; border-radius: 6px; flex-wrap: wrap;">
+            <div>
+                <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">Start Date:</label>
+                <input type="date" id="expenseStartDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div>
+                <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">End Date:</label>
+                <input type="date" id="expenseEndDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div style="display: flex; gap: 10px; align-items: flex-end; margin-top: 20px;">
+                <button onclick="window.exportExpenseExcel()" style="background: #2e7d32; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📥 Export Excel (.CSV)</button>
+               <button onclick="window.printExpensePDF()" style="background: #d32f2f; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">🖨️ Print / Download PDF</button>
+            </div>
+        </div>
     </div>
 
     <!-- Total Summary (जम्मा Revenue, Total Expense, Net Profit) देखाउने सेक्सन -->
@@ -1252,7 +1247,196 @@ window.deleteExpense = async function(id) {
         window.loadExpenses();
     }
 };
-  
+
+  // ➕ नयाँ खर्च Supabase मा सेभ गर्ने फंक्सन
+window.addExpense = async function() {
+    let dateVal = document.getElementById("expenseDateInput").value;
+    let category = document.getElementById("expenseCategory").value.trim();
+    let amount = parseFloat(document.getElementById("expenseAmount").value);
+    let description = document.getElementById("expenseDescription").value.trim();
+
+    if (!dateVal || !category || isNaN(amount)) {
+        alert("⚠️ कृपया मिति, श्रेणी (Category) र रकम (Amount) सही तरिकाले भर्नुहोस्!");
+        return;
+    }
+
+    let { error } = await supabaseClient.from('expenses').insert([
+        { date: dateVal, category: category, amount: amount, description: description }
+    ]);
+
+    if (error) {
+        alert("❌ Error adding expense: " + error.message);
+    } else {
+        alert("✅ Expense Added Successfully!");
+        document.getElementById("expenseDateInput").value = "";
+        document.getElementById("expenseCategory").value = "";
+        document.getElementById("expenseAmount").value = "";
+        document.getElementById("expenseDescription").value = "";
+        window.loadExpenseSummary();
+    }
+};
+
+// 📊 जम्मा खर्च र Net Profit लोड गर्ने फंक्सन
+window.loadExpenseSummary = async function() {
+    try {
+        let { data, error } = await supabaseClient.from('expenses').select('*');
+        if (error) {
+            console.log("Error loading expenses:", error.message);
+            return;
+        }
+
+        let totalExpense = 0;
+        (data || []).forEach(item => {
+            totalExpense += parseFloat(item.amount) || 0;
+        });
+
+        document.getElementById("summaryExpense").innerText = "RM " + totalExpense.toFixed(2);
+
+        // Net Profit हिसाब (Revenue मानौं 147.00 छ)
+        let totalRevenue = 147.00;
+        let netProfit = totalRevenue - totalExpense;
+        let netProfitEl = document.getElementById("summaryNetProfit");
+        netProfitEl.innerText = "RM " + netProfit.toFixed(2);
+        netProfitEl.style.color = netProfit >= 0 ? "#388E3C" : "#D32F2F";
+
+    } catch (err) {
+        console.log("Catch error:", err);
+    }
+};
+
+// पेज खुल्दा यो चल्नेछ
+window.loadExpenseSummary();
+
+// 📥 Excel (CSV) मा Export गर्ने फंक्सन
+window.exportExpenseExcel = async function() {
+    let startDate = document.getElementById("expenseStartDate").value;
+    let endDate = document.getElementById("expenseEndDate").value;
+
+    let query = supabaseClient.from('expenses').select('*');
+    if (startDate && endDate) {
+        query = query.gte('date', startDate).lte('date', endDate);
+    }
+
+    let { data, error } = await query;
+    if (error) {
+        alert("❌ Error exporting data: " + error.message);
+        return;
+    }
+
+    if (!data || data.length === 0) {
+        alert("⚠️ यो मितिभित्र कुनै खर्च भेटिएन!");
+        return;
+    }
+
+    let csv = [];
+    csv.push("Date,Category,Amount (RM),Description");
+
+    data.forEach(item => {
+        csv.push(`"${item.date}","${item.category}",${item.amount},"${item.description || ''}"`);
+    });
+
+    let csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+    let downloadLink = document.createElement("a");
+    downloadLink.download = "Expense_Report_" + (startDate || "All") + "_to_" + (endDate || "All") + ".csv";
+    downloadLink.href = window.URL.createObjectURL(csvFile);
+    downloadLink.style.display = "none";
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
+};
+
+  let csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
+    let downloadLink = document.createElement("a");
+    // ... (तपाईंका अन्य कोडहरू)
+    document.body.removeChild(downloadLink);
+};
+
+// 👇 यो नयाँ फंक्सनलाई ठ्याक्कै यहाँ (</script> भन्दा माथि) राख्नुहोस्:
+window.printExpensePDF = async function() {
+    let startDate = document.getElementById("expenseStartDate").value;
+    let endDate = document.getElementById("expenseEndDate").value;
+
+    let query = supabaseClient.from('expenses').select('*');
+    if (startDate && endDate) {
+        query = query.gte('date', startDate).lte('date', endDate);
+    }
+
+    let { data, error } = await query;
+    if (error || !data) {
+        alert("❌ Error fetching report data: " + (error ? error.message : "No data"));
+        return;
+    }
+
+    if (data.length === 0) {
+        alert("⚠️ यो मितिभित्र कुनै खर्च भेटिएन!");
+        return;
+    }
+
+    let totalExp = 0;
+    let tableRows = "";
+
+    data.forEach((item, index) => {
+        let amt = parseFloat(item.amount) || 0;
+        totalExp += amt;
+        tableRows += `
+            <tr>
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${index + 1}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;">${item.date || ''}</td>
+                <td style="padding: 8px; border: 1px solid #ddd;"><b>${item.category || ''}</b></td>
+                <td style="padding: 8px; border: 1px solid #ddd;">${item.description || ''}</td>
+                <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #d32f2f;"><b>RM ${amt.toFixed(2)}</b></td>
+            </tr>
+        `;
+    });
+
+    let printWindow = window.open('', '', 'height=700,width=900');
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Expense Report Statement</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+                .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e91e63; padding-bottom: 10px; }
+                .header h2 { margin: 0; color: #e91e63; font-size: 24px; }
+                .header p { margin: 5px 0 0 0; color: #666; font-size: 14px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                th { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; text-align: left; }
+                .summary-box { margin-top: 20px; text-align: right; font-size: 16px; background: #fff5f5; padding: 12px; border-radius: 6px; border: 1px solid #ffe0e0; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h2>UGRATARA RESTAURANT</h2>
+                <p>📊 <b>Expense Report Statement</b> (${startDate || 'All Time'} to ${endDate || 'All Time'})</p>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 40px; text-align: center;">S.N.</th>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th style="text-align: right;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${tableRows}
+                </tbody>
+            </table>
+            <div class="summary-box">
+                <span style="color: #d32f2f; font-weight: bold;">Total Expense: RM ${totalExp.toFixed(2)}</span>
+            </div>
+        </body>
+        </html>
+    `);
+
+    printWindow.document.close();
+    printWindow.focus();
+    setTimeout(() => {
+        printWindow.print();
+        printWindow.close();
+    }, 500);
+};  
 </script>
 </body>
 </html>
