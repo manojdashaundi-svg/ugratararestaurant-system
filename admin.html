@@ -996,7 +996,7 @@
     printWindow.document.close();
   };
 
-  window.loadStaffList = async function() {
+ window.loadStaffList = async function() {
     let staffTable = document.getElementById("staffTableList");
     if (!staffTable) return;
 
@@ -1014,9 +1014,10 @@
 
     let html = "";
     data.forEach(staff => {
+      // Supabase का सबै सम्भावित स्तम्भ नामहरू चेक गर्ने
       let uName = staff.email || staff.full_name || staff.username || '';
       let uPass = staff.password || '';
-      let uRole = staff.role || 'STAFF';
+      let uRole = staff.role || staff.position || 'STAFF';
       let uRoleUpper = String(uRole).toUpperCase();
       let isManager = (typeof myRole !== 'undefined' && myRole === "manager");
       let isAdminOrMgr = (uRoleUpper === "ADMIN" || uRoleUpper === "MANAGER");
@@ -1032,7 +1033,7 @@
           `;
         }
       } else {
-        let isMain = (uName === "Manoj" || (uRoleUpper === "ADMIN" && staff.id === 1));
+        let isMain = (uName === "admin@ugratara.com" || staff.id === 1);
         actionHtml = isMain ? 
           `<span style="color:#e91e63; font-weight:bold;">👑 Admin</span>` : 
           `<button onclick="window.editStaff(${staff.id}, '${uName}', '${uPass}', '${uRole}')" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer;">Edit</button>
