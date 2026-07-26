@@ -51,7 +51,6 @@
     .chart-container { background:#fff; padding:15px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin:20px 0; border:1px solid #ddd; width:100%; height: 280px; display:none; }
     .inStockBtn { background:#4CAF50; color:white; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; display: inline-flex; align-items: center; gap: 5px; }
     .outStockBtn { background:#ff9800; color:white; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
-    .editBtn { background:#2196F3; color:white; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
     .menu-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
   </style>
 </head>
@@ -105,7 +104,7 @@
     <div id="monthlySalesChart" style="width: 100%; height: 250px;"></div>
   </div>
   
-<!-- 📈 Today's Hourly Sales Trend Chart Section -->
+  <!-- 📈 Today's Hourly Sales Trend Chart Section -->
   <div class="chart-container" id="hourlySalesChartDiv" style="display: block; width: 100%; height: 320px; background: #fff; padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
     <h3 style="color: #e91e63; margin-bottom: 10px; font-size: 16px;">Today's Hourly Sales Trend (RM)</h3>
     <div id="hourlySalesChart" style="width: 100%; height: 250px;"></div>
@@ -260,23 +259,27 @@
     
     document.getElementById("loginBtn").innerText = "Verifying...";
     
-    let { data } = await supabaseClient.from('admins').select('*').eq('email', u).eq('password', p).single();
+    let { data, error } = await supabaseClient.from('admins').select('*').eq('email', u).eq('password', p).maybeSingle();
     document.getElementById("loginBtn").innerText = "Login";
 
-    if (data) {
-      sessionStorage.setItem("ADMIN_LOGIN", "true");
-      sessionStorage.setItem("USER_ROLE", data.role ? data.role.toLowerCase() : "admin");
-      sessionStorage.setItem("LOGGED_USER", u.toLowerCase());
-      myRole = data.role ? data.role.toLowerCase() : "admin";
-      currentLoggedInUser = u.toLowerCase();
-      window.showAdminPanel();
-    } else {
+    if (error || !data) {
       alert("Wrong Email or Password.");
+      return;
     }
+
+    sessionStorage.setItem("ADMIN_LOGIN", "true");
+    let userRole = data.role ? data.role.toLowerCase() : "admin";
+    sessionStorage.setItem("USER_ROLE", userRole);
+    localStorage.setItem("adminRole", userRole);
+    sessionStorage.setItem("LOGGED_USER", u.toLowerCase());
+    
+    myRole = userRole;
+    currentLoggedInUser = u.toLowerCase();
+    window.showAdminPanel();
   };
 
   // १. अर्डर लोड गर्ने र सिरियल वाइज क्रम मिलाएर देखाउने सही फंक्सन
- window.loadOrders = async function() {
+  window.loadOrders = async function() {
     let { data, error } = await supabaseClient
       .from('orders')
       .select('*');
@@ -342,7 +345,6 @@
             actionButtons = `<span style="color:green; font-weight:bold;">✅ Delivered</span>`;
         }
 
-        // अर्डर नम्बरलाई क्रमबद्ध देखाउने व्यवस्था
         let displayOrderNo = o.order_no && String(o.order_no).startsWith("ORD") ? o.order_no : ("ORD" + (1001 + (totalOrdersCount - 1 - index)));
 
         html += `<tr>
@@ -360,6 +362,7 @@
     }
     tableBody.innerHTML = html;
   };
+
   // २. KOT वा Bill प्रिन्ट गर्ने र ५८मिमी प्रिन्टरको लागि सुन्दर डिजाइन बनाउने फंक्सन
   window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
     let res = await supabaseClient.from('orders').update({ status: nextStatus }).eq('order_no', orderNo);
@@ -431,7 +434,7 @@
     }
   };
 
-  // 🖨️ ५८मिमी प्रिन्टरको पेपर साइज फिक्स गर्ने र अतिरिक्त हेडर/फुटर हटाउने प्रिन्ट फंक्सन
+  // 🖨️ ५८मिमी प्रिन्टरको पेपर साइज फिक्स गर्ने फंक्सन
   window.executeSystemPrint = function() {
     var printArea = document.getElementById("printableInvoiceArea");
     if (!printArea) return;
@@ -468,7 +471,6 @@
     }, 400);
   };
 
-  // ❌ प्रिन्ट मोडल बक्स बन्द गर्ने सही फंक्सन
   window.closePrintModal = function() {
     var modalBox = document.getElementById("printModalBox");
     if(modalBox) {
@@ -524,7 +526,7 @@
     reader.readAsDataURL(file);
   };
 
-  // 📊 सबै ड्यासबोर्ड तथ्याङ्कहरू सही तरिकाले गणना गर्ने फंक्सन
+  // 📊 सबै ड्यासबोर्ड तथ्याङ्कहरू गणना गर्ने फंक्सन
   window.calculateDashboardStats = function(orders) {
     let totalOrders = orders.length;
     let totalRevenue = 0;
@@ -542,15 +544,12 @@
 
       if (o.time) {
         let orderDate = new Date(o.time);
-        
-        // यदि सीधा Date parse भएन भने स्ट्रिङबाट मिलाउने
         if (isNaN(orderDate.getTime())) {
           let cleanTime = o.time.replace(/at/gi, "").trim();
           orderDate = new Date(cleanTime);
         }
 
         if (!isNaN(orderDate.getTime())) {
-          // 🟢 आजको मिति मिलेको छ कि छैन चेक गर्ने (Day, Month, Year)
           if (
             orderDate.getDate() === currentDay &&
             orderDate.getMonth() === currentMonth &&
@@ -559,7 +558,6 @@
             todaySales += amount;
           }
           
-          // 🟢 यो महिनाको बिक्री चेक गर्ने
           if (
             orderDate.getMonth() === currentMonth &&
             orderDate.getFullYear() === currentYear
@@ -588,7 +586,6 @@
       document.getElementById("dashAvgOrder").innerText = "RM " + avgOrderValue.toFixed(2);
     
     window.drawMonthlySalesChart(orders);
-    
     window.drawHourlySalesChart(orders);
   };
 
@@ -720,7 +717,7 @@
     document.getElementById("loginScreen").style.display = "flex";
   }
 
-  // 📊 मासिक बिक्रीको चार्ट (Monthly Sales Insights & Growth) देखाउने फंक्सन
+  // 📊 मासिक बिक्रीको चार्ट देखाउने फंक्सन
   window.drawMonthlySalesChart = function(orders) {
     if (typeof google === 'undefined' || !google.visualization) return;
 
@@ -738,7 +735,7 @@
         if (!isNaN(orderDate.getTime())) {
           let year = orderDate.getFullYear();
           let month = String(orderDate.getMonth() + 1).padStart(2, '0');
-          let key = `${year}-${month}`; // जस्तै: 2026-06, 2026-07
+          let key = `${year}-${month}`;
 
           if (!monthlyDataMap[key]) {
             monthlyDataMap[key] = 0;
@@ -748,9 +745,7 @@
       }
     });
 
-    // महिना अनुसार क्रम मिलाउने
     let sortedKeys = Object.keys(monthlyDataMap).sort();
-    
     let chartArray = [['Months (Year-MM)', 'Revenue (RM)']];
     sortedKeys.forEach(key => {
       chartArray.push([key, monthlyDataMap[key]]);
@@ -761,10 +756,9 @@
     }
 
     let data = google.visualization.arrayToDataTable(chartArray);
-
     let options = {
       legend: { position: 'none' },
-      colors: ['#8E24AA'], // जामुनी रङ्ग (Purple)
+      colors: ['#8E24AA'],
       hAxis: { title: 'Months (Year-MM)' },
       vAxis: { title: 'Revenue (RM)', minValue: 0 },
       animation: { startup: true, duration: 1000, easing: 'out' }
@@ -773,7 +767,8 @@
     let chart = new google.visualization.ColumnChart(document.getElementById('monthlySalesChart'));
     chart.draw(data, options);
   };
-// 📊 आजको प्रतिघण्टा बिक्रीको ट्रेन्ड (Today's Hourly Sales Trend) देखाउने फंक्सन
+
+  // 📊 आजको प्रतिघण्टा बिक्रीको ट्रेन्ड देखाउने फंक्सन
   window.drawHourlySalesChart = function(orders) {
     if (typeof google === 'undefined' || !google.visualization) return;
 
@@ -798,7 +793,6 @@
         }
 
         if (!isNaN(orderDate.getTime())) {
-          // केवल आजको अर्डरहरू मात्र फिल्टर गर्ने
           if (
             orderDate.getDate() === currentDay &&
             orderDate.getMonth() === currentMonth &&
@@ -818,13 +812,12 @@
     });
 
     let data = google.visualization.arrayToDataTable(chartArray);
-
     let options = {
       legend: { position: 'none' },
-      colors: ['#E91E63'], // गुलाबी/रातो रङ्ग (Pink/Red)
+      colors: ['#E91E63'],
       hAxis: { title: 'Time (Hours)', slantedText: true },
       vAxis: { title: 'Revenue (RM)', minValue: 0 },
-      curveType: 'function', // गोलो घुमेको चिल्लो लाइन देखाउन
+      curveType: 'function',
       animation: { startup: true, duration: 1000, easing: 'out' }
     };
 
@@ -968,7 +961,7 @@
     printWindow.document.close();
   };
 
-  // 👥 स्टाफहरूको सूची लोड गर्ने फंक्सन
+  // 👥 स्टाफहरूको सूची लोड गर्ने (सुरक्षासहित: म्यानेजरले एडमिन लुकाउने)
   window.loadStaffList = async function() {
     let { data, error } = await supabaseClient
       .from('admins')
@@ -985,17 +978,24 @@
 
     let html = "";
     (data || []).forEach(staff => {
-      let isMainAdmin = (staff.email === "Manoj" || staff.role === "ADMIN" && staff.id === 1);
+      let uRole = staff.role || 'STAFF';
+
+      // 🔒 सुरक्षा: यदि लगइन गर्ने व्यक्ति 'manager' हो भने, 'admin' रोल भएकोलाई लुकाउने
+      if (window.myRole === 'manager' && uRole.toLowerCase() === 'admin') {
+          return;
+      }
+
+      let isMainAdmin = (staff.email === "Manoj" || uRole === "ADMIN" && staff.id === 1);
       let actionHtml = isMainAdmin ? 
         `<span style="color:#e91e63; font-weight:bold;">👑 Admin</span>` : 
-        `<button class="editBtn" onclick="window.editStaff(${staff.id}, '${staff.email}', '${staff.password}', '${staff.role}')" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
+        `<button class="editBtn" onclick="window.editStaff(${staff.id}, '${staff.email}', '${staff.password}', '${uRole}')" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
          <button class="removeBtn" onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">❌ Delete</button>`;
 
       html += `
         <tr>
           <td><b>${staff.email || ''}</b></td>
           <td>${staff.password || ''}</td>
-          <td><b>${staff.role || 'STAFF'}</b></td>
+          <td><b>${uRole}</b></td>
           <td>${actionHtml}</td>
         </tr>
       `;
@@ -1062,7 +1062,6 @@
       window.loadStaffList();
     }
   };
-  
 </script>
 </body>
 </html>
