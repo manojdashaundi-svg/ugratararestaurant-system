@@ -1002,15 +1002,15 @@ if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
     printWindow.document.close();
   };
 
-  // 👥 स्टाफहरूको सूची लोड गर्ने (सुरक्षासहित: म्यानेजरले एडमिन लुकाउने)
- window.loadStaffList = async function() {
+  // 👥 स्टाफहरूको सूची लोड गर्ने (Custom Role र Access Status सहित)
+window.loadStaffList = async function() {
     let staffTable = document.getElementById("staffTableList");
     if (!staffTable) return;
 
     try {
         let { data, error } = await supabaseClient.from('admins').select('*');
         if (error) {
-            staffTable.innerHTML = `<tr><td colspan="4" style="color:red; padding:10px;">Error: ${error.message}</td></tr>`;
+            staffTable.innerHTML = `<tr><td colspan="5" style="color:red; padding:10px;">Error: ${error.message}</td></tr>`;
             return;
         }
 
@@ -1019,37 +1019,55 @@ if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
             let uName = staff.email || staff.username || '';
             let uPass = staff.password || '';
             let uRole = staff.role || 'STAFF';
+            let uStatus = staff.status !== undefined ? staff.status : 'Active';
 
             // 🔒 सुरक्षा: यदि लगइन गर्ने व्यक्ति 'manager' हो भने, 'admin' रोल भएकोलाई लुकाउने
             if (window.myRole === 'manager' && uRole.toLowerCase() === 'admin') {
                 return;
             }
 
-            let isMainAdmin = (uName.toLowerCase() === "manoj" || uRole === "ADMIN" && staff.id === 1);
+            let isMainAdmin = (uName.toLowerCase() === "manoj" || uRole.toUpperCase() === "ADMIN" && staff.id === 1);
+            
+            let statusBtnClass = uStatus === 'Active' ? 'inStockBtn' : 'outStockBtn';
+            let statusText = uStatus === 'Active' ? '🟢 Active' : '🔴 Inactive';
+
             let actionHtml = isMainAdmin ? 
                 `<span style="color:#e91e63; font-weight:bold;">👑 Admin</span>` : 
-                `<button class="editBtn" onclick="window.editStaff(${staff.id}, '${uName}', '${uPass}', '${uRole}')" style="background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
-                 <button class="removeBtn" onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">❌ Delete</button>`;
+                `<button class="${statusBtnClass}" onclick="window.toggleStaffStatus(${staff.id}, '${uStatus}')" style="padding:5px 8px; font-size:12px;">${statusText}</button>
+                 <button class="editBtn" onclick="window.editStaff(${staff.id}, '${uName}', '${uPass}', '${uRole}')" style="background:#2196F3; color:white; border:none; padding:5px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">✏️ Edit</button>
+                 <button class="removeBtn" onclick="window.deleteStaff(${staff.id})" style="background:#f44336; color:white; border:none; padding:5px 8px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px;">❌ Delete</button>`;
 
             html += `
                 <tr>
                     <td><b>${uName}</b></td>
                     <td>${uPass}</td>
                     <td><b>${uRole}</b></td>
+                    <td>${uStatus}</td>
                     <td>${actionHtml}</td>
                 </tr>
             `;
         });
 
         if (html === "") {
-            html = `<tr><td colspan="4" style="padding:15px;">No staff members found.</td></tr>`;
+            html = `<tr><td colspan="5" style="padding:15px;">No staff members found.</td></tr>`;
         }
 
         staffTable.innerHTML = html;
 
     } catch (err) {
         console.log("Load staff catch error:", err);
-        staffTable.innerHTML = `<tr><td colspan="4" style="color:red; padding:10px;">Error loading staff.</td></tr>`;
+        staffTable.innerHTML = `<tr><td colspan="5" style="color:red; padding:10px;">Error loading staff.</td></tr>`;
+    }
+};
+
+// 🔄 स्टाफको Access चालू वा बन्द (Active/Inactive) गर्ने फंक्सन
+window.toggleStaffStatus = async function(staffId, currentStatus) {
+    let newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+    let { error } = await supabaseClient.from('admins').update({ status: newStatus }).eq('id', staffId);
+    if (error) {
+      alert("❌ Error updating status: " + error.message);
+    } else {
+      window.loadStaffList();
     }
 };
   // ➕ नयाँ स्टाफ थप्ने फंक्सन
