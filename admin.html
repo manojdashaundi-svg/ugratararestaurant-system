@@ -792,7 +792,7 @@
     document.querySelectorAll(".earning-row").forEach((row, idx) => {
       let desc = row.querySelector("input[type='text']").value || "Earnings";
       let amt = parseFloat(row.querySelector(".earning-amount").value) || 0;
-      earningsRowsHtml += `<tr><td style="border: 1px solid #000; padding: 4px;">${idx + 1}. ${desc}</td><td style="border: 1px solid #000; padding: 4px; text-align: right;">${amt.toFixed(2)}</td></tr>`;
+      earningsRowsHtml += `<tr><td style="border: 1px solid #000; padding: 3px;">${idx + 1}. ${desc}</td><td style="border: 1px solid #000; padding: 3px; text-align: right;">${amt.toFixed(2)}</td></tr>`;
     });
 
     let deductionsRowsHtml = "";
@@ -800,7 +800,7 @@
       let desc = row.querySelector(".deduction-desc").value;
       let amt = parseFloat(row.querySelector(".deduction-amount").value) || 0;
       if (desc && amt > 0) {
-        deductionsRowsHtml += `<tr><td style="border: 1px solid #000; padding: 4px;">Deduction: ${desc}</td><td style="border: 1px solid #000; padding: 4px; text-align: right; color: #d32f2f;">-${amt.toFixed(2)}</td></tr>`;
+        deductionsRowsHtml += `<tr><td style="border: 1px solid #000; padding: 3px;">Deduction: ${desc}</td><td style="border: 1px solid #000; padding: 3px; text-align: right; color: #d32f2f;">-${amt.toFixed(2)}</td></tr>`;
       }
     });
 
@@ -826,32 +826,32 @@
     alert("✅ Salary Voucher Saved & Added to Expenses Successfully!");
     window.loadExpenseSummary();
 
-    // चौडा र चिटिक्क मिलेको भौचर डिजाइन (Google Apps Script को पहिलो फोटो जस्तै स्पष्ट)
+    // ✅ चिटिक्क मिलेको साइज र चौडाइ ताकि एउटै पानामा परफेक्ट देखियोस्
     let singleVoucherHtml = `
-      <div style="font-family: 'Courier New', Courier, monospace; font-size: 11.5px; color: #000; padding: 12px; border: 1.5px dashed #000; margin-bottom: 12px; width: 100%; max-width: 680px; box-sizing: border-box; background: #fff;">
-        <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 5px; margin-bottom: 8px;">
-          <h3 style="margin: 0; font-size: 15px; font-weight: bold; letter-spacing: 0.5px;">GLOBAL UGRATARA (A) SDN. BHD.</h3>
-          <p style="margin: 3px 0 0 0; font-size: 10px;">41 & 45, TKT 4, JALAN LEBOH PUDU, 50050, WP. KUALA LUMPUR</p>
+      <div style="font-family: 'Courier New', Courier, monospace; font-size: 10.5px; color: #000; padding: 8px; border: 1.5px dashed #000; margin-bottom: 8px; width: 100%; box-sizing: border-box; background: #fff;">
+        <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 3px; margin-bottom: 5px;">
+          <h3 style="margin: 0; font-size: 13px; font-weight: bold;">GLOBAL UGRATARA (A) SDN. BHD.</h3>
+          <p style="margin: 2px 0 0 0; font-size: 9px;">41 & 45, TKT 4, JALAN LEBOH PUDU, 50050, WP. KUALA LUMPUR</p>
         </div>
-        <div style="text-align: center; font-weight: bold; text-decoration: underline; margin-bottom: 8px; font-size: 13px; letter-spacing: 1px;">SALARY VOUCHER</div>
+        <div style="text-align: center; font-weight: bold; text-decoration: underline; margin-bottom: 5px; font-size: 11px;">SALARY VOUCHER</div>
         
-        <table style="width: 100%; border: none; margin-bottom: 8px; font-size: 11.5px; background: transparent;">
+        <table style="width: 100%; border: none; margin-bottom: 5px; font-size: 10.5px; background: transparent;">
           <tr>
-            <td style="border: none; text-align: left; padding: 2px;"><b>Employee Name :</b> ${empName}</td>
-            <td style="border: none; text-align: right; padding: 2px;"><b>Date :</b> ${day}/${month}/${year}</td>
+            <td style="border: none; text-align: left; padding: 1px;"><b>Employee Name :</b> ${empName}</td>
+            <td style="border: none; text-align: right; padding: 1px;"><b>Date :</b> ${day}/${month}/${year}</td>
           </tr>
           <tr>
-            <td style="border: none; text-align: left; padding: 2px;" colspan="2"><b>Designation :</b> ${desig}</td>
+            <td style="border: none; text-align: left; padding: 1px;" colspan="2"><b>Designation :</b> ${desig}</td>
           </tr>
         </table>
 
-        <div style="background: #000; color: #fff; padding: 3px 8px; font-weight: bold; margin-bottom: 8px; font-size: 12px;">VOUCHER NO. ${voucherNo}</div>
+        <div style="background: #000; color: #fff; padding: 2px 6px; font-weight: bold; margin-bottom: 5px; font-size: 10.5px;">VOUCHER NO. ${voucherNo}</div>
         
-        <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 11.5px;">
+        <table style="width: 100%; border-collapse: collapse; margin-bottom: 5px; font-size: 10.5px;">
           <thead>
             <tr>
-              <th style="border: 1px solid #000; padding: 5px; text-align: left; background:#eee;">Earnings & Allowances</th>
-              <th style="border: 1px solid #000; padding: 5px; text-align: right; background:#eee; width: 100px;">RM</th>
+              <th style="border: 1px solid #000; padding: 3px; text-align: left; background:#eee;">Earnings & Allowances</th>
+              <th style="border: 1px solid #000; padding: 3px; text-align: right; background:#eee; width: 80px;">RM</th>
             </tr>
           </thead>
           <tbody>
@@ -860,15 +860,15 @@
           </tbody>
         </table>
         
-        <div style="text-align: right; font-weight: bold; margin-bottom: 8px; font-size: 13px; background: #f8f8f8; padding: 5px; border: 1px solid #000;">
+        <div style="text-align: right; font-weight: bold; margin-bottom: 5px; font-size: 11px; background: #f8f8f8; padding: 3px; border: 1px solid #000;">
           NET Salary: RM ${netSalary.toFixed(2)}
         </div>
         
-        <div style="margin-bottom: 15px; font-weight: bold; font-size: 11.5px;">☑ Payment Mode: ${paymentMode}</div>
+        <div style="margin-bottom: 8px; font-weight: bold; font-size: 10.5px;">☑ Payment Mode: ${paymentMode}</div>
         
-        <div style="display: flex; justify-content: space-between; font-size: 11px; align-items: flex-end; margin-top: 10px;">
+        <div style="display: flex; justify-content: space-between; font-size: 10px; align-items: flex-end;">
           <div><b>Hotel Copy / Staff Copy</b></div>
-          <div style="border-top: 1px solid #000; width: 180px; text-align: center; padding-top: 3px; font-weight: bold;">Employee Signature</div>
+          <div style="border-top: 1px solid #000; width: 140px; text-align: center; padding-top: 2px; font-weight: bold;">Employee Signature</div>
         </div>
       </div>
     `;
@@ -878,9 +878,9 @@
       <head>
         <title>Salary Voucher Print</title>
         <style>
-          @page { size: A4; margin: 8mm; }
+          @page { size: A4; margin: 6mm; }
           body { font-family: Arial, sans-serif; margin: 0; padding: 0; display: flex; flex-direction: column; align-items: center; }
-          .cut-line { border-top: 1px dashed #000; margin: 10px 0; text-align: center; font-size: 10.5px; color: #333; width: 100%; }
+          .cut-line { border-top: 1px dashed #000; margin: 6px 0; text-align: center; font-size: 9.5px; color: #333; width: 100%; }
         </style>
       </head>
       <body>
