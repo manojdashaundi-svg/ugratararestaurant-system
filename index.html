@@ -84,7 +84,7 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
 
     <div id="menu" style="text-align:center; font-size:18px; padding:20px; color:#666;">Loading Menu Items...</div>
 
-    <!-- 📦 Track Your Order (Placed right above Shopping Cart as requested) -->
+    <!-- 📦 Track Your Order -->
     <hr style="margin:25px 0; border:0; border-top:1px solid #ddd; width: 100%;">
     <div style="padding: 0 4px; text-align: left;">
         <h2>📦 Track Your Order</h2>
@@ -148,14 +148,14 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
 <!-- 💬 Live Support Chat Popup Modal -->
 <div id="chatPopupBox" class="chat-popup-box">
     <div class="chat-popup-header">
-        <span>💬 Live Support</span>
+        <span id="chatHeaderTitle">💬 Live Support</span>
         <button class="chat-popup-close" onclick="window.toggleChatPopup()">✕</button>
     </div>
-    <div class="chat-popup-body">
+    <div class="chat-popup-body" id="chatPopupContent">
         <p style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 10px;">How can we help you?</p>
-        <button class="chat-option-btn chat-option-1" onclick="window.startLiveChat('Delivery')">🚚 1. Delivery Issue</button>
-        <button class="chat-option-btn chat-option-2" onclick="window.startLiveChat('Order Taker')">🍔 2. Order Issue</button>
-        <button class="chat-option-btn chat-option-3" onclick="window.startLiveChat('Manager')">👑 3. Complain & Info</button>
+        <button class="chat-option-btn chat-option-1" onclick="window.openActiveChat('Delivery')">🚚 1. Delivery Issue</button>
+        <button class="chat-option-btn chat-option-2" onclick="window.openActiveChat('Order Taker')">🍔 2. Order Issue</button>
+        <button class="chat-option-btn chat-option-3" onclick="window.openActiveChat('Manager')">👑 3. Complain & Info</button>
     </div>
 </div>
 
@@ -166,7 +166,7 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
   // डेटाबेसबाट हालसम्मका अर्डरहरू तानेर सही सिरियल नम्बर निकाल्ने
   async function generateNextOrderNo() {
     let { data: existingOrders } = await supabaseClient.from('orders').select('order_no');
-    let nextSerialNo = 1001; // यदि एउटा पनि अर्डर छैन भने ORD1001 बाट सुरु हुने
+    let nextSerialNo = 1001;
 
     if (existingOrders && existingOrders.length > 0) {
       let serials = existingOrders.map(o => {
@@ -177,10 +177,10 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
       nextSerialNo = (maxNum >= 1001) ? (maxNum + 1) : (1001 + existingOrders.length);
     }
 
-    return "ORD" + nextSerialNo; // परिणाम: ORD1001, ORD1002, ORD1003...
+    return "ORD" + nextSerialNo;
   }
 
-  // 💬 Live Support Chat Toggle & Handler Functions
+  // 💬 Live Support Chat Toggle & Active Chat Window Function
   window.toggleChatPopup = function() {
     let box = document.getElementById("chatPopupBox");
     if (box) {
@@ -188,9 +188,63 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
     }
   };
 
-  window.startLiveChat = function(supportType) {
-    alert("💬 Connecting you with " + supportType + " support...");
-    window.toggleChatPopup();
+  window.openActiveChat = function(supportType) {
+    let bodyEl = document.getElementById("chatPopupContent");
+    let headerEl = document.getElementById("chatHeaderTitle");
+    if(!bodyEl) return;
+
+    if(headerEl) headerEl.innerText = "💬 Live Chat (" + supportType + ")";
+
+    let nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    bodyEl.innerHTML = `
+      <div style="font-size: 12px; color: #666; margin-bottom: 8px; text-align: center;">Connected to ${supportType} Support</div>
+      <div id="customerChatMessages" style="height: 180px; overflow-y: auto; background: #f9f9f9; border: 1px solid #ddd; border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;">
+        <div style="background: #e3f2fd; padding: 6px 10px; border-radius: 6px; font-size: 13px; width: fit-content; max-width: 85%;">
+          <b>Support:</b> Hello! How can we help you with your ${supportType.toLowerCase()}?
+          <div style="font-size: 9px; color: #888; text-align: right; margin-top: 2px;">${nowStr}</div>
+        </div>
+      </div>
+      <div style="display: flex; gap: 6px;">
+        <input type="text" id="customerChatInput" placeholder="Type message..." style="flex: 1; padding: 8px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; margin:0;">
+        <button onclick="window.sendCustomerChatMessage()" style="background: #e91e63; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px;">Send</button>
+      </div>
+      <button onclick="window.resetChatMenu()" style="background: none; border: none; color: #2196F3; font-size: 11px; cursor: pointer; margin-top: 6px; text-decoration: underline;">← Back to menu</button>
+    `;
+  };
+
+  window.sendCustomerChatMessage = function() {
+    let inputEl = document.getElementById("customerChatInput");
+    let msgBox = document.getElementById("customerChatMessages");
+    if(!inputEl || !msgBox) return;
+    let text = inputEl.value.trim();
+    if(!text) return;
+
+    let nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+    msgBox.innerHTML += `
+      <div style="background: #fff; padding: 6px 10px; border-radius: 6px; font-size: 13px; width: fit-content; max-width: 85%; margin-left: auto; border: 1px solid #eee;">
+        <b>You:</b> ${text}
+        <div style="font-size: 9px; color: #888; text-align: right; margin-top: 2px;">${nowStr}</div>
+      </div>
+    `;
+    inputEl.value = "";
+    msgBox.scrollTop = msgBox.scrollHeight;
+  };
+
+  window.resetChatMenu = function() {
+    let bodyEl = document.getElementById("chatPopupContent");
+    let headerEl = document.getElementById("chatHeaderTitle");
+    if(!bodyEl) return;
+
+    if(headerEl) headerEl.innerText = "💬 Live Support";
+
+    bodyEl.innerHTML = `
+      <p style="font-size: 14px; font-weight: bold; color: #333; margin-bottom: 10px;">How can we help you?</p>
+      <button class="chat-option-btn chat-option-1" onclick="window.openActiveChat('Delivery')">🚚 1. Delivery Issue</button>
+      <button class="chat-option-btn chat-option-2" onclick="window.openActiveChat('Order Taker')">🍔 2. Order Issue</button>
+      <button class="chat-option-btn chat-option-3" onclick="window.openActiveChat('Manager')">👑 3. Complain & Info</button>
+    `;
   };
 </script>
 <script src="script.js"></script>
