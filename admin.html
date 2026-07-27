@@ -449,7 +449,6 @@
 
   var myRole = "admin";
   var currentLoggedInUser = "";
-  // localStorage बाट तुरुन्तै क्याच लोड गर्ने जसले गर्दा 'Loading...' देखिने छैन
   var activeOrdersCache = JSON.parse(localStorage.getItem("cached_active_orders") || "[]");
   var menuItemsCache = [
     { id: 1, name: "Chicken Momo", price: 12, category: "Momo", description: "Fresh juicy chicken momo", status: "In Stock", image: "" },
@@ -512,7 +511,6 @@
   };
 
   window.loadOrders = async function() {
-    // यदि क्याचमा पहिल्यै डाटा छ भने लोडिङ देखाउनुको सट्टा तुरुन्तै रेन्डर गर्ने
     if (activeOrdersCache.length > 0) {
       window.calculateDashboardStats(activeOrdersCache);
       window.renderActiveOrdersTable(activeOrdersCache);
@@ -532,7 +530,6 @@
           window.playTringTringBell();
         }
         activeOrdersCache = newSorted;
-        // लोकल स्टोरेजमा सेभ गर्ने ताकि अर्को पटक तुरुन्तै देखाउन सकियोस्
         localStorage.setItem("cached_active_orders", JSON.stringify(activeOrdersCache));
       } else if (error) {
         console.log("Supabase load orders error:", error);
@@ -1247,7 +1244,7 @@
 
   if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
     myRole = sessionStorage.getItem("USER_ROLE") || "admin";
-    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER"] || "";
+    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
     window.showAdminPanel();
   } else {
     document.getElementById("loginScreen").style.display = "flex";
