@@ -84,15 +84,6 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
 
     <div id="menu" style="text-align:center; font-size:18px; padding:20px; color:#666;">Loading Menu Items...</div>
 
-    <!-- 📦 Track Your Order -->
-    <hr style="margin:25px 0; border:0; border-top:1px solid #ddd; width: 100%;">
-    <div style="padding: 0 4px; text-align: left;">
-        <h2>📦 Track Your Order</h2>
-        <input id="trackOrderNo" type="text" placeholder="Enter Order No (Example: ORD1001)" style="width:100%; padding:14px; margin:10px 0; border-radius:8px; border:1px solid #ddd; font-size:18px;">
-        <button class="place-btn" style="background:#e91e63;" onclick="window.trackMyOrder()">Track Order</button>
-        <div id="trackResult" style="margin-top:20px;"></div>
-    </div>
-
     <!-- 🛒 Shopping Cart & Checkout Section -->
     <div class="customer cart-section">
         <h2>Shopping Cart</h2>
@@ -138,6 +129,15 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
 
         <button class="place-btn" id="submitOrderBtn" onclick="window.placeOrder()">🚀 Place Order</button>
     </div>
+
+    <!-- 📦 Track Your Order -->
+    <hr style="margin:25px 0; border:0; border-top:1px solid #ddd; width: 100%;">
+    <div style="padding: 0 4px; text-align: left;">
+        <h2>📦 Track Your Order</h2>
+        <input id="trackOrderNo" type="text" placeholder="Enter Order No (Example: ORD1001)" style="width:100%; padding:14px; margin:10px 0; border-radius:8px; border:1px solid #ddd; font-size:18px;">
+        <button class="place-btn" style="background:#e91e63;" onclick="window.trackMyOrder()">Track Order</button>
+        <div id="trackResult" style="margin-top:20px;"></div>
+    </div>
 </div>
 
 <div class="floating-cart" onclick="window.openCart()">🛒<div class="cart-count" id="cartCount">0</div></div>
@@ -163,7 +163,7 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
 <script>
-  // 🔄 Persistent Session ID using localStorage so old chats are always visible
+  // 🔄 Persistent Session ID using localStorage so previous chats remain visible on reload or return
   var currentChatSessionId = localStorage.getItem("ugratara_chat_session");
   if (!currentChatSessionId) {
     currentChatSessionId = "ORD_" + Math.floor(1000 + Math.random() * 9000);
@@ -172,9 +172,10 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
 
   var activeSupportType = "Manager";
 
+  // डेटाबेसबाट हालसम्मका अर्डरहरू तानेर सही सिरियल नम्बर निकाल्ने
   async function generateNextOrderNo() {
     let { data: existingOrders } = await supabaseClient.from('orders').select('order_no');
-    let nextSerialNo = 1001;
+    let nextSerialNo = 1001; // यदि एउटा पनि अर्डर छैन भने ORD1001 बाट सुरु हुने
 
     if (existingOrders && existingOrders.length > 0) {
       let serials = existingOrders.map(o => {
@@ -185,7 +186,7 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
       nextSerialNo = (maxNum >= 1001) ? (maxNum + 1) : (1001 + existingOrders.length);
     }
 
-    return "ORD" + nextSerialNo;
+    return "ORD" + nextSerialNo; // परिणाम: ORD1001, ORD1002, ORD1003...
   }
 
   window.toggleChatPopup = function() {
@@ -294,10 +295,10 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
     `;
   };
 
-  // 🔄 Realtime listener to instantly show Admin replies on Customer screen
+  // 🔄 Realtime listener to instantly show Admin replies on Customer screen without refresh
   try {
     supabaseClient
-      .channel('public:chats')
+      .channel('public:customer_live_chat')
       .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, payload => {
         if(payload.new && payload.new.session_id === currentChatSessionId) {
           window.fetchCustomerMessages();
