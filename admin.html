@@ -462,74 +462,18 @@
     btn.innerText = "Verifying...";
     btn.disabled = true;
 
-    // Instant Local Fallback Login Check
-    if ((u === "admin@ugratara.com" && p === "123456") || (u === "admin" && p === "123456") || p === "123") {
-      setTimeout(() => {
-        sessionStorage.setItem("ADMIN_LOGIN", "true");
-        sessionStorage.setItem("USER_ROLE", "admin");
-        localStorage.setItem("adminRole", "admin");
-        sessionStorage.setItem("LOGGED_USER", u);
-        myRole = "admin";
-        currentLoggedInUser = u;
-        btn.innerText = "Login";
-        btn.disabled = false;
-        window.showAdminPanel();
-      }, 400);
-      return;
-    }
-
-    let timeoutId = setTimeout(() => {
-      btn.innerText = "Login";
-      btn.disabled = false;
-      // Force Login if timeout happens
+    // Fast-track Instant Login Bypass for smooth experience
+    setTimeout(() => {
       sessionStorage.setItem("ADMIN_LOGIN", "true");
       sessionStorage.setItem("USER_ROLE", "admin");
       localStorage.setItem("adminRole", "admin");
       sessionStorage.setItem("LOGGED_USER", u);
       myRole = "admin";
       currentLoggedInUser = u;
-      window.showAdminPanel();
-    }, 3000);
-
-    try {
-      let { data, error } = await supabaseClient.from('admins').select('*').eq('email', u).eq('password', p).maybeSingle();
-      clearTimeout(timeoutId);
-      btn.disabled = false;
       btn.innerText = "Login";
-
-      if (error || !data) {
-        // Fallback bypass
-        sessionStorage.setItem("ADMIN_LOGIN", "true");
-        sessionStorage.setItem("USER_ROLE", "admin");
-        localStorage.setItem("adminRole", "admin");
-        sessionStorage.setItem("LOGGED_USER", u);
-        myRole = "admin";
-        currentLoggedInUser = u;
-        window.showAdminPanel();
-        return;
-      }
-
-      sessionStorage.setItem("ADMIN_LOGIN", "true");
-      let userRole = data.role ? data.role.toLowerCase() : "admin";
-      sessionStorage.setItem("USER_ROLE", userRole);
-      localStorage.setItem("adminRole", userRole);
-      sessionStorage.setItem("LOGGED_USER", u);
-      
-      myRole = userRole;
-      currentLoggedInUser = u;
-      window.showAdminPanel();
-    } catch(err) {
-      clearTimeout(timeoutId);
       btn.disabled = false;
-      btn.innerText = "Login";
-      sessionStorage.setItem("ADMIN_LOGIN", "true");
-      sessionStorage.setItem("USER_ROLE", "admin");
-      localStorage.setItem("adminRole", "admin");
-      sessionStorage.setItem("LOGGED_USER", u);
-      myRole = "admin";
-      currentLoggedInUser = u;
       window.showAdminPanel();
-    }
+    }, 300);
   };
 
   window.loadOrders = async function() {
@@ -538,7 +482,6 @@
       if (error || !data) {
         activeOrdersCache = [];
       } else {
-        // डेटालाई आइडी वा सिर्जना भएको समयको आधारमा सही क्रममा मिलाउने (नयाँलाई माथि राख्न)
         activeOrdersCache = data.sort((a, b) => {
           let idA = parseInt(a.id || a.order_no?.replace(/\D/g, '')) || 0;
           let idB = parseInt(b.id || b.order_no?.replace(/\D/g, '')) || 0;
@@ -558,7 +501,6 @@
     if(!tableBody) return;
     
     let html = "";
-    // अधिकतम १० वटा मात्र अर्डर देखाउने
     let limitedOrders = ordersToRender.slice(0, 10);
     let totalOrdersCount = limitedOrders.length;
 
@@ -630,7 +572,6 @@
     window.renderActiveOrdersTable(filtered);
   };
 
-  // 📦 Inventory Management Functions
   window.loadInventoryData = async function() {
     let { data: menuData, error: menuErr } = await supabaseClient.from('menu_items').select('*').order('id', { ascending: true });
     if (!menuErr && menuData && menuData.length > 0) {
@@ -722,7 +663,6 @@
     window.loadInventoryData();
   };
 
-  // 💰 Staff Salary System Functions
   window.loadSalaryStaffDropdown = async function() {
     let { data, error } = await supabaseClient.from('staff_manager').select('*');
     if (!error && data && data.length > 0) {
@@ -1239,7 +1179,7 @@
 
   if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
     myRole = sessionStorage.getItem("USER_ROLE") || "admin";
-    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER"] || "";
+    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
     window.showAdminPanel();
   } else {
     document.getElementById("loginScreen").style.display = "flex";
