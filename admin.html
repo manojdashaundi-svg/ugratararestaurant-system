@@ -60,11 +60,6 @@
   <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
 </audio>
 
-<!-- 🖱️ माउस क्लिक साउन्डको लागि भरपर्दो अडियो एलिमेन्ट -->
-<audio id="clickSoundAudio" preload="auto">
-  <source src="https://www.soundjay.com/buttons/button-3.mp3" type="audio/mpeg">
-</audio>
-
 <div id="loginScreen" class="login-overlay">
   <div class="login-card">
     <h2>🔐 STAFF LOGIN</h2>
@@ -348,23 +343,37 @@
     { email: "admin@ugratara.com", password: "123456", role: "admin", status: "Active" }
   ];
 
-  // 🖱️ ग्लोबल माउस क्लिक साउन्ड बजाउने भरपर्दो फंक्शन
+  // 🖱️ ब्राउजरको Web Audio API मार्फत शतप्रतिशत बज्ने साउन्ड जेनेरेटर
   window.playClickSound = function() {
     try {
-      const clickAudio = document.getElementById("clickSoundAudio");
-      if (clickAudio) {
-        clickAudio.currentTime = 0;
-        clickAudio.play().catch(e => {
-          // ब्राउजरको अटोप्ले प्रतिबन्ध हटाउन युजर क्लिकमा एकपटक लोड गर्ने
-          console.log("Audio play deferred:", e);
-        });
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!window.audioCtx) {
+        window.audioCtx = new AudioContext();
       }
+      if (window.audioCtx.state === 'suspended') {
+        window.audioCtx.resume();
+      }
+      
+      let osc = window.audioCtx.createOscillator();
+      let gain = window.audioCtx.createGain();
+      
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(600, window.audioCtx.currentTime); // क्लिक फ्रिक्वेन्सी
+      
+      gain.gain.setValueAtTime(0.15, window.audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.0001, window.audioCtx.currentTime + 0.05);
+      
+      osc.connect(gain);
+      gain.connect(window.audioCtx.destination);
+      
+      osc.start();
+      osc.stop(window.audioCtx.currentTime + 0.05);
     } catch(e) {
-      console.log("Click sound error:", e);
+      console.log("Web Audio API error:", e);
     }
   };
 
-  // 🖱️ एडमिन प्यानल भित्र जुनसुकै बटन, अप्सन, ड्रपडाउन वा इन्पुटमा क्लिक गर्दा स्वतः साउन्ड बज्ने इभेन्ट लिスナー
+  // 🖱️ एडमिन प्यानल भित्र जुनसुकै बटन, अप्सन वा इलिमेन्टमा क्लिक गर्दा साउन्ड ट्रिगर गर्ने
   document.addEventListener("click", function(event) {
     let target = event.target;
     if (target.tagName === "BUTTON" || target.closest("button") || target.tagName === "A" || target.closest("a") || target.tagName === "SELECT" || target.tagName === "INPUT" || target.tagName === "LABEL") {
