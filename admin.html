@@ -834,14 +834,14 @@
       <head>
         <title>Salary Voucher Print</title>
         <style>
-          @page { size: A4 portrait; margin: 6mm; }
+          @page { size: A4 portrait; margin: 5mm 8mm; }
           body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fff; }
-          .cut-line { border-top: 1px dashed #000; margin: 10px 0; text-align: center; font-size: 9.5px; color: #555; }
+          .cut-line { border-top: 2px dashed #000; margin-top: 23mm; margin-bottom: 15px; text-align: center; font-size: 9.5px; font-weight: bold; color: #000; }
         </style>
       </head>
       <body>
         ${singleVoucherHtml}
-        <div class="cut-line">------------------------------------ ✂️ (च्यात्नुहोस् / Cut Here) ✂️ ------------------------------------</div>
+        <div class="cut-line">---------------------------------------------------- ✂️ (च्यात्नुहोस् / Cut Here) ✂️ ----------------------------------------------------</div>
         ${singleVoucherHtml}
         <script>
           window.onload = function() { window.print(); window.close(); }
