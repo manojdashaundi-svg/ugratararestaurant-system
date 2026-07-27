@@ -538,8 +538,13 @@
       if (error || !data) {
         activeOrdersCache = [];
       } else {
-        // नयाँ अर्डरहरू सिधै टपमा देखाउन रिभर्स (Reverse) गरिएको छ
-        activeOrdersCache = data.reverse();
+        // डेटालाई आइडी वा सिर्जना भएको समयको आधारमा सही क्रममा मिलाउने (नयाँलाई माथि राख्न)
+        activeOrdersCache = data.sort((a, b) => {
+          let idA = parseInt(a.id || a.order_no?.replace(/\D/g, '')) || 0;
+          let idB = parseInt(b.id || b.order_no?.replace(/\D/g, '')) || 0;
+          if (idA !== idB) return idB - idA;
+          return new Date(b.time || 0) - new Date(a.time || 0);
+        });
       }
       window.calculateDashboardStats(activeOrdersCache);
       window.renderActiveOrdersTable(activeOrdersCache);
