@@ -429,37 +429,21 @@
       <div style="flex: 1; min-width: 280px; border-right: 1px solid #ddd; padding-right: 10px;">
         <h4>Active Chats</h4>
         <div id="chatListContainer" style="display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto;">
-          <div style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #fafafa; cursor: pointer;">
-            <b>ORD0076 (Sh...)</b><br><small>2026-07-11, 01:44 PM</small><br>
-            <span style="background: #9C27B0; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px;">MANAGER</span>
-          </div>
-          <div style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #fafafa; cursor: pointer;">
-            <b>ORD0087 (mio okl k)</b><br><small>2026-07-11, 01:44 PM</small><br>
-            <span style="background: #2196F3; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px;">DELIVERY</span>
-          </div>
+          <div style="padding: 10px; color: #666;">Loading chats...</div>
         </div>
       </div>
       <div style="flex: 2; min-width: 320px; display: flex; flex-direction: column; justify-content: space-between;">
         <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 10px;">
-          <h4 style="margin: 0;" id="activeChatTitle">Order: ORD0076 [Complain and Product Information]</h4>
+          <h4 style="margin: 0;" id="activeChatTitle">Select a chat from left</h4>
           <div>
             <span style="font-size: 13px; font-weight: bold; color: #555;">Pass to:</span>
-            <button onclick="window.passChat('Manager')" style="background: #9C27B0; color: #white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; color:#fff; font-size:12px;">Manager</button>
-            <button onclick="window.passChat('O. Taker')" style="background: #FF9800; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size:12px;">O. Taker</button>
+            <button onclick="window.passChat('Manager')" style="background: #9C27B0; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size:12px;">Manager</button>
+            <button onclick="window.passChat('Order Taker')" style="background: #FF9800; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size:12px;">O. Taker</button>
             <button onclick="window.passChat('Delivery')" style="background: #2196F3; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size:12px;">Delivery</button>
           </div>
         </div>
         <div id="chatMessagesBox" style="background: #f9f9f9; padding: 15px; border-radius: 8px; height: 250px; overflow-y: auto; border: 1px solid #ddd; display: flex; flex-direction: column; gap: 10px;">
-          <div style="background: #fff; padding: 8px 12px; border-radius: 6px; border: 1px solid #eee; width: fit-content; max-width: 80%;">
-            <small style="color: #777; display: block; font-weight: bold;">Customer</small>
-            <span>hi</span>
-            <small style="color: #999; display: block; font-size: 10px; margin-top: 2px;">2026-07-11, 01:44 PM</small>
-          </div>
-          <div style="background: #fff; padding: 8px 12px; border-radius: 6px; border: 1px solid #eee; width: fit-content; max-width: 80%;">
-            <small style="color: #777; display: block; font-weight: bold;">Customer</small>
-            <span>Namaste</span>
-            <small style="color: #999; display: block; font-size: 10px; margin-top: 2px;">2026-07-11, 01:45 PM</small>
-          </div>
+          <div style="color: #777; text-align: center; margin-top: 100px;">No conversation selected.</div>
         </div>
         <div style="display: flex; gap: 10px; margin-top: 10px;">
           <input type="text" id="adminChatInput" placeholder="Type a reply..." style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
@@ -497,6 +481,7 @@
   var staffListCache = [
     { email: "admin@ugratara.com", password: "123456", role: "admin", status: "Active" }
   ];
+  var selectedChatSession = null;
 
   // 🖱️ ब्राउजरको Web Audio API मार्फत चर्को र प्रस्ट बज्ने माउस क्लिक साउन्ड
   window.playClickSound = function() {
@@ -512,10 +497,10 @@
       let osc = window.audioCtx.createOscillator();
       let gain = window.audioCtx.createGain();
       
-      osc.type = 'triangle'; // चर्को र स्पस्ट साउन्डको लागि
+      osc.type = 'triangle';
       osc.frequency.setValueAtTime(800, window.audioCtx.currentTime);
       
-      gain.gain.setValueAtTime(0.6, window.audioCtx.currentTime); // भोल्युम बढाइएको (Gain 0.6)
+      gain.gain.setValueAtTime(0.6, window.audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.0001, window.audioCtx.currentTime + 0.08);
       
       osc.connect(gain);
@@ -523,12 +508,9 @@
       
       osc.start();
       osc.stop(window.audioCtx.currentTime + 0.08);
-    } catch(e) {
-      console.log("Web Audio API error:", e);
-    }
+    } catch(e) {}
   };
 
-  // 🖱️ एडमिन प्यानल भित्र जुनसुकै बटन, अप्सन वा इलिमेन्टमा क्लिक गर्दा स्वतः साउन्ड बज्ने
   document.addEventListener("click", function(event) {
     let target = event.target;
     if (target.tagName === "BUTTON" || target.closest("button") || target.tagName === "A" || target.closest("a") || target.tagName === "SELECT" || target.tagName === "INPUT" || target.tagName === "LABEL") {
@@ -536,7 +518,6 @@
     }
   });
 
-  // 🔔 ३ पटक लगातार "ट्रिङ-ट्रिङ-ट्रिङ" बजाउने फंक्शन
   window.playTringTringBell = function() {
     try {
       const audio = document.getElementById("notificationAudio");
@@ -546,19 +527,15 @@
       audio.play().then(() => {
         setTimeout(() => {
           audio.currentTime = 0;
-          audio.play().catch(e => console.log(e));
+          audio.play().catch(e => {});
         }, 200);
 
         setTimeout(() => {
           audio.currentTime = 0;
-          audio.play().catch(e => console.log(e));
+          audio.play().catch(e => {});
         }, 400);
-      }).catch(err => {
-        console.log("Audio autoplay prevented by browser:", err);
-      });
-    } catch(e) {
-      console.log("Bell sound error:", e);
-    }
+      }).catch(err => {});
+    } catch(e) {}
   };
 
   window.testBellSound = function() {
@@ -609,17 +586,13 @@
         }
         activeOrdersCache = newSorted;
         localStorage.setItem("cached_active_orders", JSON.stringify(activeOrdersCache));
-      } else if (error) {
-        console.log("Supabase load orders error:", error);
       }
       window.calculateDashboardStats(activeOrdersCache);
       window.renderActiveOrdersTable(activeOrdersCache);
-    } catch (err) {
-      console.log("Load orders catch error:", err);
-    }
+    } catch (err) {}
   };
 
-  // 🔄 Supabase Realtime Subscription
+  // 🔄 Supabase Realtime Subscription for Orders & Chats
   window.setupRealtimeOrders = function() {
     try {
       supabaseClient
@@ -629,9 +602,106 @@
           window.loadOrders();
         })
         .subscribe();
-    } catch(e) {
-      console.log("Realtime error:", e);
-    }
+
+      supabaseClient
+        .channel('public:chats')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, payload => {
+          window.playTringTringBell();
+          window.loadAdminChats();
+          if(selectedChatSession === payload.new.session_id) {
+            window.selectChatSession(selectedChatSession);
+          }
+        })
+        .subscribe();
+    } catch(e) {}
+  };
+
+  window.loadAdminChats = async function() {
+    try {
+      let { data, error } = await supabaseClient.from('chats').select('*').order('id', { ascending: false });
+      if(error || !data) return;
+
+      let sessions = {};
+      data.forEach(m => {
+        if(!sessions[m.session_id]) {
+          sessions[m.session_id] = {
+            session_id: m.session_id,
+            customer_name: m.customer_name || 'Customer',
+            support_type: m.support_type || 'General',
+            last_time: m.time || ''
+          };
+        }
+      });
+
+      let container = document.getElementById("chatListContainer");
+      if(!container) return;
+
+      let html = "";
+      Object.values(sessions).forEach(s => {
+        let badgeColor = s.support_type === 'Manager' ? '#9C27B0' : (s.support_type === 'Delivery' ? '#2196F3' : '#FF9800');
+        let isSelected = selectedChatSession === s.session_id ? 'background: #ffe0e0;' : 'background: #fafafa;';
+        html += `
+          <div onclick="window.selectChatSession('${s.session_id}')" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; ${isSelected} cursor: pointer;">
+            <b>${s.session_id} (${s.customer_name})</b><br><small style="color:#666;">${s.last_time}</small><br>
+            <span style="background: ${badgeColor}; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px;">${s.support_type.toUpperCase()}</span>
+          </div>
+        `;
+      });
+      container.innerHTML = html || `<div style="padding:10px; color:#666;">No active chats found.</div>`;
+    } catch(e) {}
+  };
+
+  window.selectChatSession = async function(sessionId) {
+    selectedChatSession = sessionId;
+    window.loadAdminChats();
+
+    try {
+      let { data } = await supabaseClient.from('chats').select('*').eq('session_id', sessionId).order('id', { ascending: true });
+      let box = document.getElementById("chatMessagesBox");
+      let titleEl = document.getElementById("activeChatTitle");
+      if(!box) return;
+
+      if(data && data.length > 0) {
+        if(titleEl) titleEl.innerText = `Chat Session: ${sessionId} [${data[0].customer_name} - ${data[0].support_type}]`;
+        let html = "";
+        data.forEach(m => {
+          let isCustomer = m.sender === 'Customer';
+          html += `
+            <div style="background: ${isCustomer ? '#fff' : '#e3f2fd'}; padding: 8px 12px; border-radius: 6px; border: 1px solid #eee; width: fit-content; max-width: 80%; ${isCustomer ? '' : 'margin-left: auto; background: #e3f2fd; border-color: #bbdefb;'}">
+              <small style="color: ${isCustomer ? '#777' : '#1976D2'}; display: block; font-weight: bold;">${m.sender} (${m.customer_name || ''})</small>
+              <span>${m.message}</span>
+              <small style="color: #999; display: block; font-size: 10px; margin-top: 2px;">${m.time || ''}</small>
+            </div>
+          `;
+        });
+        box.innerHTML = html;
+        box.scrollTop = box.scrollHeight;
+      }
+    } catch(e) {}
+  };
+
+  window.sendAdminChat = async function() {
+    if(!selectedChatSession) { alert("⚠️ कृपया अघिल्लो सूचीबाट एउटा च्याट छान्नुहोस्!"); return; }
+    let inputEl = document.getElementById("adminChatInput");
+    let msg = inputEl.value.trim();
+    if(!msg) return;
+
+    let timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    let dateStr = new Date().toISOString().slice(0, 10) + ", " + timeStr;
+
+    try {
+      await supabaseClient.from('chats').insert([{
+        session_id: selectedChatSession,
+        customer_name: "Admin Staff",
+        support_type: "Admin",
+        sender: "Admin",
+        message: msg,
+        time: dateStr
+      }]);
+
+      inputEl.value = "";
+      window.selectChatSession(selectedChatSession);
+    } catch(err) {}
   };
 
   window.renderActiveOrdersTable = function(ordersToRender) {
@@ -712,23 +782,6 @@
 
   window.passChat = function(roleName) {
     alert("✅ Chat successfully passed to: " + roleName);
-  };
-
-  window.sendAdminChat = function() {
-    let inputEl = document.getElementById("adminChatInput");
-    let msg = inputEl.value.trim();
-    if(!msg) return;
-    let box = document.getElementById("chatMessagesBox");
-    let nowStr = new Date().toLocaleString();
-    box.innerHTML += `
-      <div style="background: #e3f2fd; padding: 8px 12px; border-radius: 6px; border: 1px solid #bbdefb; width: fit-content; max-width: 80%; margin-left: auto;">
-        <small style="color: #1976D2; display: block; font-weight: bold;">Admin (You)</small>
-        <span>${msg}</span>
-        <small style="color: #999; display: block; font-size: 10px; margin-top: 2px;">${nowStr}</small>
-      </div>
-    `;
-    inputEl.value = "";
-    box.scrollTop = box.scrollHeight;
   };
 
   window.loadInventoryData = async function() {
@@ -1328,6 +1381,7 @@
     window.loadMenuList();
     window.loadOrders();
     window.setupRealtimeOrders();
+    window.loadAdminChats();
     window.loadStaffList();
     window.loadExpenseSummary();
     window.loadInventoryData();
@@ -1336,6 +1390,7 @@
     // Background auto-polling backup every 10 seconds
     setInterval(() => {
       window.loadOrders();
+      window.loadAdminChats();
     }, 10000);
   };
 
@@ -1348,6 +1403,95 @@
   } else {
     document.getElementById("loginScreen").style.display = "flex";
   }
+
+  // 💬 Load Admin Live Chats from Supabase
+  window.loadAdminChats = async function() {
+    try {
+      let { data, error } = await supabaseClient.from('chats').select('*').order('id', { ascending: false });
+      if(error || !data) return;
+
+      let sessions = {};
+      data.forEach(m => {
+        if(!sessions[m.session_id]) {
+          sessions[m.session_id] = {
+            session_id: m.session_id,
+            customer_name: m.customer_name || 'Customer',
+            support_type: m.support_type || 'General',
+            last_time: m.time || ''
+          };
+        }
+      });
+
+      let container = document.getElementById("chatListContainer");
+      if(!container) return;
+
+      let html = "";
+      Object.values(sessions).forEach(s => {
+        let badgeColor = s.support_type === 'Manager' ? '#9C27B0' : (s.support_type === 'Delivery' ? '#2196F3' : '#FF9800');
+        let isSelected = selectedChatSession === s.session_id ? 'background: #ffe0e0;' : 'background: #fafafa;';
+        html += `
+          <div onclick="window.selectChatSession('${s.session_id}')" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; ${isSelected} cursor: pointer;">
+            <b>${s.session_id} (${s.customer_name})</b><br><small style="color:#666;">${s.last_time}</small><br>
+            <span style="background: ${badgeColor}; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px;">${s.support_type.toUpperCase()}</span>
+          </div>
+        `;
+      });
+      container.innerHTML = html || `<div style="padding:10px; color:#666;">No active chats found.</div>`;
+    } catch(e) {}
+  };
+
+  window.selectChatSession = async function(sessionId) {
+    selectedChatSession = sessionId;
+    window.loadAdminChats();
+
+    try {
+      let { data } = await supabaseClient.from('chats').select('*').eq('session_id', sessionId).order('id', { ascending: true });
+      let box = document.getElementById("chatMessagesBox");
+      let titleEl = document.getElementById("activeChatTitle");
+      if(!box) return;
+
+      if(data && data.length > 0) {
+        if(titleEl) titleEl.innerText = `Chat Session: ${sessionId} [${data[0].customer_name} - ${data[0].support_type}]`;
+        let html = "";
+        data.forEach(m => {
+          let isCustomer = m.sender === 'Customer';
+          html += `
+            <div style="background: ${isCustomer ? '#fff' : '#e3f2fd'}; padding: 8px 12px; border-radius: 6px; border: 1px solid #eee; width: fit-content; max-width: 80%; ${isCustomer ? '' : 'margin-left: auto; background: #e3f2fd; border-color: #bbdefb;'}">
+              <small style="color: ${isCustomer ? '#777' : '#1976D2'}; display: block; font-weight: bold;">${m.sender} (${m.customer_name || ''})</small>
+              <span>${m.message}</span>
+              <small style="color: #999; display: block; font-size: 10px; margin-top: 2px;">${m.time || ''}</small>
+            </div>
+          `;
+        });
+        box.innerHTML = html;
+        box.scrollTop = box.scrollHeight;
+      }
+    } catch(e) {}
+  };
+
+  window.sendAdminChat = async function() {
+    if(!selectedChatSession) { alert("⚠️ कृपया अघिल्लो सूचीबाट एउटा च्याट छान्नुहोस्!"); return; }
+    let inputEl = document.getElementById("adminChatInput");
+    let msg = inputEl.value.trim();
+    if(!msg) return;
+
+    let timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    let dateStr = new Date().toISOString().slice(0, 10) + ", " + timeStr;
+
+    try {
+      await supabaseClient.from('chats').insert([{
+        session_id: selectedChatSession,
+        customer_name: "Admin Staff",
+        support_type: "Admin",
+        sender: "Admin",
+        message: msg,
+        time: dateStr
+      }]);
+
+      inputEl.value = "";
+      window.selectChatSession(selectedChatSession);
+    } catch(err) {}
+  };
 
   window.drawMonthlySalesChart = function(orders) {
     if (typeof google === 'undefined' || !google.visualization) return;
@@ -1598,9 +1742,7 @@
         let netProfitEl = document.getElementById("summaryNetProfit");
         netProfitEl.innerText = "RM " + netProfit.toFixed(2);
         netProfitEl.style.color = netProfit >= 0 ? "#388E3C" : "#D32F2F";
-    } catch (err) {
-        console.log("Catch error:", err);
-    }
+    } catch (err) {}
   };
 
   window.exportExpenseExcel = async function() {
