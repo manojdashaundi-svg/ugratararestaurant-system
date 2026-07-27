@@ -60,6 +60,11 @@
   <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
 </audio>
 
+<!-- 🖱️ माउस क्लिक साउन्डको लागि अडियो एलिमेन्ट -->
+<audio id="clickSoundAudio" preload="auto">
+  <source src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" type="audio/mpeg">
+</audio>
+
 <div id="loginScreen" class="login-overlay">
   <div class="login-card">
     <h2>🔐 STAFF LOGIN</h2>
@@ -316,121 +321,6 @@
     </div>
 </div>
 
-<!-- 💰 Staff Salary Sheet & Voucher System -->
-<div class="salary-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-    <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">💰 Staff Salary Sheet & Voucher System</h3>
-    
-    <!-- 1. Add New Staff & Designation -->
-    <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd;">
-        <h4 style="margin-bottom: 10px; color: #333;">+ Add New Staff & Designation</h4>
-        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <input id="salStaffName" type="text" placeholder="Full Name (e.g. Shova Kumari)" style="flex: 2; min-width: 200px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-            <input id="salStaffDesig" type="text" placeholder="Designation (e.g. Cleaner, Store Keeper)" style="flex: 2; min-width: 200px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-            <button class="addBtn" onclick="window.addNewSalaryStaff()" style="background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add Staff</button>
-        </div>
-    </div>
-
-    <!-- 2. Create Salary Voucher -->
-    <div style="background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e91e63;">
-        <h4 style="margin-bottom: 15px; color: #e91e63;">🧾 Create Salary Voucher</h4>
-        
-        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
-            <div style="flex: 2; min-width: 250px;">
-                <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Employee Name:</label>
-                <select id="voucherEmpSelect" onchange="window.onVoucherEmpChange()" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
-                    <option value="">-- कामदार रोज्नुहोस् --</option>
-                </select>
-            </div>
-            <div style="flex: 2; min-width: 250px;">
-                <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Designation:</label>
-                <input id="voucherDesignation" type="text" placeholder="Designation" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
-            </div>
-        </div>
-
-        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
-            <div style="flex: 1; min-width: 100px;">
-                <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Day:</label>
-                <input id="voucherDay" type="number" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
-            </div>
-            <div style="flex: 1; min-width: 100px;">
-                <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Month:</label>
-                <input id="voucherMonth" type="number" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
-            </div>
-            <div style="flex: 1; min-width: 100px;">
-                <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Year:</label>
-                <input id="voucherYear" type="number" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
-            </div>
-        </div>
-
-        <!-- Earnings & Allowances -->
-        <div style="margin-bottom: 15px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <label style="font-weight: bold; color: #333;">Earnings & Allowances:</label>
-                <button onclick="window.addEarningRow()" style="background: #e91e63; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">+ Add Earnings</button>
-            </div>
-            <div id="earningsContainer" style="display: flex; flex-direction: column; gap: 8px;">
-                <div style="display: flex; gap: 10px; align-items: center;" class="earning-row">
-                    <input type="text" value="MONTHLY BASIC SALARY PAYED" style="flex: 3; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                    <input type="number" value="0" oninput="window.calculateNetSalary()" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="earning-amount">
-                    <button onclick="window.removeRow(this)" style="background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">✕</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Deductions -->
-        <div style="margin-bottom: 15px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <label style="font-weight: bold; color: #333;">Deductions:</label>
-                <button onclick="window.addDeductionRow()" style="background: #e91e63; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">+ Add Deduction</button>
-            </div>
-            <div id="deductionsContainer" style="display: flex; flex-direction: column; gap: 8px;">
-                <div style="display: flex; gap: 10px; align-items: center;" class="deduction-row">
-                    <input type="text" placeholder="Deduction Description" style="flex: 3; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="deduction-desc">
-                    <input type="number" value="0" oninput="window.calculateNetSalary()" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="deduction-amount">
-                    <button onclick="window.removeRow(this)" style="background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">✕</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Payment Mode -->
-        <div style="margin-bottom: 20px;">
-            <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Payment Mode:</label>
-            <select id="voucherPaymentMode" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
-                <option value="💵 CASH PAYMENT">💵 CASH PAYMENT</option>
-                <option value="🏦 BANK CASH / CHECK DEPOSITE">🏦 BANK CASH / CHECK DEPOSITE</option>
-                <option value="📱 MOBILE BANKING TRANSFER">📱 MOBILE BANKING TRANSFER</option>
-            </select>
-        </div>
-
-        <!-- NET Salary Display -->
-        <div style="background: #fff5f5; border: 1px dashed #e91e63; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 18px; font-weight: bold; color: #e91e63;">
-            NET Salary: RM <span id="displayNetSalary">0.00</span>
-        </div>
-
-        <!-- Save & Print Button -->
-        <button onclick="window.saveAndPrintSalaryVoucher()" style="background: #4CAF50; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px;">💾 Save & Print Salary Voucher</button>
-    </div>
-
-    <!-- 3. Salary Statements Export & Report -->
-    <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
-        <h4 style="color: #333; margin-bottom: 10px;">📊 Salary Statements Export & Report</h4>
-        <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-            <div>
-                <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">Start Date:</label>
-                <input type="date" id="salaryStartDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-            </div>
-            <div>
-                <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">End Date:</label>
-                <input type="date" id="salaryEndDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-            </div>
-            <div style="display: flex; gap: 10px; align-items: flex-end; margin-top: 20px;">
-                <button onclick="window.exportSalaryExcel()" class="excelBtn" style="background: #2e7d32; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📥 Download Excel (.CSV)</button>
-                <button onclick="window.printSalaryPDF()" class="pdfBtn" style="background: #d32f2f; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📄 Print / PDF Report</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <!-- 🎯 KOT र Bill प्रिन्ट मोडल बक्स -->
 <div id="printModalBox" class="print-modal">
   <div class="print-box">
@@ -457,6 +347,26 @@
   var staffListCache = [
     { email: "admin@ugratara.com", password: "123456", role: "admin", status: "Active" }
   ];
+
+  // 🖱️ ग्लोबल माउस क्लिक साउन्ड बजाउने फंक्शन
+  window.playClickSound = function() {
+    try {
+      const clickAudio = document.getElementById("clickSoundAudio");
+      if (clickAudio) {
+        clickAudio.currentTime = 0;
+        clickAudio.play().catch(e => console.log("Click sound play error:", e));
+      }
+    } catch(e) {
+      console.log("Click sound error:", e);
+    }
+  };
+
+  // 🖱️ एडमिन प्यानल भित्र जुनसुकै बटन, लिंक वा अप्सनमा क्लिक गर्दा स्वतः साउन्ड बज्ने इभेन्ट लistener
+  document.addEventListener("click", function(event) {
+    if (event.target.tagName === "BUTTON" || event.target.closest("button") || event.target.tagName === "A" || event.target.closest("a") || event.target.tagName === "SELECT" || event.target.type === "checkbox" || event.target.type === "radio") {
+      window.playClickSound();
+    }
+  });
 
   // 🔔 ३ पटक लगातार "ट्रिङ-ट्रिङ-ट्रिङ" बजाउने फंक्शन
   window.playTringTringBell = function() {
@@ -723,288 +633,6 @@
     window.loadInventoryData();
   };
 
-  window.loadSalaryStaffDropdown = async function() {
-    let { data, error } = await supabaseClient.from('staff_manager').select('*');
-    if (!error && data && data.length > 0) {
-      staffListCache = data.map(s => ({ email: s.staff_name, role: s.designation }));
-    }
-
-    let selectEl = document.getElementById("voucherEmpSelect");
-    if (!selectEl) return;
-    let opts = `<option value="">-- कामदार रोज्नुहोस् --</option>`;
-    staffListCache.forEach(s => {
-      let name = s.email || s.staff_name || '';
-      let desig = s.role || s.designation || '';
-      opts += `<option value="${name}" data-desig="${desig}">${name} (${desig})</option>`;
-    });
-    selectEl.innerHTML = opts;
-
-    let now = new Date();
-    if(document.getElementById("voucherDay")) document.getElementById("voucherDay").value = now.getDate();
-    if(document.getElementById("voucherMonth")) document.getElementById("voucherMonth").value = now.getMonth() + 1;
-    if(document.getElementById("voucherYear")) document.getElementById("voucherYear").value = now.getFullYear();
-
-    window.calculateNetSalary();
-  };
-
-  window.onVoucherEmpChange = function() {
-    let selectEl = document.getElementById("voucherEmpSelect");
-    let selectedOpt = selectEl.options[selectEl.selectedIndex];
-    let desig = selectedOpt.getAttribute("data-desig") || "";
-    if(document.getElementById("voucherDesignation")) {
-      document.getElementById("voucherDesignation").value = desig;
-    }
-  };
-
-  window.addNewSalaryStaff = async function() {
-    let name = document.getElementById("salStaffName").value.trim();
-    let desig = document.getElementById("salStaffDesig").value.trim();
-    if (!name || !desig) { alert("⚠️ कृपया पूरा नाम र पद (Designation) लेख्नुहोस्!"); return; }
-
-    await supabaseClient.from('staff_manager').insert([{ staff_name: name, designation: desig }]);
-    await supabaseClient.from('admins').insert([{ email: name, password: '123', role: desig }]);
-
-    alert("✅ Staff Added Successfully!");
-    document.getElementById("salStaffName").value = "";
-    document.getElementById("salStaffDesig").value = "";
-    window.loadSalaryStaffDropdown();
-    window.loadStaffList();
-  };
-
-  window.addEarningRow = function() {
-    let container = document.getElementById("earningsContainer");
-    let div = document.createElement("div");
-    div.className = "earning-row";
-    div.style.display = "flex";
-    div.style.gap = "10px";
-    div.style.alignItems = "center";
-    div.innerHTML = `
-      <input type="text" placeholder="Allowance Description" style="flex: 3; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-      <input type="number" value="0" oninput="window.calculateNetSalary()" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="earning-amount">
-      <button onclick="window.removeRow(this)" style="background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">✕</button>
-    `;
-    container.appendChild(div);
-  };
-
-  window.addDeductionRow = function() {
-    let container = document.getElementById("deductionsContainer");
-    let div = document.createElement("div");
-    div.className = "deduction-row";
-    div.style.display = "flex";
-    div.style.gap = "10px";
-    div.style.alignItems = "center";
-    div.innerHTML = `
-      <input type="text" placeholder="Deduction Description" style="flex: 3; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="deduction-desc">
-      <input type="number" value="0" oninput="window.calculateNetSalary()" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="deduction-amount">
-      <button onclick="window.removeRow(this)" style="background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">✕</button>
-    `;
-    container.appendChild(div);
-  };
-
-  window.removeRow = function(btn) {
-    btn.closest('div').remove();
-    window.calculateNetSalary();
-  };
-
-  window.calculateNetSalary = function() {
-    let totalEarnings = 0;
-    let earningAmounts = document.querySelectorAll(".earning-amount");
-    earningAmounts.forEach(input => {
-      totalEarnings += parseFloat(input.value) || 0;
-    });
-
-    let totalDeductions = 0;
-    let deductionAmounts = document.querySelectorAll(".deduction-amount");
-    deductionAmounts.forEach(input => {
-      totalDeductions += parseFloat(input.value) || 0;
-    });
-
-    let net = totalEarnings - totalDeductions;
-    if(document.getElementById("displayNetSalary")) {
-      document.getElementById("displayNetSalary").innerText = net.toFixed(2);
-    }
-    return net;
-  };
-
-  window.saveAndPrintSalaryVoucher = async function() {
-    let empName = document.getElementById("voucherEmpSelect").value;
-    let desig = document.getElementById("voucherDesignation").value.trim();
-    let day = document.getElementById("voucherDay").value;
-    let month = document.getElementById("voucherMonth").value;
-    let year = document.getElementById("voucherYear").value;
-    let paymentMode = document.getElementById("voucherPaymentMode").value;
-
-    if (!empName) { alert("⚠️ कृपया कामदारको नाम छान्नुहोस्!"); return; }
-
-    let netSalary = window.calculateNetSalary();
-    let dateStr = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-    let voucherNo = Math.floor(10 + Math.random() * 90);
-
-    let earningsText = "";
-    document.querySelectorAll(".earning-row").forEach(row => {
-      let desc = row.querySelector("input[type='text']").value;
-      let amt = row.querySelector(".earning-amount").value;
-      earningsText += `${desc}: RM ${amt}; `;
-    });
-
-    await supabaseClient.from('expenses').insert([{
-      date: dateStr,
-      category: 'Staff Salary',
-      amount: netSalary,
-      description: `Voucher #${voucherNo} - ${empName} (${desig}) | Mode: ${paymentMode} | ${earningsText}`
-    }]);
-
-    alert("✅ Salary Voucher Saved & Added Successfully!");
-    window.loadExpenseSummary();
-
-    let singleVoucherHtml = `
-      <div style="font-family: Arial, sans-serif; font-size: 11px; color: #000; padding: 14px 18px; border: 1.5px solid #000; background: #fff; height: 44.5vh; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;">
-        <div>
-          <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 8px;">
-            <h3 style="margin: 0; font-size: 14.5px; font-weight: bold;">GLOBAL UGRATARA (A) SDN. BHD.</h3>
-            <p style="margin: 2px 0 0 0; font-size: 10px;">41 & 45, TKT 4, JALAN LEBOH PUDU, 50050, WP. KUALA LUMPUR</p>
-          </div>
-          <div style="text-align: center; font-weight: bold; text-decoration: underline; margin-bottom: 8px; font-size: 12.5px;">SALARY VOUCHER</div>
-          <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 11.5px;">
-            <div><b>Employee Name :</b> ${empName}</div>
-            <div><b>Date :</b> ${day}/${month}/${year}</div>
-          </div>
-          <div style="margin-bottom: 8px; font-size: 11.5px;"><b>Designation :</b> ${desig}</div>
-          <div style="background: #000; color: #fff; padding: 3px 6px; font-weight: bold; margin-bottom: 8px; font-size: 11px;">VOUCHER NO. ${voucherNo}</div>
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 11.5px;">
-            <thead>
-              <tr><th style="border: 1px solid #000; padding: 5px; text-align: left; background:#f0f0f0;">Earnings</th><th style="border: 1px solid #000; padding: 5px; text-align: right; background:#f0f0f0; width: 70px;">RM</th></tr>
-            </thead>
-            <tbody>
-              <tr><td style="border: 1px solid #000; padding: 5px;">1. MONTHLY BASIC SALARY PAYED</td><td style="border: 1px solid #000; padding: 5px; text-align: right;">${netSalary.toFixed(2)}</td></tr>
-            </tbody>
-          </table>
-          <div style="text-align: right; font-weight: bold; margin-bottom: 8px; font-size: 12.5px;">NET Salary: RM ${netSalary.toFixed(2)}</div>
-          <div style="font-weight: bold; font-size: 11px;">☑ ${paymentMode}</div>
-        </div>
-        <div style="display: flex; justify-content: space-between; font-size: 10.5px; align-items: flex-end; border-top: 1px dotted #999; padding-top: 6px;">
-          <div>Hotel Copy / Staff Copy</div>
-          <div style="border-top: 1px solid #000; width: 150px; text-align: center; padding-top: 2px;">Employee Signature</div>
-        </div>
-      </div>
-    `;
-
-    let fullA4PrintHtml = `
-      <html>
-      <head>
-        <title>Salary Voucher Print</title>
-        <style>
-          @page { size: A4 portrait; margin: 5mm 8mm; }
-          body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fff; }
-          .cut-line { border-top: 2px dashed #000; margin-top: 13mm; margin-bottom: 10mm; text-align: center; font-size: 1px; color: transparent; }
-        </style>
-      </head>
-      <body>
-        ${singleVoucherHtml}
-        <div class="cut-line">----------------------------------------------------------------------------------------------------------------------------------------</div>
-        ${singleVoucherHtml}
-        <script>
-          window.onload = function() { window.print(); window.close(); }
-        <\/script>
-      </body>
-      </html>
-    `;
-    
-    let printWin = window.open('', '_blank', 'height=700,width=800');
-    printWin.document.write(fullA4PrintHtml);
-    printWin.document.close();
-  };
-
-  window.exportSalaryExcel = async function() {
-    let startDate = document.getElementById("salaryStartDate").value;
-    let endDate = document.getElementById("salaryEndDate").value;
-
-    let { data } = await supabaseClient.from('expenses').select('*').eq('category', 'Staff Salary');
-    let filtered = (data || []).filter(item => {
-      if (!startDate || !endDate) return true;
-      let itemDt = new Date(item.date);
-      return itemDt >= new Date(startDate) && itemDt <= new Date(endDate);
-    });
-
-    let csv = ["Date,Category,Amount (RM),Description"];
-    filtered.forEach(item => {
-      csv.push(`"${item.date}","${item.category}",${item.amount},"${(item.description || '').replace(/"/g, '""')}"`);
-    });
-
-    let blob = new Blob([csv.join("\n")], { type: "text/csv" });
-    let link = document.createElement("a");
-    link.download = "Salary_Statement_Report.csv";
-    link.href = window.URL.createObjectURL(blob);
-    link.click();
-  };
-
-  window.printSalaryPDF = async function() {
-    let startDate = document.getElementById("salaryStartDate").value;
-    let endDate = document.getElementById("salaryEndDate").value;
-
-    let { data } = await supabaseClient.from('expenses').select('*').eq('category', 'Staff Salary');
-    let filtered = (data || []).filter(item => {
-      if (!startDate || !endDate) return true;
-      let itemDt = new Date(item.date);
-      return itemDt >= new Date(startDate) && itemDt <= new Date(endDate);
-    });
-
-    let total = 0;
-    let rows = "";
-    filtered.forEach((item, idx) => {
-      let amt = parseFloat(item.amount) || 0;
-      total += amt;
-      rows += `
-        <tr>
-          <td style="border:1px solid #ddd; padding:8px; text-align:center;">${idx + 1}</td>
-          <td style="border:1px solid #ddd; padding:8px; text-align:center;">${item.date}</td>
-          <td style="border:1px solid #ddd; padding:8px;">${item.description}</td>
-          <td style="border:1px solid #ddd; padding:8px; text-align:right; color:#d32f2f;"><b>RM ${amt.toFixed(2)}</b></td>
-        </tr>
-      `;
-    });
-
-    let pWin = window.open('', '_blank', 'height=700,width=900');
-    pWin.document.write(`
-      <html>
-      <head>
-        <title>Salary Report Statement</title>
-        <style>
-          body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
-          .header { text-align: center; border-bottom: 2px solid #e91e63; padding-bottom: 10px; margin-bottom: 20px; }
-          table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-          th { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; text-align: left; }
-          .summary { margin-top: 20px; text-align: right; font-size: 16px; background: #fff5f5; padding: 12px; border: 1px solid #ffe0e0; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h2>UGRATARA RESTAURANT</h2>
-          <p>📊 <b>Staff Salary Statement Report</b> (${startDate || 'All Time'} to ${endDate || 'All Time'})</p>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th style="width:40px; text-align:center;">S.N.</th>
-              <th style="text-align:center;">Date</th>
-              <th>Description / Employee Details</th>
-              <th style="text-align:right;">Amount (RM)</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-        <div class="summary">
-          <span style="color: #d32f2f; font-weight: bold;">Total Salary Paid: RM ${total.toFixed(2)}</span>
-        </div>
-        <script>
-          window.onload = function() { window.print(); window.close(); }
-        <\/script>
-      </body>
-      </html>
-    `);
-    pWin.document.close();
-  };
-
   window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
     await supabaseClient.from('orders').update({ status: nextStatus }).eq('order_no', orderNo);
     await window.loadOrders();
@@ -1232,7 +860,6 @@
     window.loadStaffList();
     window.loadExpenseSummary();
     window.loadInventoryData();
-    window.loadSalaryStaffDropdown();
 
     // Background auto-polling backup every 10 seconds
     setInterval(() => {
@@ -1454,7 +1081,6 @@
     document.getElementById("staffPassword").value = "";
     document.getElementById("staffRoleInput").value = "";
     window.loadStaffList();
-    window.loadSalaryStaffDropdown();
   };
 
   window.deleteStaff = async function(staffId) {
