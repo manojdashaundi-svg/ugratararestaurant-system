@@ -664,6 +664,23 @@
   };
 
   window.loadSalaryStaffDropdown = async function() {
+    // 1. admins टेबलबाट सम्पूर्ण स्टाफहरूको नाम र रोलहरू तानेर staff_manager मा स्वतः सिंक गर्ने
+    let { data: adminData, error: adminErr } = await supabaseClient.from('admins').select('*');
+    if (!adminErr && adminData && adminData.length > 0) {
+      for (let adm of adminData) {
+        let staffName = adm.email || adm.username || '';
+        let designation = adm.role || 'Staff';
+        if (staffName) {
+          // Check if already exists in staff_manager to prevent unnecessary duplication
+          let { data: existingMgr } = await supabaseClient.from('staff_manager').select('*').eq('staff_name', staffName);
+          if (!existingMgr || existingMgr.length === 0) {
+            await supabaseClient.from('staff_manager').insert([{ staff_name: staffName, designation: designation }]);
+          }
+        }
+      }
+    }
+
+    // 2. staff_manager टेबलबाट डेटा लोड गरी ड्रपडाउनमा देखाउने
     let { data, error } = await supabaseClient.from('staff_manager').select('*');
     if (!error && data && data.length > 0) {
       staffListCache = data.map(s => ({ email: s.staff_name, role: s.designation }));
@@ -675,7 +692,7 @@
     staffListCache.forEach(s => {
       let name = s.email || s.staff_name || '';
       let desig = s.role || s.designation || '';
-      opts += `<option value="${name}" data-desig="${desig}">${name}</option>`;
+      opts += `<option value="${name}" data-desig="${desig}">${name} (${desig})</option>`;
     });
     selectEl.innerHTML = opts;
 
