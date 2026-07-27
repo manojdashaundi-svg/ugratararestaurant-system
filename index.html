@@ -164,6 +164,7 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
 <script src="supabase.js"></script>
 <script>
   var currentChatSessionId = "ORD_" + Math.floor(1000 + Math.random() * 9000);
+  var activeSupportType = "Manager";
 
   async function generateNextOrderNo() {
     let { data: existingOrders } = await supabaseClient.from('orders').select('order_no');
@@ -189,6 +190,7 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
   };
 
   window.openActiveChat = async function(supportType) {
+    activeSupportType = supportType;
     let bodyEl = document.getElementById("chatPopupContent");
     let headerEl = document.getElementById("chatHeaderTitle");
     if(!bodyEl) return;
@@ -210,24 +212,31 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
       <button onclick="window.resetChatMenu()" style="background: none; border: none; color: #2196F3; font-size: 11px; cursor: pointer; margin-top: 6px; text-decoration: underline;">← Back to menu</button>
     `;
 
+    window.fetchCustomerMessages();
+  };
+
+  window.fetchCustomerMessages = async function() {
     try {
-      let { data } = await supabaseClient.from('chats').select('*').eq('session_id', currentChatSessionId);
-      if(data && data.length > 0) {
-        let msgBox = document.getElementById("customerChatMessages");
-        if(msgBox) {
-          let html = "";
-          data.forEach(m => {
-            let isMe = m.sender === 'Customer';
-            html += `
-              <div style="background: ${isMe ? '#fff' : '#e3f2fd'}; padding: 6px 10px; border-radius: 6px; font-size: 13px; width: fit-content; max-width: 85%; ${isMe ? 'margin-left: auto; border: 1px solid #eee;' : ''}">
-                <b>${m.sender}:</b> ${m.message}
-                <div style="font-size: 9px; color: #888; text-align: right; margin-top: 2px;">${m.time || ''}</div>
-              </div>
-            `;
-          });
-          msgBox.innerHTML = html;
-          msgBox.scrollTop = msgBox.scrollHeight;
-        }
+      let { data } = await supabaseClient.from('chats').select('*').eq('session_id', currentChatSessionId).order('id', { ascending: true });
+      let msgBox = document.getElementById("customerChatMessages");
+      if(msgBox && data) {
+        let html = `
+          <div style="background: #e3f2fd; padding: 6px 10px; border-radius: 6px; font-size: 13px; width: fit-content; max-width: 85%;">
+            <b>Support:</b> Hello! How can we help you with your ${activeSupportType.toLowerCase()}?
+            <div style="font-size: 9px; color: #888; text-align: right; margin-top: 2px;">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+          </div>
+        `;
+        data.forEach(m => {
+          let isMe = m.sender === 'Customer';
+          html += `
+            <div style="background: ${isMe ? '#fff' : '#e3f2fd'}; padding: 6px 10px; border-radius: 6px; font-size: 13px; width: fit-content; max-width: 85%; ${isMe ? 'margin-left: auto; border: 1px solid #eee;' : ''}">
+              <b>${m.sender}:</b> ${m.message}
+              <div style="font-size: 9px; color: #888; text-align: right; margin-top: 2px;">${m.time || ''}</div>
+            </div>
+          `;
+        });
+        msgBox.innerHTML = html;
+        msgBox.scrollTop = msgBox.scrollHeight;
       }
     } catch(e) {
       console.log(e);
@@ -253,17 +262,8 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
         time: dateStr
       }]);
 
-      let msgBox = document.getElementById("customerChatMessages");
-      if(msgBox) {
-        msgBox.innerHTML += `
-          <div style="background: #fff; padding: 6px 10px; border-radius: 6px; font-size: 13px; width: fit-content; max-width: 85%; margin-left: auto; border: 1px solid #eee;">
-            <b>You:</b> ${text}
-            <div style="font-size: 9px; color: #888; text-align: right; margin-top: 2px;">${dateStr}</div>
-          </div>
-        `;
-        inputEl.value = "";
-        msgBox.scrollTop = msgBox.scrollHeight;
-      }
+      inputEl.value = "";
+      window.fetchCustomerMessages();
     } catch(err) {
       console.log("Chat send error:", err);
     }
@@ -283,6 +283,20 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
       <button class="chat-option-btn chat-option-3" onclick="window.openActiveChat('Manager')">👑 3. Complain & Info</button>
     `;
   };
+
+  // 🔄 Realtime listener to instantly show Admin replies on Customer screen
+  try {
+    supabaseClient
+      .channel('public:chats_customer')
+      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, payload => {
+        if(payload.new && payload.new.session_id === currentChatSessionId) {
+          window.fetchCustomerMessages();
+        }
+      })
+      .subscribe();
+  } catch(e) {
+    console.log("Realtime error:", e);
+  }
 </script>
 <script src="script.js"></script>
 </body>
