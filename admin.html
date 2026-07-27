@@ -60,9 +60,9 @@
   <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
 </audio>
 
-<!-- 🖱️ माउस क्लिक साउन्डको लागि अडियो एलिमेन्ट -->
+<!-- 🖱️ माउस क्लिक साउन्डको लागि भरपर्दो अडियो एलिमेन्ट -->
 <audio id="clickSoundAudio" preload="auto">
-  <source src="https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3" type="audio/mpeg">
+  <source src="https://www.soundjay.com/buttons/button-3.mp3" type="audio/mpeg">
 </audio>
 
 <div id="loginScreen" class="login-overlay">
@@ -348,22 +348,26 @@
     { email: "admin@ugratara.com", password: "123456", role: "admin", status: "Active" }
   ];
 
-  // 🖱️ ग्लोबल माउस क्लिक साउन्ड बजाउने फंक्शन
+  // 🖱️ ग्लोबल माउस क्लिक साउन्ड बजाउने भरपर्दो फंक्शन
   window.playClickSound = function() {
     try {
       const clickAudio = document.getElementById("clickSoundAudio");
       if (clickAudio) {
         clickAudio.currentTime = 0;
-        clickAudio.play().catch(e => console.log("Click sound play error:", e));
+        clickAudio.play().catch(e => {
+          // ब्राउजरको अटोप्ले प्रतिबन्ध हटाउन युजर क्लिकमा एकपटक लोड गर्ने
+          console.log("Audio play deferred:", e);
+        });
       }
     } catch(e) {
       console.log("Click sound error:", e);
     }
   };
 
-  // 🖱️ एडमिन प्यानल भित्र जुनसुकै बटन, लिंक वा अप्सनमा क्लिक गर्दा स्वतः साउन्ड बज्ने इभेन्ट लistener
+  // 🖱️ एडमिन प्यानल भित्र जुनसुकै बटन, अप्सन, ड्रपडाउन वा इन्पुटमा क्लिक गर्दा स्वतः साउन्ड बज्ने इभेन्ट लिスナー
   document.addEventListener("click", function(event) {
-    if (event.target.tagName === "BUTTON" || event.target.closest("button") || event.target.tagName === "A" || event.target.closest("a") || event.target.tagName === "SELECT" || event.target.type === "checkbox" || event.target.type === "radio") {
+    let target = event.target;
+    if (target.tagName === "BUTTON" || target.closest("button") || target.tagName === "A" || target.closest("a") || target.tagName === "SELECT" || target.tagName === "INPUT" || target.tagName === "LABEL") {
       window.playClickSound();
     }
   });
@@ -1176,7 +1180,7 @@
                 table { width: 100%; border-collapse: collapse; margin-top: 15px; }
                 th { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; text-align: left; }
                 td { border: 1px solid #ddd; padding: 8px; }
-                .summary-box { margin-top: 20px; text-align: right; font-size: 16px; background: #fff5f5; padding: 12px; border-radius: 6px; border: 1px solid #ffe0e0; }
+                .summary-box { margin-top: 20px; text-align: right; font-size: 16px; background: #f0f7ff; padding: 12px; border-radius: 6px; border: 1px solid #cce5ff; }
             </style>
         </head>
         <body>
