@@ -450,25 +450,43 @@
     var p = document.getElementById("password").value.trim();
     if(u === "" || p === "") { alert("Enter credentials."); return; }
     
-    document.getElementById("loginBtn").innerText = "Verifying...";
-    
-    let { data, error } = await supabaseClient.from('admins').select('*').eq('email', u).eq('password', p).maybeSingle();
-    document.getElementById("loginBtn").innerText = "Login";
+    let btn = document.getElementById("loginBtn");
+    btn.innerText = "Verifying...";
+    btn.disabled = true;
 
-    if (error || !data) {
-      alert("Wrong Email or Password.");
-      return;
+    // Timeout safety to prevent infinite loading on network/db hang
+    let timeoutId = setTimeout(() => {
+      btn.innerText = "Login";
+      btn.disabled = false;
+      alert("⚠️ Connection timeout. Please check your internet or database connection.");
+    }, 5000);
+
+    try {
+      let { data, error } = await supabaseClient.from('admins').select('*').eq('email', u).eq('password', p).maybeSingle();
+      clearTimeout(timeoutId);
+      btn.disabled = false;
+      btn.innerText = "Login";
+
+      if (error || !data) {
+        alert("Wrong Email or Password.");
+        return;
+      }
+
+      sessionStorage.setItem("ADMIN_LOGIN", "true");
+      let userRole = data.role ? data.role.toLowerCase() : "admin";
+      sessionStorage.setItem("USER_ROLE", userRole);
+      localStorage.setItem("adminRole", userRole);
+      sessionStorage.setItem("LOGGED_USER", u.toLowerCase());
+      
+      myRole = userRole;
+      currentLoggedInUser = u.toLowerCase();
+      window.showAdminPanel();
+    } catch(err) {
+      clearTimeout(timeoutId);
+      btn.disabled = false;
+      btn.innerText = "Login";
+      alert("❌ Login error: " + err.message);
     }
-
-    sessionStorage.setItem("ADMIN_LOGIN", "true");
-    let userRole = data.role ? data.role.toLowerCase() : "admin";
-    sessionStorage.setItem("USER_ROLE", userRole);
-    localStorage.setItem("adminRole", userRole);
-    sessionStorage.setItem("LOGGED_USER", u.toLowerCase());
-    
-    myRole = userRole;
-    currentLoggedInUser = u.toLowerCase();
-    window.showAdminPanel();
   };
 
   window.loadOrders = async function() {
@@ -826,7 +844,6 @@
     alert("✅ Salary Voucher Saved & Added to Expenses Successfully!");
     window.loadExpenseSummary();
 
-    // ✅ साइज मिलाइएको HTML (तपाईंको सेम्पल PDF जस्तै चिटिक्क र कम्प्याक्ट)
     let singleVoucherHtml = `
       <div style="font-family: 'Courier New', Courier, monospace; font-size: 10px; color: #000; padding: 6px 10px; border: 1.5px dashed #000; margin-bottom: 6px; width: 100%; box-sizing: border-box; background: #fff;">
         <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 2px; margin-bottom: 4px;">
