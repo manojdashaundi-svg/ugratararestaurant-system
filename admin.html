@@ -29,7 +29,7 @@
     .addBtn { background:#e91e63; color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; }
     .editBtn { background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
     .removeBtn { background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
-    .staff-section, .menu-section, .inventory-section, .salary-section { background:#fff; padding:20px; border-radius:10px; margin-top:40px; border:1px solid #ddd; display:block; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+    .staff-section, .menu-section, .inventory-section, .salary-section, .chat-section { background:#fff; padding:20px; border-radius:10px; margin-top:40px; border:1px solid #ddd; display:block; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
     .excelBtn { background:#1F7246; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
     .pdfBtn { background:#E01A22; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
     .login-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f5f5f5; display:flex; justify-content:center; align-items:center; z-index:99999; }
@@ -129,6 +129,53 @@
       <div style="display: flex; gap: 10px; margin-top: 5px;">
         <button class="excelBtn" onclick="window.exportExcelReport()" style="background: #1F7246; color: white; border: none; padding: 11px 18px; border-radius: 8px; font-weight: bold; cursor: pointer;">📥 Export Excel (.CSV)</button>
         <button class="pdfBtn" onclick="window.printPdfReport()" style="background: #E01A22; color: white; border: none; padding: 11px 18px; border-radius: 8px; font-weight: bold; cursor: pointer;">🖨️ Print / Download PDF</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 💬 Live Support Chat Center Section -->
+  <div class="chat-section">
+    <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">💬 Live Support Chat Center</h3>
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 280px; border-right: 1px solid #ddd; padding-right: 10px;">
+        <h4>Active Chats</h4>
+        <div id="chatListContainer" style="display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto;">
+          <div style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #fafafa; cursor: pointer;">
+            <b>ORD0076 (Sh...)</b><br><small>2026-07-11, 01:44 PM</small><br>
+            <span style="background: #9C27B0; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px;">MANAGER</span>
+          </div>
+          <div style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #fafafa; cursor: pointer;">
+            <b>ORD0087 (mio okl k)</b><br><small>2026-07-11, 01:44 PM</small><br>
+            <span style="background: #2196F3; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px;">DELIVERY</span>
+          </div>
+        </div>
+      </div>
+      <div style="flex: 2; min-width: 320px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 10px;">
+          <h4 style="margin: 0;" id="activeChatTitle">Order: ORD0076 [Complain and Product Information]</h4>
+          <div>
+            <span style="font-size: 13px; font-weight: bold; color: #555;">Pass to:</span>
+            <button onclick="window.passChat('Manager')" style="background: #9C27B0; color: #white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; color:#fff; font-size:12px;">Manager</button>
+            <button onclick="window.passChat('O. Taker')" style="background: #FF9800; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size:12px;">O. Taker</button>
+            <button onclick="window.passChat('Delivery')" style="background: #2196F3; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size:12px;">Delivery</button>
+          </div>
+        </div>
+        <div id="chatMessagesBox" style="background: #f9f9f9; padding: 15px; border-radius: 8px; height: 250px; overflow-y: auto; border: 1px solid #ddd; display: flex; flex-direction: column; gap: 10px;">
+          <div style="background: #fff; padding: 8px 12px; border-radius: 6px; border: 1px solid #eee; width: fit-content; max-width: 80%;">
+            <small style="color: #777; display: block; font-weight: bold;">Customer</small>
+            <span>hi</span>
+            <small style="color: #999; display: block; font-size: 10px; margin-top: 2px;">2026-07-11, 01:44 PM</small>
+          </div>
+          <div style="background: #fff; padding: 8px 12px; border-radius: 6px; border: 1px solid #eee; width: fit-content; max-width: 80%;">
+            <small style="color: #777; display: block; font-weight: bold;">Customer</small>
+            <span>Namaste</span>
+            <small style="color: #999; display: block; font-size: 10px; margin-top: 2px;">2026-07-11, 01:45 PM</small>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+          <input type="text" id="adminChatInput" placeholder="Type a reply..." style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+          <button onclick="window.sendAdminChat()" style="background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">Send</button>
+        </div>
       </div>
     </div>
   </div>
@@ -668,6 +715,27 @@
       return ordNo.includes(query) || custName.includes(query) || phoneNum.includes(query);
     });
     window.renderActiveOrdersTable(filtered);
+  };
+
+  window.passChat = function(roleName) {
+    alert("✅ Chat successfully passed to: " + roleName);
+  };
+
+  window.sendAdminChat = function() {
+    let inputEl = document.getElementById("adminChatInput");
+    let msg = inputEl.value.trim();
+    if(!msg) return;
+    let box = document.getElementById("chatMessagesBox");
+    let nowStr = new Date().toLocaleString();
+    box.innerHTML += `
+      <div style="background: #e3f2fd; padding: 8px 12px; border-radius: 6px; border: 1px solid #bbdefb; width: fit-content; max-width: 80%; margin-left: auto;">
+        <small style="color: #1976D2; display: block; font-weight: bold;">Admin (You)</small>
+        <span>${msg}</span>
+        <small style="color: #999; display: block; font-size: 10px; margin-top: 2px;">${nowStr}</small>
+      </div>
+    `;
+    inputEl.value = "";
+    box.scrollTop = box.scrollHeight;
   };
 
   window.loadInventoryData = async function() {
