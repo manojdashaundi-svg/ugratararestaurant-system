@@ -163,7 +163,8 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase.js"></script>
 <script>
-  // डेटाबेसबाट हालसम्मका अर्डरहरू तानेर सही सिरियल नम्बर निकाल्ने
+  var currentChatSessionId = "ORD_" + Math.floor(1000 + Math.random() * 9000);
+
   async function generateNextOrderNo() {
     let { data: existingOrders } = await supabaseClient.from('orders').select('order_no');
     let nextSerialNo = 1001;
@@ -180,7 +181,6 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
     return "ORD" + nextSerialNo;
   }
 
-  // 💬 Live Support Chat Toggle & Active Chat Window Function
   window.toggleChatPopup = function() {
     let box = document.getElementById("chatPopupBox");
     if (box) {
@@ -188,48 +188,85 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
     }
   };
 
-  window.openActiveChat = function(supportType) {
+  window.openActiveChat = async function(supportType) {
     let bodyEl = document.getElementById("chatPopupContent");
     let headerEl = document.getElementById("chatHeaderTitle");
     if(!bodyEl) return;
 
     if(headerEl) headerEl.innerText = "💬 Live Chat (" + supportType + ")";
 
-    let nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-
     bodyEl.innerHTML = `
       <div style="font-size: 12px; color: #666; margin-bottom: 8px; text-align: center;">Connected to ${supportType} Support</div>
       <div id="customerChatMessages" style="height: 180px; overflow-y: auto; background: #f9f9f9; border: 1px solid #ddd; border-radius: 6px; padding: 8px; display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px;">
         <div style="background: #e3f2fd; padding: 6px 10px; border-radius: 6px; font-size: 13px; width: fit-content; max-width: 85%;">
           <b>Support:</b> Hello! How can we help you with your ${supportType.toLowerCase()}?
-          <div style="font-size: 9px; color: #888; text-align: right; margin-top: 2px;">${nowStr}</div>
+          <div style="font-size: 9px; color: #888; text-align: right; margin-top: 2px;">${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
         </div>
       </div>
       <div style="display: flex; gap: 6px;">
         <input type="text" id="customerChatInput" placeholder="Type message..." style="flex: 1; padding: 8px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; margin:0;">
-        <button onclick="window.sendCustomerChatMessage()" style="background: #e91e63; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px;">Send</button>
+        <button onclick="window.sendCustomer('${supportType}')" style="background: #e91e63; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 13px;">Send</button>
       </div>
       <button onclick="window.resetChatMenu()" style="background: none; border: none; color: #2196F3; font-size: 11px; cursor: pointer; margin-top: 6px; text-decoration: underline;">← Back to menu</button>
     `;
+
+    try {
+      let { data } = await supabaseClient.from('chats').select('*').eq('session_id', currentChatSessionId);
+      if(data && data.length > 0) {
+        let msgBox = document.getElementById("customerChatMessages");
+        if(msgBox) {
+          let html = "";
+          data.forEach(m => {
+            let isMe = m.sender === 'Customer';
+            html += `
+              <div style="background: ${isMe ? '#fff' : '#e3f2fd'}; padding: 6px 10px; border-radius: 6px; font-size: 13px; width: fit-content; max-width: 85%; ${isMe ? 'margin-left: auto; border: 1px solid #eee;' : ''}">
+                <b>${m.sender}:</b> ${m.message}
+                <div style="font-size: 9px; color: #888; text-align: right; margin-top: 2px;">${m.time || ''}</div>
+              </div>
+            `;
+          });
+          msgBox.innerHTML = html;
+          msgBox.scrollTop = msgBox.scrollHeight;
+        }
+      }
+    } catch(e) {
+      console.log(e);
+    }
   };
 
-  window.sendCustomerChatMessage = function() {
+  window.sendCustomer = async function(supportType) {
     let inputEl = document.getElementById("customerChatInput");
-    let msgBox = document.getElementById("customerChatMessages");
-    if(!inputEl || !msgBox) return;
+    if(!inputEl) return;
     let text = inputEl.value.trim();
     if(!text) return;
 
-    let nowStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    let timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    let dateStr = new Date().toISOString().slice(0, 10) + ", " + timeStr;
 
-    msgBox.innerHTML += `
-      <div style="background: #fff; padding: 6px 10px; border-radius: 6px; font-size: 13px; width: fit-content; max-width: 85%; margin-left: auto; border: 1px solid #eee;">
-        <b>You:</b> ${text}
-        <div style="font-size: 9px; color: #888; text-align: right; margin-top: 2px;">${nowStr}</div>
-      </div>
-    `;
-    inputEl.value = "";
-    msgBox.scrollTop = msgBox.scrollHeight;
+    try {
+      await supabaseClient.from('chats').insert([{
+        session_id: currentChatSessionId,
+        customer_name: document.getElementById("customerName")?.value || "Guest Customer",
+        support_type: supportType,
+        sender: "Customer",
+        message: text,
+        time: dateStr
+      }]);
+
+      let msgBox = document.getElementById("customerChatMessages");
+      if(msgBox) {
+        msgBox.innerHTML += `
+          <div style="background: #fff; padding: 6px 10px; border-radius: 6px; font-size: 13px; width: fit-content; max-width: 85%; margin-left: auto; border: 1px solid #eee;">
+            <b>You:</b> ${text}
+            <div style="font-size: 9px; color: #888; text-align: right; margin-top: 2px;">${dateStr}</div>
+          </div>
+        `;
+        inputEl.value = "";
+        msgBox.scrollTop = msgBox.scrollHeight;
+      }
+    } catch(err) {
+      console.log("Chat send error:", err);
+    }
   };
 
   window.resetChatMenu = function() {
