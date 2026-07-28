@@ -63,7 +63,7 @@
 <div id="loginScreen" class="login-overlay">
   <div class="login-card">
     <h2>🔐 STAFF LOGIN</h2>
-    <input id="username" type="text" placeholder="Username" autocomplete="off" value="admin@ugratara.com">
+    <input id="username" type="text" placeholder="Username / Email" autocomplete="off" value="admin@ugratara.com">
     <input id="password" type="password" placeholder="Password" autocomplete="off" value="123456">
     <button id="loginBtn" onclick="window.handleLogin()">Login</button>
   </div>
@@ -194,7 +194,7 @@
   </div>
 
   <!-- 📦 Inventory Management Section -->
-  <div class="inventory-section">
+  <div id="inventoryManagementBox" class="inventory-section">
     <h3>📦 Inventory Management</h3>
     <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #ddd;">
       <div style="margin-bottom: 15px;">
@@ -268,7 +268,7 @@
     </div>
   </div>
 
-  <div style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
+  <div id="expenseTrackerBox" style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
       <h3 style="margin-bottom: 15px; color: #333;">💰 Expense & Profit Tracker</h3>
       
       <!-- खर्च थप्ने इनपुट बक्सहरू -->
@@ -308,7 +308,7 @@
   </div>
 
   <!-- 💰 Staff Salary Sheet & Voucher System -->
-  <div class="salary-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <div id="salaryManagementBox" class="salary-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
       <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">💰 Staff Salary Sheet & Voucher System</h3>
       
       <!-- 1. Add New Staff & Designation -->
@@ -553,17 +553,42 @@
     btn.innerText = "Verifying...";
     btn.disabled = true;
 
-    setTimeout(() => {
-      sessionStorage.setItem("ADMIN_LOGIN", "true");
-      sessionStorage.setItem("USER_ROLE", "admin");
-      localStorage.setItem("adminRole", "admin");
-      sessionStorage.setItem("LOGGED_USER", u);
-      myRole = "admin";
-      currentLoggedInUser = u;
-      btn.innerText = "Login";
-      btn.disabled = false;
-      window.showAdminPanel();
-    }, 300);
+    try {
+      let { data, error } = await supabaseClient.from('admins').select('*').eq('email', u).single();
+      if (!error && data) {
+        if (String(data.password).trim() === p) {
+          let assignedRole = String(data.role || "admin").toLowerCase();
+          sessionStorage.setItem("ADMIN_LOGIN", "true");
+          sessionStorage.setItem("USER_ROLE", assignedRole);
+          localStorage.setItem("adminRole", assignedRole);
+          sessionStorage.setItem("LOGGED_USER", u);
+          myRole = assignedRole;
+          currentLoggedInUser = u;
+          btn.innerText = "Login";
+          btn.disabled = false;
+          window.showAdminPanel();
+          return;
+        }
+      }
+    } catch(e) {}
+
+    // Default fallback for master admin
+    if (u === "admin@ugratara.com" && p === "123456") {
+        sessionStorage.setItem("ADMIN_LOGIN", "true");
+        sessionStorage.setItem("USER_ROLE", "admin");
+        localStorage.setItem("adminRole", "admin");
+        sessionStorage.setItem("LOGGED_USER", u);
+        myRole = "admin";
+        currentLoggedInUser = u;
+        btn.innerText = "Login";
+        btn.disabled = false;
+        window.showAdminPanel();
+        return;
+    }
+
+    btn.innerText = "Login";
+    btn.disabled = false;
+    alert("⚠️ गलत Username वा Password!");
   };
 
   window.loadOrders = async function() {
@@ -1027,7 +1052,7 @@
             <tbody>
               <tr><td style="border: 1px solid #000; padding: 5px;">1. MONTHLY BASIC SALARY PAYED</td><td style="border: 1px solid #000; padding: 5px; text-align: right;">${netSalary.toFixed(2)}</td></tr>
             </tbody>
-          </table>
+           </table>
           <div style="text-align: right; font-weight: bold; margin-bottom: 8px; font-size: 12.5px;">NET Salary: RM ${netSalary.toFixed(2)}</div>
           <div style="font-weight: bold; font-size: 11px;">☑ ${paymentMode}</div>
         </div>
@@ -1058,7 +1083,7 @@
       </body>
       </html>
     `;
-     
+    
     let printWin = window.open('', '_blank', 'height=700,width=800');
     printWin.document.write(fullA4PrintHtml);
     printWin.document.close();
@@ -1205,7 +1230,7 @@
         </div>
       `}
     </div>`;
-     
+    
     if(document.getElementById("printableInvoiceArea")) {
         document.getElementById("printableInvoiceArea").innerHTML = invoiceHtml;
         document.getElementById("printModalBox").style.display = "flex";
@@ -1276,7 +1301,7 @@
     if(document.getElementById("dashTodaySales")) document.getElementById("dashTodaySales").innerText = "RM " + todaySales.toFixed(2);
     if(document.getElementById("dashMonthSales")) document.getElementById("dashMonthSales").innerText = "RM " + monthSales.toFixed(2);
     if(document.getElementById("dashAvgOrder")) document.getElementById("dashAvgOrder").innerText = "RM " + avgOrderValue.toFixed(2);
-     
+    
     window.drawMonthlySalesChart(orders);
     window.drawHourlySalesChart(orders);
   };
@@ -1366,14 +1391,58 @@
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("adminContent").style.display = "block";
     window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
-     
+    
     let roleBadge = document.getElementById("userRoleBadge");
     if(roleBadge) roleBadge.innerText = myRole.toUpperCase();
 
+    // 🛡️ भूमिका (Role) अनुसार सेक्सनहरू नियन्त्रण गर्ने कोड
     let dashBox = document.getElementById("salesDashboardBox");
-    if(dashBox) dashBox.style.display = "flex";
+    let monthlyChartDiv = document.getElementById("monthlySalesChartDiv");
+    let hourlyChartDiv = document.getElementById("hourlySalesChartDiv");
+    let salesReportDiv = document.getElementById("salesReportGeneratorSection");
     let menuBox = document.getElementById("menuManagementBox");
-    if(menuBox) menuBox.style.display = "block";
+    let inventoryBox = document.getElementById("inventoryManagementBox");
+    let staffBox = document.getElementById("staffManagementBox");
+    let expenseBox = document.getElementById("expenseTrackerBox");
+    let salaryBox = document.getElementById("salaryManagementBox");
+
+    if (myRole === "admin") {
+        if(dashBox) dashBox.style.display = "flex";
+        if(monthlyChartDiv) monthlyChartDiv.style.display = "block";
+        if(hourlyChartDiv) hourlyChartDiv.style.display = "block";
+        if(menuBox) menuBox.style.display = "block";
+        if(inventoryBox) inventoryBox.style.display = "block";
+        if(staffBox) staffBox.style.display = "block";
+        if(expenseBox) expenseBox.style.display = "block";
+        if(salaryBox) salaryBox.style.display = "block";
+    } else if (myRole === "manager") {
+        if(dashBox) dashBox.style.display = "flex";
+        if(monthlyChartDiv) monthlyChartDiv.style.display = "block";
+        if(hourlyChartDiv) hourlyChartDiv.style.display = "block";
+        if(menuBox) menuBox.style.display = "block";
+        if(inventoryBox) inventoryBox.style.display = "block";
+        if(staffBox) staffBox.style.display = "none";
+        if(expenseBox) expenseBox.style.display = "block";
+        if(salaryBox) salaryBox.style.display = "block";
+    } else if (myRole === "order_taker" || myRole === "cook") {
+        if(dashBox) dashBox.style.display = "none";
+        if(monthlyChartDiv) monthlyChartDiv.style.display = "none";
+        if(hourlyChartDiv) monthlyChartDiv.style.display = "none";
+        if(menuBox) menuBox.style.display = "block";
+        if(inventoryBox) inventoryBox.style.display = "none";
+        if(staffBox) staffBox.style.display = "none";
+        if(expenseBox) expenseBox.style.display = "none";
+        if(salaryBox) salaryBox.style.display = "none";
+    } else if (myRole === "delivery") {
+        if(dashBox) dashBox.style.display = "none";
+        if(monthlyChartDiv) monthlyChartDiv.style.display = "none";
+        if(hourlyChartDiv) monthlyChartDiv.style.display = "none";
+        if(menuBox) menuBox.style.display = "none";
+        if(inventoryBox) inventoryBox.style.display = "none";
+        if(staffBox) staffBox.style.display = "none";
+        if(expenseBox) expenseBox.style.display = "none";
+        if(salaryBox) salaryBox.style.display = "none";
+    }
 
     window.loadMenuList();
     window.loadOrders();
@@ -1573,7 +1642,7 @@
     if (row) {
       let statusCell = row.cells[3];
       if (statusCell) statusCell.innerText = newStatus;
-       
+      
       btnElement.innerText = newStatus === 'Active' ? '🟢 Active' : '🔴 Inactive';
       btnElement.className = newStatus === 'Active' ? 'inStockBtn' : 'outStockBtn';
       btnElement.setAttribute('onclick', `window.toggleStaffStatus(this, '${newStatus}')`);
