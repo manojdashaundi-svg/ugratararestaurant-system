@@ -728,18 +728,7 @@
     if(!tableBody) return;
     
     let html = "";
-    let isOrderTaker = (window.myRole === "order_taker" || window.myRole === "ordertaker");
-
-    // यदि ORDER_TAKER हो भने 'preparing' स्टेटस भएका अर्डरहरूलाई रेन्डर गर्ने सूचीबाट पूर्ण रूपमा फिल्टर गरेर हटाउने
-    let filteredOrders = ordersToRender;
-    if (isOrderTaker) {
-      filteredOrders = ordersToRender.filter(o => {
-        let st = String(o.status || "").trim().toLowerCase();
-        return st !== "preparing";
-      });
-    }
-
-    let limitedOrders = filteredOrders.slice(0, 10);
+    let limitedOrders = ordersToRender.slice(0, 10);
     let totalOrdersCount = limitedOrders.length;
 
     if(totalOrdersCount === 0) {
@@ -755,21 +744,20 @@
         let delivHtml = (o.proof_img && o.proof_img !== "None" && o.proof_img !== "") ?  
           `<img src="${o.proof_img}" class="proof-thumb" onclick="window.openImageViewer('${o.proof_img}')">` : `None`;
         
-        let statusSelect = isOrderTaker ? `<b style="text-transform: uppercase; color: #e91e63;">${o.status || 'Pending'}</b>` : 
-          `<select id="status_${o.order_no || o.id}">
-            <option value="Pending" ${status==="pending"?"selected":""}>Pending</option>
-            <option value="Preparing" ${status==="preparing"?"selected":""}>Preparing</option>
-            <option value="Ready" ${status==="ready"?"selected":""}>Ready</option>
-            <option value="Out for Delivery" ${status==="out for delivery"?"selected":""}>Out for Delivery</option>
-            <option value="Delivered" ${status==="delivered"?"selected":""}>Delivered</option>
-          </select> 
-          <button class="updateBtn" onclick="window.manualUpdate('${o.order_no || o.id}')">Go</button>`;
+        let statusSelect = `<select id="status_${o.order_no || o.id}">
+          <option value="Pending" ${status==="pending"?"selected":""}>Pending</option>
+          <option value="Preparing" ${status==="preparing"?"selected":""}>Preparing</option>
+          <option value="Ready" ${status==="ready"?"selected":""}>Ready</option>
+          <option value="Out for Delivery" ${status==="out for delivery"?"selected":""}>Out for Delivery</option>
+          <option value="Delivered" ${status==="delivered"?"selected":""}>Delivered</option>
+        </select> 
+        <button class="updateBtn" onclick="window.manualUpdate('${o.order_no || o.id}')">Go</button>`;
 
         let actionButtons = "";
         if (status === "pending" || status === "order received" || status === "") {
             actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
         } else if (status === "preparing") {
-            actionButtons = ``;
+            actionButtons = `<button class="rdyBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Ready', 'bill')">🍳 Ready & Bill</button>`;
         } else if (status === "ready") {
             actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no || o.id}', 'Out for Delivery')">🚚 Dispatch</button>`;
         } else if (status === "out for delivery") {
