@@ -466,6 +466,14 @@
   </div>
 </div>
 
+<!-- 🖼️ Image Viewer Modal (Payment Slip & Delivery Proof ठूलो ब्यानरमा हेर्नका लागि थप गरिएको) -->
+<div id="imageViewerModal" class="image-viewer-modal" onclick="window.closeImageViewer()">
+  <div class="image-viewer-box" onclick="event.stopPropagation()">
+    <img id="viewerTargetImage" src="" alt="Proof Banner">
+    <button class="close-viewer-btn" onclick="window.closeImageViewer()">Close ✕</button>
+  </div>
+</div>
+
 <script>
   const SUPABASE_URL = 'https://lorhrfdqzagulicwcctx.supabase.co';
   const SUPABASE_ANON_KEY = 'sb_publishable_YxubnsG5x3QD_OaPzEEy_w_wzLVLSlW';
@@ -1501,44 +1509,44 @@
     printWindow.document.write(`
       <html>
       <head>
-          <title>Sales Report Statement</title>
-          <style>
-              body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
-              .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e91e63; padding-bottom: 10px; }
-              .header h2 { margin: 0; color: #e91e63; font-size: 24px; }
-              .header p { margin: 5px 0 0 0; color: #666; font-size: 14px; }
-              table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-              th { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; text-align: left; }
-              td { border: 1px solid #ddd; padding: 8px; }
-              .summary-box { margin-top: 20px; text-align: right; font-size: 16px; background: #f0f7ff; padding: 12px; border-radius: 6px; border: 1px solid #cce5ff; }
-          </style>
+        <title>Sales Report Statement</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+          .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e91e63; padding-bottom: 10px; }
+          .header h2 { margin: 0; color: #e91e63; font-size: 24px; }
+          .header p { margin: 5px 0 0 0; color: #666; font-size: 14px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+          th { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; text-align: left; }
+          td { border: 1px solid #ddd; padding: 8px; }
+          .summary-box { margin-top: 20px; text-align: right; font-size: 16px; background: #f0f7ff; padding: 12px; border-radius: 6px; border: 1px solid #cce5ff; }
+        </style>
       </head>
       <body>
-          <div class="header">
-              <h2>UGRATARA RESTAURANT</h2>
-              <p>📊 <b>Sales Report Statement</b> (${startDate || 'All Time'} to ${endDate || 'All Time'})</p>
-          </div>
-          <table>
-              <thead>
-                  <tr>
-                      <th style="width: 40px; text-align: center;">S.N.</th>
-                      <th style="text-align: center;">Date & Time</th>
-                      <th style="text-align: center;">Order No</th>
-                      <th>Customer Name</th>
-                      <th style="text-align: center;">Status</th>
-                      <th style="text-align: right;">Total Amount</th>
-                  </tr>
-              </thead>
-              <tbody>
-                  ${tableRows}
-              </tbody>
-          </table>
-          <div class="summary-box">
-              <span style="color: #1976D2; font-weight: bold;">Total Revenue: RM ${totalRev.toFixed(2)}</span>
-          </div>
-          <script>
-              window.onload = function() { window.print(); window.close(); }
-          <\/script>
+        <div class="header">
+          <h2>UGRATARA RESTAURANT</h2>
+          <p>📊 <b>Sales Report Statement</b> (${startDate || 'All Time'} to ${endDate || 'All Time'})</p>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width: 40px; text-align: center;">S.N.</th>
+              <th style="text-align: center;">Date & Time</th>
+              <th style="text-align: center;">Order No</th>
+              <th>Customer Name</th>
+              <th style="text-align: center;">Status</th>
+              <th style="text-align: right;">Total Amount</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${tableRows}
+          </tbody>
+        </table>
+        <div class="summary-box">
+          <span style="color: #1976D2; font-weight: bold;">Total Revenue: RM ${totalRev.toFixed(2)}</span>
+        </div>
+        <script>
+          window.onload = function() { window.print(); window.close(); }
+        <\/script>
       </body>
       </html>
     `);
@@ -1733,8 +1741,8 @@
             <script>
                 window.onload = function() { window.print(); window.close(); }
             <\/script>
-        </body>
-        </html>
+      </body>
+      </html>
     `);
     printWindow.document.close();
   };
