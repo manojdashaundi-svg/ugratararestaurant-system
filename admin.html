@@ -63,7 +63,7 @@
 <div id="loginScreen" class="login-overlay">
   <div class="login-card">
     <h2>🔐 STAFF LOGIN</h2>
-    <input id="username" type="text" placeholder="Username" autocomplete="off" value="admin@ugratara.com">
+    <input id="username" type="text" placeholder="Username / Email" autocomplete="off" value="admin@ugratara.com">
     <input id="password" type="password" placeholder="Password" autocomplete="off" value="123456">
     <button id="loginBtn" onclick="window.handleLogin()">Login</button>
   </div>
@@ -544,26 +544,48 @@
     } catch(e) {}
   }, { once: true });
 
+  // 🔐 Supabase बाट युजरनेम र पासवर्ड प्रमाणीकरण गर्ने र सही रोल तानेर प्यानल खोल्ने फंक्सन
   window.handleLogin = async function() {
     var u = document.getElementById("username").value.trim().toLowerCase();
     var p = document.getElementById("password").value.trim();
-    if(u === "" || p === "") { alert("Enter credentials."); return; }
+    if(u === "" || p === "") { alert("कृपया युजरनेम र पासवर्ड लेख्नुहोस्!"); return; }
     
     let btn = document.getElementById("loginBtn");
     btn.innerText = "Verifying...";
     btn.disabled = true;
 
-    setTimeout(() => {
-      sessionStorage.setItem("ADMIN_LOGIN", "true");
-      sessionStorage.setItem("USER_ROLE", "admin");
-      localStorage.setItem("adminRole", "admin");
-      sessionStorage.setItem("LOGGED_USER", u);
-      myRole = "admin";
-      currentLoggedInUser = u;
+    try {
+      let { data, error } = await supabaseClient
+        .from('admins')
+        .select('*')
+        .ilike('email', u)
+        .eq('password', p)
+        .single();
+
       btn.innerText = "Login";
       btn.disabled = false;
+
+      if (error || !data) {
+        alert("❌ गलत युजरनेम वा पासवर्ड! कृपया फेरि प्रयास गर्नुहोस्।");
+        return;
+      }
+
+      let assignedRole = data.role ? String(data.role).trim() : "admin";
+
+      sessionStorage.setItem("ADMIN_LOGIN", "true");
+      sessionStorage.setItem("USER_ROLE", assignedRole);
+      localStorage.setItem("adminRole", assignedRole);
+      sessionStorage.setItem("LOGGED_USER", u);
+      
+      myRole = assignedRole;
+      currentLoggedInUser = u;
+
       window.showAdminPanel();
-    }, 300);
+    } catch(err) {
+      btn.innerText = "Login";
+      btn.disabled = false;
+      alert("⚠️ लगइन गर्दा त्रुटि भयो: " + err.message);
+    }
   };
 
   window.loadOrders = async function() {
@@ -1365,10 +1387,10 @@
   window.showAdminPanel = function() {
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("adminContent").style.display = "block";
-    window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
+    window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toUpperCase();
      
     let roleBadge = document.getElementById("userRoleBadge");
-    if(roleBadge) roleBadge.innerText = myRole.toUpperCase();
+    if(roleBadge) roleBadge.innerText = window.myRole;
 
     let dashBox = document.getElementById("salesDashboardBox");
     if(dashBox) dashBox.style.display = "flex";
@@ -1728,9 +1750,9 @@
             <\/script>
       </body>
       </html>
-    `);
-    printWindow.document.close();
-  };
+  `);
+  printWindow.document.close();
+};
 </script>
 </body>
 </html>
