@@ -115,7 +115,7 @@
   </div>
 
   <!-- 📊 Sales Report Generator & Export Section -->
-  <div style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <div id="salesReportSection" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
     <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">📊 Sales Report Generator & Export</h3>
     <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
       <div>
@@ -194,7 +194,7 @@
   </div>
 
   <!-- 📦 Inventory Management Section -->
-  <div class="inventory-section">
+  <div id="inventorySectionBox" class="inventory-section">
     <h3>📦 Inventory Management</h3>
     <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #ddd;">
       <div style="margin-bottom: 15px;">
@@ -268,7 +268,7 @@
     </div>
   </div>
 
-  <div style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
+  <div id="expenseTrackerBox" style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
       <h3 style="margin-bottom: 15px; color: #333;">💰 Expense & Profit Tracker</h3>
       
       <!-- खर्च थप्ने इनपुट बक्सहरू -->
@@ -308,7 +308,7 @@
   </div>
 
   <!-- 💰 Staff Salary Sheet & Voucher System -->
-  <div class="salary-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <div id="salarySectionBox" class="salary-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
       <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">💰 Staff Salary Sheet & Voucher System</h3>
       
       <!-- 1. Add New Staff & Designation -->
@@ -423,7 +423,7 @@
   </div>
 
   <!-- 💬 Live Support Chat Center Section (Moved to Bottom) -->
-  <div class="chat-section">
+  <div id="chatSectionBox" class="chat-section">
     <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">💬 Live Support Chat Center</h3>
     <div style="display: flex; gap: 20px; flex-wrap: wrap;">
       <div style="flex: 1; min-width: 280px; border-right: 1px solid #ddd; padding-right: 10px;">
@@ -727,8 +727,26 @@
     var tableBody = document.getElementById("ordersTable");
     if(!tableBody) return;
     
+    let currentRoleLower = String(sessionStorage.getItem("USER_ROLE") || "").toLowerCase();
+    let processedOrders = ordersToRender;
+
+    // 🎯 ORDER_TAKER को लागि फिल्टर (Pending/Order Received मात्र, Instant Action मा Receive & KOT)
+    if (currentRoleLower.includes("order_taker") || currentRoleLower.includes("ordertaker")) {
+      processedOrders = ordersToRender.filter(o => {
+        let st = String(o.status || "").trim().toLowerCase();
+        return st === "pending" || st === "order received" || st === "";
+      });
+    } 
+    // 🚚 DELIVERY को लागि फिल्टर (Ready वा Out for Delivery मात्र)
+    else if (currentRoleLower.includes("delivery")) {
+      processedOrders = ordersToRender.filter(o => {
+        let st = String(o.status || "").trim().toLowerCase();
+        return st === "ready" || st === "out for delivery";
+      });
+    }
+
     let html = "";
-    let limitedOrders = ordersToRender.slice(0, 10);
+    let limitedOrders = processedOrders.slice(0, 10);
     let totalOrdersCount = limitedOrders.length;
 
     if(totalOrdersCount === 0) {
@@ -1392,19 +1410,51 @@
     let roleBadge = document.getElementById("userRoleBadge");
     if(roleBadge) roleBadge.innerText = window.myRole;
 
-    let dashBox = document.getElementById("salesDashboardBox");
-    if(dashBox) dashBox.style.display = "flex";
-    let menuBox = document.getElementById("menuManagementBox");
-    if(menuBox) menuBox.style.display = "block";
+    let roleLower = window.myRole.toLowerCase();
 
-    window.loadMenuList();
+    // 🎯 भूमिका अनुसार सेक्सनहरू लुकाउने वा देखाउने व्यवस्थापन
+    let dashBox = document.getElementById("salesDashboardBox");
+    let monthlyChart = document.getElementById("monthlySalesChartDiv");
+    let hourlyChart = document.getElementById("hourlySalesChartDiv");
+    let salesReportSec = document.getElementById("salesReportSection");
+    let menuBox = document.getElementById("menuManagementBox");
+    let invBox = document.getElementById("inventorySectionBox");
+    let staffBox = document.getElementById("staffManagementBox");
+    let expenseBox = document.getElementById("expenseTrackerBox");
+    let salaryBox = document.getElementById("salarySectionBox");
+
+    if (roleLower.includes("order_taker") || roleLower.includes("ordertaker") || roleLower.includes("delivery")) {
+      // ORDER_TAKER र DELIVERY को लागि केवल Active Orders र Chat मात्र देखाउने (बाकी लुकाउने)
+      if(dashBox) dashBox.style.display = "none";
+      if(monthlyChart) monthlyChart.style.display = "none";
+      if(hourlyChart) hourlyChart.style.display = "none";
+      if(salesReportSec) salesReportSec.style.display = "none";
+      if(menuBox) menuBox.style.display = "none";
+      if(invBox) invBox.style.display = "none";
+      if(staffBox) staffBox.style.display = "none";
+      if(expenseBox) expenseBox.style.display = "none";
+      if(salaryBox) salaryBox.style.display = "none";
+    } else {
+      // FULL ADMIN / MANAGER को लागि सबै देखाउने
+      if(dashBox) dashBox.style.display = "flex";
+      if(monthlyChart) monthlyChart.style.display = "block";
+      if(hourlyChart) hourlyChart.style.display = "block";
+      if(salesReportSec) salesReportSec.style.display = "block";
+      if(menuBox) menuBox.style.display = "block";
+      if(invBox) invBox.style.display = "block";
+      if(staffBox) staffBox.style.display = "block";
+      if(expenseBox) expenseBox.style.display = "block";
+      if(salaryBox) salaryBox.style.display = "block";
+      window.loadMenuList();
+      window.loadStaffList();
+      window.loadExpenseSummary();
+      window.loadInventoryData();
+      window.loadSalaryStaffDropdown();
+    }
+
     window.loadOrders();
     window.setupRealtimeOrders();
     window.loadAdminChats();
-    window.loadStaffList();
-    window.loadExpenseSummary();
-    window.loadInventoryData();
-    window.loadSalaryStaffDropdown();
 
     setInterval(() => {
       window.loadOrders();
@@ -1757,7 +1807,7 @@
             </div>
             <script>
                 window.onload = function() { window.print(); window.close(); }
-            <\/script>
+            </script>
       </body>
       </html>
   `);
