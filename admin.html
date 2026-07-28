@@ -592,18 +592,7 @@
     try {
       let { data, error } = await supabaseClient.from('orders').select('*');
       if (!error && data) {
-        let isOrderTaker = (window.myRole === "order_taker" || window.myRole === "ordertaker");
-
-        let processedData = data;
-        if (isOrderTaker) {
-          let activeOnly = data.filter(o => {
-            let st = String(o.status || "").trim().toLowerCase();
-            return st !== "delivered" && st !== "completed" && st !== "preparing";
-          });
-          processedData = activeOnly.length > 0 ? activeOnly : data;
-        }
-
-        let newSorted = processedData.sort((a, b) => {
+        let newSorted = data.sort((a, b) => {
           let idA = parseInt(a.id || a.order_no?.replace(/\D/g, '')) || 0;
           let idB = parseInt(b.id || b.order_no?.replace(/\D/g, '')) || 0;
           if (idA !== idB) return idB - idA;
@@ -619,67 +608,6 @@
       window.calculateDashboardStats(activeOrdersCache);
       window.renderActiveOrdersTable(activeOrdersCache);
     } catch (err) {}
-  };
-
-  window.showAdminPanel = function() {
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("adminContent").style.display = "block";
-    window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
-     
-    let roleBadge = document.getElementById("userRoleBadge");
-    if(roleBadge) roleBadge.innerText = window.myRole.toUpperCase();
-
-    let isOrderTaker = (window.myRole === "order_taker" || window.myRole === "ordertaker");
-
-    let dashBox = document.getElementById("salesDashboardBox");
-    if(dashBox) dashBox.style.display = isOrderTaker ? "none" : "flex";
-
-    let monthlyChart = document.getElementById("monthlySalesChartDiv");
-    if(monthlyChart) monthlyChart.style.display = isOrderTaker ? "none" : "block";
-
-    let hourlyChart = document.getElementById("hourlySalesChartDiv");
-    if(hourlyChart) hourlyChart.style.display = isOrderTaker ? "none" : "block";
-
-    let allSections = document.querySelectorAll("body > div#adminContent > div");
-    allSections.forEach(sec => {
-      let text = sec.innerText || "";
-      if (text.includes("Sales Report Generator") || 
-          text.includes("Expense & Profit Tracker") || 
-          text.includes("Staff Salary Sheet") || 
-          text.includes("Monthly Sales Insights") || 
-          text.includes("Today's Hourly Sales")) {
-        sec.style.display = isOrderTaker ? "none" : "block";
-      }
-    });
-
-    let menuBox = document.getElementById("menuManagementBox");
-    if(menuBox) menuBox.style.display = isOrderTaker ? "none" : "block";
-
-    let invBox = document.querySelector(".inventory-section");
-    if(invBox) invBox.style.display = isOrderTaker ? "none" : "block";
-
-    let staffBox = document.getElementById("staffManagementBox");
-    if(staffBox) staffBox.style.display = isOrderTaker ? "none" : "block";
-
-    let salarySec = document.querySelector(".salary-section");
-    if(salarySec) salarySec.style.display = isOrderTaker ? "none" : "block";
-
-    window.loadOrders();
-    window.setupRealtimeOrders();
-    window.loadAdminChats();
-
-    if(!isOrderTaker) {
-      window.loadMenuList();
-      window.loadStaffList();
-      window.loadExpenseSummary();
-      window.loadInventoryData();
-      window.loadSalaryStaffDropdown();
-    }
-
-    setInterval(() => {
-      window.loadOrders();
-      window.loadAdminChats();
-    }, 2000);
   };
 
   window.setupRealtimeOrders = function() {
@@ -800,17 +728,7 @@
     if(!tableBody) return;
     
     let html = "";
-    let isOrderTaker = (window.myRole === "order_taker" || window.myRole === "ordertaker");
-
-    let filteredOrders = ordersToRender;
-    if (isOrderTaker) {
-      filteredOrders = ordersToRender.filter(o => {
-        let st = String(o.status || "").trim().toLowerCase();
-        return st !== "preparing";
-      });
-    }
-
-    let limitedOrders = filteredOrders.slice(0, 10);
+    let limitedOrders = ordersToRender.slice(0, 10);
     let totalOrdersCount = limitedOrders.length;
 
     if(totalOrdersCount === 0) {
@@ -826,25 +744,20 @@
         let delivHtml = (o.proof_img && o.proof_img !== "None" && o.proof_img !== "") ?  
           `<img src="${o.proof_img}" class="proof-thumb" onclick="window.openImageViewer('${o.proof_img}')">` : `None`;
         
-        let statusSelect = isOrderTaker ? `<b style="text-transform: uppercase; color: #e91e63;">${o.status || 'Pending'}</b>` : 
-          `<select id="status_${o.order_no || o.id}">
-            <option value="Pending" ${status==="pending"?"selected":""}>Pending</option>
-            <option value="Preparing" ${status==="preparing"?"selected":""}>Preparing</option>
-            <option value="Ready" ${status==="ready"?"selected":""}>Ready</option>
-            <option value="Out for Delivery" ${status==="out for delivery"?"selected":""}>Out for Delivery</option>
-            <option value="Delivered" ${status==="delivered"?"selected":""}>Delivered</option>
-          </select> 
-          <button class="updateBtn" onclick="window.manualUpdate('${o.order_no || o.id}')">Go</button>`;
+        let statusSelect = `<select id="status_${o.order_no || o.id}">
+          <option value="Pending" ${status==="pending"?"selected":""}>Pending</option>
+          <option value="Preparing" ${status==="preparing"?"selected":""}>Preparing</option>
+          <option value="Ready" ${status==="ready"?"selected":""}>Ready</option>
+          <option value="Out for Delivery" ${status==="out for delivery"?"selected":""}>Out for Delivery</option>
+          <option value="Delivered" ${status==="delivered"?"selected":""}>Delivered</option>
+        </select> 
+        <button class="updateBtn" onclick="window.manualUpdate('${o.order_no || o.id}')">Go</button>`;
 
         let actionButtons = "";
         if (status === "pending" || status === "order received" || status === "") {
             actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
         } else if (status === "preparing") {
-            if (isOrderTaker) {
-                actionButtons = ``;
-            } else {
-                actionButtons = `<button class="rdyBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Ready', 'bill')">🍳 Ready & Bill</button>`;
-            }
+            actionButtons = `<button class="rdyBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Ready', 'bill')">🍳 Ready & Bill</button>`;
         } else if (status === "ready") {
             actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no || o.id}', 'Out for Delivery')">🚚 Dispatch</button>`;
         } else if (status === "out for delivery") {
@@ -1462,6 +1375,43 @@
     }
   };
 
+  window.openImageViewer = function(imgUrl) {
+    document.getElementById("viewerTargetImage").src = imgUrl;
+    document.getElementById("imageViewerModal").style.display = "flex";
+  };
+
+  window.closeImageViewer = function() {
+    document.getElementById("imageViewerModal").style.display = "none";
+  };
+
+  window.showAdminPanel = function() {
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("adminContent").style.display = "block";
+    window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toUpperCase();
+     
+    let roleBadge = document.getElementById("userRoleBadge");
+    if(roleBadge) roleBadge.innerText = window.myRole;
+
+    let dashBox = document.getElementById("salesDashboardBox");
+    if(dashBox) dashBox.style.display = "flex";
+    let menuBox = document.getElementById("menuManagementBox");
+    if(menuBox) menuBox.style.display = "block";
+
+    window.loadMenuList();
+    window.loadOrders();
+    window.setupRealtimeOrders();
+    window.loadAdminChats();
+    window.loadStaffList();
+    window.loadExpenseSummary();
+    window.loadInventoryData();
+    window.loadSalaryStaffDropdown();
+
+    setInterval(() => {
+      window.loadOrders();
+      window.loadAdminChats();
+    }, 2000);
+  };
+
   window.logout = function() { sessionStorage.clear(); window.location.reload(); };
 
   if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
@@ -1616,6 +1566,7 @@
     let { data } = await supabaseClient.from('admins').select('*').order('id', { ascending: true });
     let staffData = (data && data.length > 0) ? data : staffListCache;
     
+    // 🔍 म्यानेजर लगइन हुँदा एडमिन र म्यानेजरहरू लुकाउने र साधारण कर्मचारी मात्र देखाउने फिल्टर
     let currentRole = String(sessionStorage.getItem("USER_ROLE") || "").toLowerCase();
     if (currentRole === "manager") {
       staffData = staffData.filter(staff => {
@@ -1806,7 +1757,7 @@
             </div>
             <script>
                 window.onload = function() { window.print(); window.close(); }
-            </script>
+            <\/script>
       </body>
       </html>
   `);
