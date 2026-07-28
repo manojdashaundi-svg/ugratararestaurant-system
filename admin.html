@@ -606,7 +606,7 @@
       supabaseClient
         .channel('public:chats_admin')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, payload => {
-          // यदि म्यासेज ग्राहक (Customer) बाट आएको हो भने मात्र चर्को घण्टी बजाउने
+          // ग्राहक (Customer) बाट नयाँ म्यासेज आउँदा साउन्ड अनिवार्य रूपमा बजाउने
           if (payload.new && payload.new.sender === 'Customer') {
             window.playTringTringBell();
           }
@@ -1401,7 +1401,7 @@
 
   if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
     myRole = sessionStorage.getItem("USER_ROLE") || "admin";
-    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
+    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER"] || "";
     window.showAdminPanel();
   } else {
     document.getElementById("loginScreen").style.display = "flex";
