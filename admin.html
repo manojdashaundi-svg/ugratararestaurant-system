@@ -574,21 +574,17 @@
   };
 
   window.loadOrders = async function() {
-    if (activeOrdersCache.length > 0) {
-      window.calculateDashboardStats(activeOrdersCache);
-      window.renderActiveOrdersTable(activeOrdersCache);
-    }
-
     try {
       let { data, error } = await supabaseClient.from('orders').select('*');
-      if (!error && data && data.length > 0) {
+      if (!error && data) {
         let newSorted = data.sort((a, b) => {
           let idA = parseInt(a.id || a.order_no?.replace(/\D/g, '')) || 0;
-          let idB = parseInt(b.id || b.order_no?.replace(/\D/g, '')) || 0;
+    <i> let idB = parseInt(b.id || b.order_no?.replace(/\D/g, '')) || 0;</i>
           if (idA !== idB) return idB - idA;
           return new Date(b.time || 0) - new Date(a.time || 0);
         });
 
+        // यदि क्यास गरिएको अर्डर संख्या भन्दा नयाँ अर्डर संख्या बढी छ भने घण्टी बजाउने
         if (activeOrdersCache.length > 0 && newSorted.length > activeOrdersCache.length) {
           window.playTringTringBell();
         }
@@ -614,7 +610,6 @@
       supabaseClient
         .channel('public:chats_admin')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, payload => {
-          // यदि म्यासेज ग्राहक (Customer) बाट आएको हो भने मात्र चर्को घण्टी बजाउने
           if (payload.new && payload.new.sender === 'Customer') {
             window.playTringTringBell();
           }
