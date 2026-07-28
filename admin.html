@@ -153,24 +153,5 @@ body{ background:#f5f5f5; color:#333; padding-bottom: 80px; width: 100%; overflo
   }
 </script>
 <script src="script.js"></script>
-<script>
-  // Supabase Realtime Listener for Chats Sound Fix
-  document.addEventListener("DOMContentLoaded", function() {
-    try {
-      if (typeof supabaseClient !== 'undefined') {
-        supabaseClient
-          .channel('public:chats_customer_sound_fix')
-          .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, payload => {
-            if (payload.new && payload.new.sender === 'Customer') {
-              if (typeof window.playTringTringBell === 'function') {
-                window.playTringTringBell();
-              }
-            }
-          })
-          .subscribe();
-      }
-    } catch(e) {}
-  });
-</script>
 </body>
 </html>
