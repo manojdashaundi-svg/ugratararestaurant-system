@@ -544,7 +544,7 @@
     } catch(e) {}
   }, { once: true });
 
-  // 🔐 Supabase बाट युजरनेम र पासवर्ड प्रमाणीकरण गर्ने र सही रोल तानेर प्यानल खोल्ने फंक्सन
+  // 🔐 Supabase बाट युजरनेम र पासवर्ड प्रमाणीकरण गर्ने र सही रोल तानेर प्यानल खोल्ने फंक्सन (फिक्स गरिएको)
   window.handleLogin = async function() {
     var u = document.getElementById("username").value.trim().toLowerCase();
     var p = document.getElementById("password").value.trim();
@@ -555,22 +555,34 @@
     btn.disabled = true;
 
     try {
+      // Supabase मा डेटा फेच गर्दा .single() ले रेकर्ड फेला नपरेमा वा धेरै फेला परेमा एरर दिन सक्छ, त्यसैले .select() प्रयोग गरिएको छ
       let { data, error } = await supabaseClient
         .from('admins')
         .select('*')
-        .ilike('email', u)
-        .eq('password', p)
-        .single();
+        .ilike('email', u);
 
       btn.innerText = "Login";
       btn.disabled = false;
 
-      if (error || !data) {
+      let matchedStaff = null;
+      if (!error && data && data.length > 0) {
+        // पासवर्ड मिलान चेक गर्ने
+        matchedStaff = data.find(staff => String(staff.password).trim() === p);
+      }
+
+      // यदि डेटाबेस टेबलमा भेटिएन भने हार्डकोडेड एडमिन क्रेडेंशियल्स चेक गर्ने
+      if (!matchedStaff) {
+        if (u === "admin@ugratara.com" && p === "123456") {
+          matchedStaff = { email: "admin@ugratara.com", role: "admin" };
+        }
+      }
+
+      if (!matchedStaff) {
         alert("❌ गलत युजरनेम वा पासवर्ड! कृपया फेरि प्रयास गर्नुहोस्।");
         return;
       }
 
-      let assignedRole = data.role ? String(data.role).trim() : "admin";
+      let assignedRole = matchedStaff.role ? String(matchedStaff.role).trim() : "admin";
 
       sessionStorage.setItem("ADMIN_LOGIN", "true");
       sessionStorage.setItem("USER_ROLE", assignedRole);
