@@ -1298,7 +1298,7 @@
     if(document.getElementById("dashTodaySales")) document.getElementById("dashTodaySales").innerText = "RM " + todaySales.toFixed(2);
     if(document.getElementById("dashMonthSales")) document.getElementById("dashMonthSales").innerText = "RM " + monthSales.toFixed(2);
     if(document.getElementById("dashAvgOrder")) document.getElementById("dashAvgOrder").innerText = "RM " + avgOrderValue.toFixed(2);
-     
+    
     window.drawMonthlySalesChart(orders);
     window.drawHourlySalesChart(orders);
   };
@@ -1565,8 +1565,15 @@
     if (!staffTable) return;
     let { data } = await supabaseClient.from('admins').select('*').order('id', { ascending: true });
     let staffData = (data && data.length > 0) ? data : staffListCache;
+    
+    // मुख्य Admin र Manager बाहेकका अन्य स्टाफहरू मात्र फिल्टर गर्ने
+    let filteredStaff = staffData.filter(staff => {
+      let r = String(staff.role || '').trim().toLowerCase();
+      return r !== 'admin' && r !== 'manager';
+    });
+
     let html = "";
-    staffData.forEach(staff => {
+    filteredStaff.forEach(staff => {
       let uName = staff.email || staff.username || '';
       let uPass = staff.password || '';
       let uRole = staff.role || '';
@@ -1610,6 +1617,12 @@
     let newRole = prompt("Edit Role:", oldRole);
     if (newRole === null) return;
 
+    let checkRole = String(newRole).trim().toLowerCase();
+    if (checkRole === 'admin' || checkRole === 'manager') {
+      alert("⚠️ सुरक्षाको कारणले Admin वा Manager रोल राख्न पाइँदैन!");
+      return;
+    }
+
     await supabaseClient.from('admins').update({ email: newEmail, password: newPass, role: newRole }).eq('id', staffId);
     alert("✅ Staff Updated Successfully!");
     window.loadStaffList();
@@ -1620,6 +1633,13 @@
     let password = document.getElementById("staffPassword").value.trim();
     let role = document.getElementById("staffRoleInput").value.trim();
     if (!username || !password || !role) { alert("Enter Username, Password and Role!"); return; }
+
+    let checkRole = String(role).trim().toLowerCase();
+    if (checkRole === 'admin' || checkRole === 'manager') {
+      alert("⚠️ सुरक्षाको कारणले Admin वा MANAGER रोल राख्न मिल्दैन!");
+      return;
+    }
+
     await supabaseClient.from('admins').insert([{ email: username, password: password, role: role }]);
     alert("✅ Staff Added!");
     document.getElementById("staffUsername").value = "";
