@@ -1385,7 +1385,7 @@
 
     let isOrderTaker = (window.myRole === "order_taker" || window.myRole === "ordertaker");
 
-    // ड्यासबोर्ड र अन्य सेक्सनहरू लुकाउने वा देखाउने सुरक्षित तरिका
+    // ड्यासबोर्ड कार्डहरू लुकाउने/देखाउने
     let dashBox = document.getElementById("salesDashboardBox");
     if(dashBox) dashBox.style.display = isOrderTaker ? "none" : "flex";
 
@@ -1394,6 +1394,19 @@
 
     let hourlyChart = document.getElementById("hourlySalesChartDiv");
     if(hourlyChart) hourlyChart.style.display = isOrderTaker ? "none" : "block";
+
+    // Sales Report, Expense, Salary र अन्य बक्सहरूलाई कन्टेनरको कक्षा (class) वा टेक्स्टका आधारमा लुकाउने
+    let allSections = document.querySelectorAll("body > div#adminContent > div");
+    allSections.forEach(sec => {
+      let text = sec.innerText || "";
+      if (text.includes("Sales Report Generator") || 
+          text.includes("Expense & Profit Tracker") || 
+          text.includes("Staff Salary Sheet") || 
+          text.includes("Monthly Sales Insights") || 
+          text.includes("Today's Hourly Sales")) {
+        sec.style.display = isOrderTaker ? "none" : "block";
+      }
+    });
 
     let menuBox = document.getElementById("menuManagementBox");
     if(menuBox) menuBox.style.display = isOrderTaker ? "none" : "block";
@@ -1404,7 +1417,10 @@
     let staffBox = document.getElementById("staffManagementBox");
     if(staffBox) staffBox.style.display = isOrderTaker ? "none" : "block";
 
-    // सधैं चलाउनुपर्ने मुख्य डेटा लोड फंक्शन्स
+    let salarySec = document.querySelector(".salary-section");
+    if(salarySec) salarySec.style.display = isOrderTaker ? "none" : "block";
+
+    // अर्डर र च्याट सधैं चालु राख्ने
     window.loadOrders();
     window.setupRealtimeOrders();
     window.loadAdminChats();
