@@ -801,9 +801,19 @@
     if(!tableBody) return;
     
     let html = "";
-    let limitedOrders = ordersToRender.slice(0, 10);
-    let totalOrdersCount = limitedOrders.length;
     let isOrderTaker = (window.myRole === "order_taker" || window.myRole === "ordertaker");
+
+    // यदि ORDER_TAKER हो भने 'preparing' स्टेटस भएका अर्डरहरूलाई रेन्डर गर्ने सूचीबाट पूर्ण रूपमा फिल्टर गरेर हटाउने
+    let filteredOrders = ordersToRender;
+    if (isOrderTaker) {
+      filteredOrders = ordersToRender.filter(o => {
+        let st = String(o.status || "").trim().toLowerCase();
+        return st !== "preparing";
+      });
+    }
+
+    let limitedOrders = filteredOrders.slice(0, 10);
+    let totalOrdersCount = limitedOrders.length;
 
     if(totalOrdersCount === 0) {
       html = `<tr><td colspan="9" style="padding:20px;">No Active Orders Found.</td></tr>`;
@@ -832,12 +842,7 @@
         if (status === "pending" || status === "order received" || status === "") {
             actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
         } else if (status === "preparing") {
-            // 🚫 यदि ORDER_TAKER हो भने पूर्ण रूपमा खाली (Blank) राख्ने
-            if (isOrderTaker) {
-                actionButtons = ``;
-            } else {
-                actionButtons = `<button class="rdyBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Ready', 'bill')">🍳 Ready & Bill</button>`;
-            }
+            actionButtons = ``;
         } else if (status === "ready") {
             actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no || o.id}', 'Out for Delivery')">🚚 Dispatch</button>`;
         } else if (status === "out for delivery") {
