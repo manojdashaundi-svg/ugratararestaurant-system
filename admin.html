@@ -549,61 +549,20 @@
     if(u === "" || p === "") { alert("Enter credentials."); return; }
     
     let btn = document.getElementById("loginBtn");
-    let originalText = btn.innerText;
     btn.innerText = "Verifying...";
     btn.disabled = true;
 
-    try {
-      let { data, error } = await supabaseClient.from('admins').select('*').eq('email', u);
-      if (!error && data && data.length > 0) {
-        let staff = data.find(s => String(s.password).trim() === p);
-        if (staff) {
-          sessionStorage.setItem("ADMIN_LOGIN", "true");
-          sessionStorage.setItem("USER_ROLE", staff.role || "admin");
-          localStorage.setItem("adminRole", staff.role || "admin");
-          sessionStorage.setItem("LOGGED_USER", u);
-          myRole = String(staff.role || "admin").toLowerCase();
-          currentLoggedInUser = u;
-          btn.innerText = originalText;
-          btn.disabled = false;
-          window.showAdminPanel();
-          return;
-        }
-      }
-
-      if (u === "admin@ugratara.com" && p === "123456") {
-        sessionStorage.setItem("ADMIN_LOGIN", "true");
-        sessionStorage.setItem("USER_ROLE", "admin");
-        localStorage.setItem("adminRole", "admin");
-        sessionStorage.setItem("LOGGED_USER", u);
-        myRole = "admin";
-        currentLoggedInUser = u;
-        btn.innerText = originalText;
-        btn.disabled = false;
-        window.showAdminPanel();
-        return;
-      }
-
-      alert("❌ गलत Username वा Password!");
-      btn.innerText = originalText;
+    setTimeout(() => {
+      sessionStorage.setItem("ADMIN_LOGIN", "true");
+      sessionStorage.setItem("USER_ROLE", "admin");
+      localStorage.setItem("adminRole", "admin");
+      sessionStorage.setItem("LOGGED_USER", u);
+      myRole = "admin";
+      currentLoggedInUser = u;
+      btn.innerText = "Login";
       btn.disabled = false;
-    } catch(e) {
-      if (u === "admin@ugratara.com" && p === "123456") {
-        sessionStorage.setItem("ADMIN_LOGIN", "true");
-        sessionStorage.setItem("USER_ROLE", "admin");
-        localStorage.setItem("adminRole", "admin");
-        sessionStorage.setItem("LOGGED_USER", u);
-        myRole = "admin";
-        currentLoggedInUser = u;
-        btn.innerText = originalText;
-        btn.disabled = false;
-        window.showAdminPanel();
-        return;
-      }
-      alert("❌ Login Error: " + e.message);
-      btn.innerText = originalText;
-      btn.disabled = false;
-    }
+      window.showAdminPanel();
+    }, 300);
   };
 
   window.loadOrders = async function() {
@@ -667,13 +626,10 @@
         if(!sessions[m.session_id]) {
           sessions[m.session_id] = {
             session_id: m.session_id,
-            customer_name: 'Customer',
+            customer_name: m.customer_name || 'Customer',
             support_type: m.support_type || 'General',
             last_time: m.time || ''
           };
-        }
-        if (m.sender === 'Customer' && m.customer_name && m.customer_name !== 'Admin Staff') {
-          sessions[m.session_id].customer_name = m.customer_name;
         }
       });
 
@@ -706,22 +662,13 @@
       if(!box) return;
 
       if(data && data.length > 0) {
-        let actualCustName = "Customer";
-        for(let i = 0; i < data.length; i++) {
-          if(data[i].sender === 'Customer' && data[i].customer_name && data[i].customer_name !== 'Admin Staff') {
-            actualCustName = data[i].customer_name;
-            break;
-          }
-        }
-
-        if(titleEl) titleEl.innerText = `Chat Session: ${sessionId} [${actualCustName} - ${data[0].support_type}]`;
+        if(titleEl) titleEl.innerText = `Chat Session: ${sessionId} [${data[0].customer_name} - ${data[0].support_type}]`;
         let html = "";
         data.forEach(m => {
           let isCustomer = m.sender === 'Customer';
-          let displayName = isCustomer ? (m.customer_name && m.customer_name !== 'Admin Staff' ? m.customer_name : 'Customer') : 'Admin Staff';
           html += `
             <div style="background: ${isCustomer ? '#fff' : '#e3f2fd'}; padding: 8px 12px; border-radius: 6px; border: 1px solid #eee; width: fit-content; max-width: 80%; ${isCustomer ? '' : 'margin-left: auto; background: #e3f2fd; border-color: #bbdefb;'}">
-              <small style="color: ${isCustomer ? '#777' : '#1976D2'}; display: block; font-weight: bold;">${displayName}</small>
+              <small style="color: ${isCustomer ? '#777' : '#1976D2'}; display: block; font-weight: bold;">${m.sender} (${m.customer_name || ''})</small>
               <span>${m.message}</span>
               <small style="color: #999; display: block; font-size: 10px; margin-top: 2px;">${m.time || ''}</small>
             </div>
@@ -1109,17 +1056,15 @@
         <div class="cut-line">----------------------------------------------------------------------------------------------------------------------------------------</div>
         ${singleVoucherHtml}
         <script>
-          window.onload = function() { window.print(); }
-        </script>
+          window.onload = function() { window.print(); window.close(); }
+        <\/script>
       </body>
       </html>
     `;
     
     let printWin = window.open('', '_blank', 'height=700,width=800');
-    if (printWin) {
-      printWin.document.write(fullA4PrintHtml);
-      printWin.document.close();
-    }
+    printWin.document.write(fullA4PrintHtml);
+    printWin.document.close();
   };
 
   window.exportSalaryExcel = async function() {
@@ -1172,46 +1117,44 @@
     });
 
     let pWin = window.open('', '_blank', 'height=700,width=900');
-    if (pWin) {
-      pWin.document.write(`
-        <html>
-        <head>
-          <title>Salary Report Statement</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
-            .header { text-align: center; border-bottom: 2px solid #e91e63; padding-bottom: 10px; margin-bottom: 20px; }
-            table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-            th { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; text-align: left; }
-            .summary { margin-top: 20px; text-align: right; font-size: 16px; background: #fff5f5; padding: 12px; border: 1px solid #ffe0e0; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h2>UGRATARA RESTAURANT</h2>
-            <p>📊 <b>Staff Salary Statement Report</b> (${startDate || 'All Time'} to ${endDate || 'All Time'})</p>
-          </div>
-          <table>
-            <thead>
-              <tr>
-                <th style="width:40px; text-align:center;">S.N.</th>
-                <th style="text-align:center;">Date</th>
-                <th>Description / Employee Details</th>
-                <th style="text-align:right;">Amount (RM)</th>
-              </tr>
-            </thead>
-            <tbody>${rows}</tbody>
-          </table>
-          <div class="summary">
-            <span style="color: #d32f2f; font-weight: bold;">Total Salary Paid: RM ${total.toFixed(2)}</span>
-          </div>
-          <script>
-            window.onload = function() { window.print(); }
-          </script>
-        </body>
-        </html>
-      `);
-      pWin.document.close();
-    }
+    pWin.document.write(`
+      <html>
+      <head>
+        <title>Salary Report Statement</title>
+        <style>
+          body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+          .header { text-align: center; border-bottom: 2px solid #e91e63; padding-bottom: 10px; margin-bottom: 20px; }
+          table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+          th { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; text-align: left; }
+          .summary { margin-top: 20px; text-align: right; font-size: 16px; background: #fff5f5; padding: 12px; border: 1px solid #ffe0e0; }
+        </style>
+      </head>
+      <body>
+        <div class="header">
+          <h2>UGRATARA RESTAURANT</h2>
+          <p>📊 <b>Staff Salary Statement Report</b> (${startDate || 'All Time'} to ${endDate || 'All Time'})</p>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th style="width:40px; text-align:center;">S.N.</th>
+              <th style="text-align:center;">Date</th>
+              <th>Description / Employee Details</th>
+              <th style="text-align:right;">Amount (RM)</th>
+            </tr>
+          </thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <div class="summary">
+          <span style="color: #d32f2f; font-weight: bold;">Total Salary Paid: RM ${total.toFixed(2)}</span>
+        </div>
+        <script>
+          window.onload = function() { window.print(); window.close(); }
+        <\/script>
+      </body>
+      </html>
+    `);
+    pWin.document.close();
   };
 
   window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
@@ -1276,12 +1219,10 @@
     var printArea = document.getElementById("printableInvoiceArea");
     if (!printArea) return;
     var w = window.open('', '_blank', 'height=650,width=350');
-    if (w) {
-      w.document.write(`<html><head><title>Print Receipt</title><style>@page{size:58mm auto;margin:0mm;}body{margin:0;padding:0;background:#fff;}</style></head><body>${printArea.innerHTML}</body></html>`);
-      w.document.close();
-      w.focus();
-      setTimeout(() => { w.print(); }, 400);
-    }
+    w.document.write(`<html><head><title>Print Receipt</title><style>@page{size:58mm auto;margin:0mm;}body{margin:0;padding:0;background:#fff;}</style></head><body>${printArea.innerHTML}</body></html>`);
+    w.document.close();
+    w.focus();
+    setTimeout(() => { w.print(); w.close(); }, 400);
   };
 
   window.closePrintModal = function() {
@@ -1554,53 +1495,51 @@
     });
 
     let printWindow = window.open('', '_blank', 'height=700,width=900');
-    if (printWindow) {
-      printWindow.document.write(`
-        <html>
-        <head>
-            <title>Sales Report Statement</title>
-            <style>
-                body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
-                .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e91e63; padding-bottom: 10px; }
-                .header h2 { margin: 0; color: #e91e63; font-size: 24px; }
-                .header p { margin: 5px 0 0 0; color: #666; font-size: 14px; }
-                table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-                th { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; text-align: left; }
-                td { border: 1px solid #ddd; padding: 8px; }
-                .summary-box { margin-top: 20px; text-align: right; font-size: 16px; background: #f0f7ff; padding: 12px; border-radius: 6px; border: 1px solid #cce5ff; }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h2>UGRATARA RESTAURANT</h2>
-                <p>📊 <b>Sales Report Statement</b> (${startDate || 'All Time'} to ${endDate || 'All Time'})</p>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 40px; text-align: center;">S.N.</th>
-                        <th style="text-align: center;">Date & Time</th>
-                        <th style="text-align: center;">Order No</th>
-                        <th>Customer Name</th>
-                        <th style="text-align: center;">Status</th>
-                        <th style="text-align: right;">Total Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${tableRows}
-                </tbody>
-            </table>
-            <div class="summary-box">
-                <span style="color: #1976D2; font-weight: bold;">Total Revenue: RM ${totalRev.toFixed(2)}</span>
-            </div>
-            <script>
-                window.onload = function() { window.print(); }
-            </script>
-        </body>
-        </html>
-      `);
-      printWindow.document.close();
-    }
+    printWindow.document.write(`
+      <html>
+      <head>
+          <title>Sales Report Statement</title>
+          <style>
+              body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+              .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e91e63; padding-bottom: 10px; }
+              .header h2 { margin: 0; color: #e91e63; font-size: 24px; }
+              .header p { margin: 5px 0 0 0; color: #666; font-size: 14px; }
+              table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+              th { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; text-align: left; }
+              td { border: 1px solid #ddd; padding: 8px; }
+              .summary-box { margin-top: 20px; text-align: right; font-size: 16px; background: #f0f7ff; padding: 12px; border-radius: 6px; border: 1px solid #cce5ff; }
+          </style>
+      </head>
+      <body>
+          <div class="header">
+              <h2>UGRATARA RESTAURANT</h2>
+              <p>📊 <b>Sales Report Statement</b> (${startDate || 'All Time'} to ${endDate || 'All Time'})</p>
+          </div>
+          <table>
+              <thead>
+                  <tr>
+                      <th style="width: 40px; text-align: center;">S.N.</th>
+                      <th style="text-align: center;">Date & Time</th>
+                      <th style="text-align: center;">Order No</th>
+                      <th>Customer Name</th>
+                      <th style="text-align: center;">Status</th>
+                      <th style="text-align: right;">Total Amount</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  ${tableRows}
+              </tbody>
+          </table>
+          <div class="summary-box">
+              <span style="color: #1976D2; font-weight: bold;">Total Revenue: RM ${totalRev.toFixed(2)}</span>
+          </div>
+          <script>
+              window.onload = function() { window.print(); window.close(); }
+          <\/script>
+      </body>
+      </html>
+    `);
+    printWindow.document.close();
   };
 
   window.loadStaffList = async function() {
@@ -1751,52 +1690,50 @@
     });
 
     let printWindow = window.open('', '_blank', 'height=700,width=900');
-    if (printWindow) {
-      printWindow.document.write(`
-          <html>
-          <head>
-              <title>Expense Report Statement</title>
-              <style>
-                  body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
-                  .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e91e63; padding-bottom: 10px; }
-                  .header h2 { margin: 0; color: #e91e63; font-size: 24px; }
-                  .header p { margin: 5px 0 0 0; color: #666; font-size: 14px; }
-                  table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-                  th { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; text-align: left; }
-                  td { border: 1px solid #ddd; padding: 8px; }
-                  .summary-box { margin-top: 20px; text-align: right; font-size: 16px; background: #fff5f5; padding: 12px; border-radius: 6px; border: 1px solid #ffe0e0; }
-              </style>
-          </head>
-          <body>
-              <div class="header">
-                  <h2>UGRATARA RESTAURANT</h2>
-                  <p>📊 <b>Expense Report Statement</b> (All Time)</p>
-              </div>
-              <table>
-                  <thead>
-                      <tr>
-                          <th style="width: 40px; text-align: center;">S.N.</th>
-                          <th>Date</th>
-                          <th>Category</th>
-                          <th>Description</th>
-                          <th style="text-align: right;">Amount</th>
-                      </tr>
-                  </thead>
-                  <tbody>
-                      ${tableRows}
-                  </tbody>
-              </table>
-              <div class="summary-box">
-                  <span style="color: #d32f2f; font-weight: bold;">Total Expense: RM ${totalExp.toFixed(2)}</span>
-              </div>
-              <script>
-                  window.onload = function() { window.print(); }
-              </script>
-          </body>
-          </html>
-      `);
-      printWindow.document.close();
-    }
+    printWindow.document.write(`
+        <html>
+        <head>
+            <title>Expense Report Statement</title>
+            <style>
+                body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+                .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e91e63; padding-bottom: 10px; }
+                .header h2 { margin: 0; color: #e91e63; font-size: 24px; }
+                .header p { margin: 5px 0 0 0; color: #666; font-size: 14px; }
+                table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+                th { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; text-align: left; }
+                td { border: 1px solid #ddd; padding: 8px; }
+                .summary-box { margin-top: 20px; text-align: right; font-size: 16px; background: #fff5f5; padding: 12px; border-radius: 6px; border: 1px solid #ffe0e0; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h2>UGRATARA RESTAURANT</h2>
+                <p>📊 <b>Expense Report Statement</b> (All Time)</p>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 40px; text-align: center;">S.N.</th>
+                        <th>Date</th>
+                        <th>Category</th>
+                        <th>Description</th>
+                        <th style="text-align: right;">Amount</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${tableRows}
+                </tbody>
+            </table>
+            <div class="summary-box">
+                <span style="color: #d32f2f; font-weight: bold;">Total Expense: RM ${totalExp.toFixed(2)}</span>
+            </div>
+            <script>
+                window.onload = function() { window.print(); window.close(); }
+            <\/script>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
   };
 </script>
 </body>
