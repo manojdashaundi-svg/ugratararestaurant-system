@@ -1403,8 +1403,12 @@
   };
 
   window.showAdminPanel = function() {
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("adminContent").style.display = "block";
+    let loginScreen = document.getElementById("loginScreen");
+    let adminContent = document.getElementById("adminContent");
+    
+    if (loginScreen) loginScreen.style.display = "none";
+    if (adminContent) adminContent.style.display = "block";
+
     window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toUpperCase();
      
     let roleBadge = document.getElementById("userRoleBadge");
@@ -1455,11 +1459,6 @@
     window.loadOrders();
     window.setupRealtimeOrders();
     window.loadAdminChats();
-
-    setInterval(() => {
-      window.loadOrders();
-      window.loadAdminChats();
-    }, 2000);
   };
 
   window.logout = function() { sessionStorage.clear(); window.location.reload(); };
@@ -1469,7 +1468,8 @@
     currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
     window.showAdminPanel();
   } else {
-    document.getElementById("loginScreen").style.display = "flex";
+    let loginScreen = document.getElementById("loginScreen");
+    if(loginScreen) loginScreen.style.display = "flex";
   }
 
   window.drawMonthlySalesChart = function(orders) {
