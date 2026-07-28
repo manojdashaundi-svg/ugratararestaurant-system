@@ -626,10 +626,13 @@
         if(!sessions[m.session_id]) {
           sessions[m.session_id] = {
             session_id: m.session_id,
-            customer_name: m.customer_name || 'Customer',
+            customer_name: 'Customer',
             support_type: m.support_type || 'General',
             last_time: m.time || ''
           };
+        }
+        if (m.sender === 'Customer' && m.customer_name && m.customer_name !== 'Admin Staff') {
+          sessions[m.session_id].customer_name = m.customer_name;
         }
       });
 
@@ -662,13 +665,22 @@
       if(!box) return;
 
       if(data && data.length > 0) {
-        if(titleEl) titleEl.innerText = `Chat Session: ${sessionId} [${data[0].customer_name} - ${data[0].support_type}]`;
+        let actualCustName = "Customer";
+        for(let i = 0; i < data.length; i++) {
+          if(data[i].sender === 'Customer' && data[i].customer_name && data[i].customer_name !== 'Admin Staff') {
+            actualCustName = data[i].customer_name;
+            break;
+          }
+        }
+
+        if(titleEl) titleEl.innerText = `Chat Session: ${sessionId} [${actualCustName} - ${data[0].support_type}]`;
         let html = "";
         data.forEach(m => {
           let isCustomer = m.sender === 'Customer';
+          let displayName = isCustomer ? (m.customer_name && m.customer_name !== 'Admin Staff' ? m.customer_name : 'Customer') : 'Admin Staff';
           html += `
             <div style="background: ${isCustomer ? '#fff' : '#e3f2fd'}; padding: 8px 12px; border-radius: 6px; border: 1px solid #eee; width: fit-content; max-width: 80%; ${isCustomer ? '' : 'margin-left: auto; background: #e3f2fd; border-color: #bbdefb;'}">
-              <small style="color: ${isCustomer ? '#777' : '#1976D2'}; display: block; font-weight: bold;">${m.sender} (${m.customer_name || ''})</small>
+              <small style="color: ${isCustomer ? '#777' : '#1976D2'}; display: block; font-weight: bold;">${displayName}</small>
               <span>${m.message}</span>
               <small style="color: #999; display: block; font-size: 10px; margin-top: 2px;">${m.time || ''}</small>
             </div>
@@ -1729,7 +1741,7 @@
             </div>
             <script>
                 window.onload = function() { window.print(); window.close(); }
-            <\/script>
+            </script>
         </body>
         </html>
     `);
