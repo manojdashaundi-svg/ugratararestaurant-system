@@ -1385,6 +1385,7 @@
 
     let isOrderTaker = (window.myRole === "order_taker" || window.myRole === "ordertaker");
 
+    // ड्यासबोर्ड र अन्य सेक्सनहरू लुकाउने वा देखाउने सुरक्षित तरिका
     let dashBox = document.getElementById("salesDashboardBox");
     if(dashBox) dashBox.style.display = isOrderTaker ? "none" : "flex";
 
@@ -1393,18 +1394,6 @@
 
     let hourlyChart = document.getElementById("hourlySalesChartDiv");
     if(hourlyChart) hourlyChart.style.display = isOrderTaker ? "none" : "block";
-
-    // सुरक्षित रूपमा अन्य सेक्सनहरू लुकाउने लजिक
-    document.querySelectorAll("div").forEach(d => {
-      try {
-        let text = d.innerText || "";
-        if (text.includes("Sales Report Generator & Export") || 
-            text.includes("Expense & Profit Tracker") || 
-            text.includes("Staff Salary Sheet & Voucher System")) {
-          d.style.display = isOrderTaker ? "none" : "block";
-        }
-      } catch(e) {}
-    });
 
     let menuBox = document.getElementById("menuManagementBox");
     if(menuBox) menuBox.style.display = isOrderTaker ? "none" : "block";
@@ -1415,6 +1404,7 @@
     let staffBox = document.getElementById("staffManagementBox");
     if(staffBox) staffBox.style.display = isOrderTaker ? "none" : "block";
 
+    // सधैं चलाउनुपर्ने मुख्य डेटा लोड फंक्शन्स
     window.loadOrders();
     window.setupRealtimeOrders();
     window.loadAdminChats();
@@ -1432,6 +1422,7 @@
       window.loadAdminChats();
     }, 2000);
   };
+  
   window.logout = function() { sessionStorage.clear(); window.location.reload(); };
 
   if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
