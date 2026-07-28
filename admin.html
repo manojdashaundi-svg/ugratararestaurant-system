@@ -592,7 +592,7 @@
     } catch (err) {}
   };
 
-  // 🔄 Supabase Realtime Subscription for Orders & Chats
+  // 🔄 Supabase Realtime Subscription for Orders & Chats with Instant Fast Notification Sound
   window.setupRealtimeOrders = function() {
     try {
       supabaseClient
@@ -606,7 +606,10 @@
       supabaseClient
         .channel('public:chats_admin')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, payload => {
-          window.playTringTringBell();
+          // यदि म्यासेज ग्राहक (Customer) बाट आएको हो भने मात्र चर्को घण्टी बजाउने
+          if (payload.new && payload.new.sender === 'Customer') {
+            window.playTringTringBell();
+          }
           window.loadAdminChats();
           if(selectedChatSession === payload.new.session_id) {
             window.selectChatSession(selectedChatSession);
@@ -1387,11 +1390,11 @@
     window.loadInventoryData();
     window.loadSalaryStaffDropdown();
 
-    // 🔄 Auto-polling interval every 3 seconds so Admin chats and orders update instantly without manual refresh
+    // 🔄 Auto-polling interval every 2 seconds for instant lightning-fast chat updates
     setInterval(() => {
       window.loadOrders();
       window.loadAdminChats();
-    }, 3000);
+    }, 2000);
   };
 
   window.logout = function() { sessionStorage.clear(); window.location.reload(); };
