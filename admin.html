@@ -534,12 +534,35 @@
           audio.currentTime = 0;
           audio.play().catch(e => {});
         }, 400);
-      }).catch(err => {});
+      }).catch(err => {
+        // Fallback Web Audio API synthesized alert chime if HTML5 audio play fails due to browser autoplay policy
+        try {
+          window.AudioContext = window.AudioContext || window.webkitAudioContext;
+          let fallbackCtx = new AudioContext();
+          let now = fallbackCtx.currentTime;
+          let osc = fallbackCtx.createOscillator();
+          let gain = fallbackCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(1200, now);
+          gain.gain.setValueAtTime(0.8, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
+          osc.connect(gain);
+          gain.connect(fallbackCtx.destination);
+          osc.start(now);
+          osc.stop(now + 0.5);
+        } catch(ex) {}
+      });
     } catch(e) {}
   };
 
   window.testBellSound = function() {
     window.playTringTringBell();
+    try {
+      const audio = document.getElementById("notificationAudio");
+      if (audio) {
+        audio.play().catch(err => {});
+      }
+    } catch(e) {}
     alert("🔔 डिजिटल घण्टी सुचारु भयो!");
   };
 
@@ -1064,7 +1087,7 @@
       </body>
       </html>
     `;
-    
+     
     let printWin = window.open('', '_blank', 'height=700,width=800');
     printWin.document.write(fullA4PrintHtml);
     printWin.document.close();
@@ -1211,7 +1234,7 @@
         </div>
       `}
     </div>`;
-    
+     
     if(document.getElementById("printableInvoiceArea")) {
         document.getElementById("printableInvoiceArea").innerHTML = invoiceHtml;
         document.getElementById("printModalBox").style.display = "flex";
@@ -1282,7 +1305,7 @@
     if(document.getElementById("dashTodaySales")) document.getElementById("dashTodaySales").innerText = "RM " + todaySales.toFixed(2);
     if(document.getElementById("dashMonthSales")) document.getElementById("dashMonthSales").innerText = "RM " + monthSales.toFixed(2);
     if(document.getElementById("dashAvgOrder")) document.getElementById("dashAvgOrder").innerText = "RM " + avgOrderValue.toFixed(2);
-    
+     
     window.drawMonthlySalesChart(orders);
     window.drawHourlySalesChart(orders);
   };
@@ -1372,7 +1395,7 @@
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("adminContent").style.display = "block";
     window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
-    
+     
     let roleBadge = document.getElementById("userRoleBadge");
     if(roleBadge) roleBadge.innerText = myRole.toUpperCase();
 
@@ -1580,7 +1603,7 @@
     if (row) {
       let statusCell = row.cells[3];
       if (statusCell) statusCell.innerText = newStatus;
-      
+       
       btnElement.innerText = newStatus === 'Active' ? '🟢 Active' : '🔴 Inactive';
       btnElement.className = newStatus === 'Active' ? 'inStockBtn' : 'outStockBtn';
       btnElement.setAttribute('onclick', `window.toggleStaffStatus(this, '${newStatus}')`);
