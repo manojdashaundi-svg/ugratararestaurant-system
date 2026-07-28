@@ -1383,7 +1383,6 @@
     let roleBadge = document.getElementById("userRoleBadge");
     if(roleBadge) roleBadge.innerText = window.myRole.toUpperCase();
 
-    // 🔍 यदि लगइन गर्ने युजर 'order_taker' हो भने केवल Active Orders र Live Support Chat मात्र देखाउने, अरू लुकाउने
     let isOrderTaker = (window.myRole === "order_taker" || window.myRole === "ordertaker");
 
     let dashBox = document.getElementById("salesDashboardBox");
@@ -1395,19 +1394,16 @@
     let hourlyChart = document.getElementById("hourlySalesChartDiv");
     if(hourlyChart) hourlyChart.style.display = isOrderTaker ? "none" : "block";
 
-    let reportBox = document.getElementById("reportStartDate")?.closest("div")?.parentElement?.parentElement;
-    // Sales Report सेक्सन कन्ट्रोल
-    let allDivs = document.querySelectorAll("div");
-    allDivs.forEach(d => {
-      if(d.innerText && d.innerText.includes("Sales Report Generator & Export")) {
-        d.style.display = isOrderTaker ? "none" : "block";
-      }
-      if(d.innerText && d.innerText.includes("Expense & Profit Tracker")) {
-        d.style.display = isOrderTaker ? "none" : "block";
-      }
-      if(d.innerText && d.innerText.includes("Staff Salary Sheet & Voucher System")) {
-        d.style.display = isOrderTaker ? "none" : "block";
-      }
+    // सुरक्षित रूपमा अन्य सेक्सनहरू लुकाउने लजिक
+    document.querySelectorAll("div").forEach(d => {
+      try {
+        let text = d.innerText || "";
+        if (text.includes("Sales Report Generator & Export") || 
+            text.includes("Expense & Profit Tracker") || 
+            text.includes("Staff Salary Sheet & Voucher System")) {
+          d.style.display = isOrderTaker ? "none" : "block";
+        }
+      } catch(e) {}
     });
 
     let menuBox = document.getElementById("menuManagementBox");
@@ -1419,7 +1415,6 @@
     let staffBox = document.getElementById("staffManagementBox");
     if(staffBox) staffBox.style.display = isOrderTaker ? "none" : "block";
 
-    // सधैं चलाउनुपर्ने मुख्य डेटा लोड फंक्शन्स
     window.loadOrders();
     window.setupRealtimeOrders();
     window.loadAdminChats();
@@ -1437,7 +1432,6 @@
       window.loadAdminChats();
     }, 2000);
   };
-
   window.logout = function() { sessionStorage.clear(); window.location.reload(); };
 
   if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
