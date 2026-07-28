@@ -558,19 +558,29 @@
       let { data, error } = await supabaseClient
         .from('admins')
         .select('*')
-        .ilike('email', u)
-        .eq('password', p)
-        .single();
+        .ilike('email', u);
 
       btn.innerText = "Login";
       btn.disabled = false;
 
-      if (error || !data) {
+      let matchedStaff = null;
+      if (!error && data && data.length > 0) {
+        matchedStaff = data.find(staff => String(staff.password).trim() === p);
+      }
+
+      // इमर्जेन्सी ब्याकअप (यदि डेटाबेसमा नभेटिएमा वा अफलाइन हुँदा)
+      if (!matchedStaff) {
+        if (u === "admin@ugratara.com" && p === "123456") {
+          matchedStaff = { email: "admin@ugratara.com", role: "admin" };
+        }
+      }
+
+      if (!matchedStaff) {
         alert("❌ गलत युजरनेम वा पासवर्ड! कृपया फेरि प्रयास गर्नुहोस्।");
         return;
       }
 
-      let assignedRole = data.role ? String(data.role).trim() : "admin";
+      let assignedRole = matchedStaff.role ? String(matchedStaff.role).trim() : "admin";
 
       sessionStorage.setItem("ADMIN_LOGIN", "true");
       sessionStorage.setItem("USER_ROLE", assignedRole);
