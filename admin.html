@@ -1375,36 +1375,62 @@
     }
   };
 
-  window.openImageViewer = function(imgUrl) {
-    document.getElementById("viewerTargetImage").src = imgUrl;
-    document.getElementById("imageViewerModal").style.display = "flex";
-  };
-
-  window.closeImageViewer = function() {
-    document.getElementById("imageViewerModal").style.display = "none";
-  };
-
   window.showAdminPanel = function() {
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("adminContent").style.display = "block";
-    window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toUpperCase();
+    window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
      
     let roleBadge = document.getElementById("userRoleBadge");
-    if(roleBadge) roleBadge.innerText = window.myRole;
+    if(roleBadge) roleBadge.innerText = window.myRole.toUpperCase();
+
+    // 🔍 यदि लगइन गर्ने युजर 'order_taker' हो भने केवल Active Orders र Live Support Chat मात्र देखाउने, अरू लुकाउने
+    let isOrderTaker = (window.myRole === "order_taker" || window.myRole === "ordertaker");
 
     let dashBox = document.getElementById("salesDashboardBox");
-    if(dashBox) dashBox.style.display = "flex";
-    let menuBox = document.getElementById("menuManagementBox");
-    if(menuBox) menuBox.style.display = "block";
+    if(dashBox) dashBox.style.display = isOrderTaker ? "none" : "flex";
 
-    window.loadMenuList();
+    let monthlyChart = document.getElementById("monthlySalesChartDiv");
+    if(monthlyChart) monthlyChart.style.display = isOrderTaker ? "none" : "block";
+
+    let hourlyChart = document.getElementById("hourlySalesChartDiv");
+    if(hourlyChart) hourlyChart.style.display = isOrderTaker ? "none" : "block";
+
+    let reportBox = document.getElementById("reportStartDate")?.closest("div")?.parentElement?.parentElement;
+    // Sales Report सेक्सन कन्ट्रोल
+    let allDivs = document.querySelectorAll("div");
+    allDivs.forEach(d => {
+      if(d.innerText && d.innerText.includes("Sales Report Generator & Export")) {
+        d.style.display = isOrderTaker ? "none" : "block";
+      }
+      if(d.innerText && d.innerText.includes("Expense & Profit Tracker")) {
+        d.style.display = isOrderTaker ? "none" : "block";
+      }
+      if(d.innerText && d.innerText.includes("Staff Salary Sheet & Voucher System")) {
+        d.style.display = isOrderTaker ? "none" : "block";
+      }
+    });
+
+    let menuBox = document.getElementById("menuManagementBox");
+    if(menuBox) menuBox.style.display = isOrderTaker ? "none" : "block";
+
+    let invBox = document.querySelector(".inventory-section");
+    if(invBox) invBox.style.display = isOrderTaker ? "none" : "block";
+
+    let staffBox = document.getElementById("staffManagementBox");
+    if(staffBox) staffBox.style.display = isOrderTaker ? "none" : "block";
+
+    // सधैं चलाउनुपर्ने मुख्य डेटा लोड फंक्शन्स
     window.loadOrders();
     window.setupRealtimeOrders();
     window.loadAdminChats();
-    window.loadStaffList();
-    window.loadExpenseSummary();
-    window.loadInventoryData();
-    window.loadSalaryStaffDropdown();
+
+    if(!isOrderTaker) {
+      window.loadMenuList();
+      window.loadStaffList();
+      window.loadExpenseSummary();
+      window.loadInventoryData();
+      window.loadSalaryStaffDropdown();
+    }
 
     setInterval(() => {
       window.loadOrders();
