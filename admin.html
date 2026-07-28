@@ -294,7 +294,7 @@
               </div>
               <div style="display: flex; gap: 10px; align-items: flex-end; margin-top: 20px;">
                   <button onclick="window.exportExpenseExcel()" style="background: #2e7d32; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📥 Export Excel (.CSV)</button>
-                 <button onclick="window.printExpensePDF()" style="background: #d32f2f; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">🖨️ Print / Download PDF</button>
+                  <button onclick="window.printExpensePDF()" style="background: #d32f2f; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">🖨️ Print / Download PDF</button>
               </div>
           </div>
       </div>
@@ -520,48 +520,42 @@
 
   window.playTringTringBell = function() {
     try {
-      const audio = document.getElementById("notificationAudio");
-      if (!audio) return;
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!window.audioCtx) {
+        window.audioCtx = new AudioContext();
+      }
+      if (window.audioCtx.state === 'suspended') {
+        window.audioCtx.resume();
+      }
       
-      audio.currentTime = 0;
-      audio.play().then(() => {
-        setTimeout(() => {
-          audio.currentTime = 0;
-          audio.play().catch(e => {});
-        }, 200);
+      // चर्को र प्रस्ट तीन पटक घण्टी बज्ने Web Audio API सिंथेटिक फलब्याक तथा मुख्य घण्टी
+      const playBeep = (timeOffset, freq) => {
+        let osc = window.audioCtx.createOscillator();
+        let gain = window.audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, window.audioCtx.currentTime + timeOffset);
+        gain.gain.setValueAtTime(1.0, window.audioCtx.currentTime + timeOffset);
+        gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + timeOffset + 0.35);
+        osc.connect(gain);
+        gain.connect(window.audioCtx.destination);
+        osc.start(window.audioCtx.currentTime + timeOffset);
+        osc.stop(window.audioCtx.currentTime + timeOffset + 0.35);
+      };
 
-        setTimeout(() => {
-          audio.currentTime = 0;
-          audio.play().catch(e => {});
-        }, 400);
-      }).catch(err => {
-        try {
-          window.AudioContext = window.AudioContext || window.webkitAudioContext;
-          let fallbackCtx = new AudioContext();
-          let now = fallbackCtx.currentTime;
-          let osc = fallbackCtx.createOscillator();
-          let gain = fallbackCtx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(1200, now);
-          gain.gain.setValueAtTime(0.8, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.5);
-          osc.connect(gain);
-          gain.connect(fallbackCtx.destination);
-          osc.start(now);
-          osc.stop(now + 0.5);
-        } catch(ex) {}
-      });
+      playBeep(0, 1046.50); // High C
+      playBeep(0.25, 1318.51); // High E
+      playBeep(0.50, 1567.98); // High G
+
+      const audio = document.getElementById("notificationAudio");
+      if (audio) {
+        audio.currentTime = 0;
+        audio.play().catch(e => {});
+      }
     } catch(e) {}
   };
 
   window.testBellSound = function() {
     window.playTringTringBell();
-    try {
-      const audio = document.getElementById("notificationAudio");
-      if (audio) {
-        audio.play().catch(err => {});
-      }
-    } catch(e) {}
     alert("🔔 डिजिटल घण्टी सुचारु भयो!");
   };
 
