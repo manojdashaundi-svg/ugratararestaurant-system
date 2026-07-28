@@ -594,13 +594,14 @@
       if (!error && data) {
         let isOrderTaker = (window.myRole === "order_taker" || window.myRole === "ordertaker");
 
-        // यदि अर्डर टेकर हो भने केवल काम गर्न बाँकी वा सक्रिय अर्डरहरू मात्र फिल्टर गर्ने
+        // यदि अर्डर टेकर हो भने Delivered बाहेकका अर्डर देखाउने, तर यदि कुनै पनि Active अर्डर छैन भने सबै अर्डर देखाउने ताकि खाली नदेखियोस्
         let processedData = data;
         if (isOrderTaker) {
-          processedData = data.filter(o => {
+          let activeOnly = data.filter(o => {
             let st = String(o.status || "").trim().toLowerCase();
             return st !== "delivered" && st !== "completed";
           });
+          processedData = activeOnly.length > 0 ? activeOnly : data;
         }
 
         let newSorted = processedData.sort((a, b) => {
@@ -619,6 +620,67 @@
       window.calculateDashboardStats(activeOrdersCache);
       window.renderActiveOrdersTable(activeOrdersCache);
     } catch (err) {}
+  };
+
+  window.showAdminPanel = function() {
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("adminContent").style.display = "block";
+    window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
+     
+    let roleBadge = document.getElementById("userRoleBadge");
+    if(roleBadge) roleBadge.innerText = window.myRole.toUpperCase();
+
+    let isOrderTaker = (window.myRole === "order_taker" || window.myRole === "ordertaker");
+
+    let dashBox = document.getElementById("salesDashboardBox");
+    if(dashBox) dashBox.style.display = isOrderTaker ? "none" : "flex";
+
+    let monthlyChart = document.getElementById("monthlySalesChartDiv");
+    if(monthlyChart) monthlyChart.style.display = isOrderTaker ? "none" : "block";
+
+    let hourlyChart = document.getElementById("hourlySalesChartDiv");
+    if(hourlyChart) hourlyChart.style.display = isOrderTaker ? "none" : "block";
+
+    let allSections = document.querySelectorAll("body > div#adminContent > div");
+    allSections.forEach(sec => {
+      let text = sec.innerText || "";
+      if (text.includes("Sales Report Generator") || 
+          text.includes("Expense & Profit Tracker") || 
+          text.includes("Staff Salary Sheet") || 
+          text.includes("Monthly Sales Insights") || 
+          text.includes("Today's Hourly Sales")) {
+        sec.style.display = isOrderTaker ? "none" : "block";
+      }
+    });
+
+    let menuBox = document.getElementById("menuManagementBox");
+    if(menuBox) menuBox.style.display = isOrderTaker ? "none" : "block";
+
+    let invBox = document.querySelector(".inventory-section");
+    if(invBox) invBox.style.display = isOrderTaker ? "none" : "block";
+
+    let staffBox = document.getElementById("staffManagementBox");
+    if(staffBox) staffBox.style.display = isOrderTaker ? "none" : "block";
+
+    let salarySec = document.querySelector(".salary-section");
+    if(salarySec) salarySec.style.display = isOrderTaker ? "none" : "block";
+
+    window.loadOrders();
+    window.setupRealtimeOrders();
+    window.loadAdminChats();
+
+    if(!isOrderTaker) {
+      window.loadMenuList();
+      window.loadStaffList();
+      window.loadExpenseSummary();
+      window.loadInventoryData();
+      window.loadSalaryStaffDropdown();
+    }
+
+    setInterval(() => {
+      window.loadOrders();
+      window.loadAdminChats();
+    }, 2000);
   };
 
   window.setupRealtimeOrders = function() {
