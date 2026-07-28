@@ -832,9 +832,9 @@
         if (status === "pending" || status === "order received" || status === "") {
             actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
         } else if (status === "preparing") {
-            // 🚫 यदि ORDER_TAKER हो भने 'Ready & Bill' बटन नदेखिने (लुकाउने)
+            // 🚫 यदि ORDER_TAKER हो भने पूर्ण रूपमा खाली (Blank) राख्ने
             if (isOrderTaker) {
-                actionButtons = `<span style="color:#777; font-size:13px; font-weight:bold;">Kitchen Preparing...</span>`;
+                actionButtons = ``;
             } else {
                 actionButtons = `<button class="rdyBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Ready', 'bill')">🍳 Ready & Bill</button>`;
             }
