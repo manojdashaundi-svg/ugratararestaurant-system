@@ -844,7 +844,7 @@
       }
     });
 
-    inventoryTable.innerHTML = html || `<tr><td colspan="6" style="padding:15px; color:#555;">All stocks are sufficient!</td></tr>`;
+    inventoryTable.innerHTML = html || `<tr><td colspan="6" style="padding: 15px; color:#555;">All stocks are sufficient!</td></tr>`;
   };
 
   window.onInventoryItemSelect = async function() {
@@ -1052,7 +1052,7 @@
             <tbody>
               <tr><td style="border: 1px solid #000; padding: 5px;">1. MONTHLY BASIC SALARY PAYED</td><td style="border: 1px solid #000; padding: 5px; text-align: right;">${netSalary.toFixed(2)}</td></tr>
             </tbody>
-           </table>
+           <table/>
           <div style="text-align: right; font-weight: bold; margin-bottom: 8px; font-size: 12.5px;">NET Salary: RM ${netSalary.toFixed(2)}</div>
           <div style="font-weight: bold; font-size: 11px;">☑ ${paymentMode}</div>
         </div>
@@ -1421,13 +1421,13 @@
         if(hourlyChartDiv) hourlyChartDiv.style.display = "block";
         if(menuBox) menuBox.style.display = "block";
         if(inventoryBox) inventoryBox.style.display = "block";
-        if(staffBox) staffBox.style.display = "none";
+        if(staffBox) staffBox.style.display = "block";
         if(expenseBox) expenseBox.style.display = "block";
         if(salaryBox) salaryBox.style.display = "block";
     } else if (myRole === "order_taker" || myRole === "cook") {
         if(dashBox) dashBox.style.display = "none";
         if(monthlyChartDiv) monthlyChartDiv.style.display = "none";
-        if(hourlyChartDiv) monthlyChartDiv.style.display = "none";
+        if(hourlyChartDiv) hourlyChartDiv.style.display = "none";
         if(menuBox) menuBox.style.display = "block";
         if(inventoryBox) inventoryBox.style.display = "none";
         if(staffBox) staffBox.style.display = "none";
@@ -1436,7 +1436,7 @@
     } else if (myRole === "delivery") {
         if(dashBox) dashBox.style.display = "none";
         if(monthlyChartDiv) monthlyChartDiv.style.display = "none";
-        if(hourlyChartDiv) monthlyChartDiv.style.display = "none";
+        if(hourlyChartDiv) hourlyChartDiv.style.display = "none";
         if(menuBox) menuBox.style.display = "none";
         if(inventoryBox) inventoryBox.style.display = "none";
         if(staffBox) staffBox.style.display = "none";
@@ -1617,6 +1617,13 @@
       let uName = staff.email || staff.username || '';
       let uPass = staff.password || '';
       let uRole = staff.role || '';
+      
+      // Filter out admin and manager roles from the list when viewed by a manager if needed, or enforce global filtering
+      let lowerRole = uRole.toLowerCase();
+      if (myRole === "manager" && (lowerRole === "admin" || lowerRole === "manager")) {
+        return;
+      }
+
       let uStatus = staff.status || 'Active';
       let statusBtnClass = uStatus === 'Active' ? 'inStockBtn' : 'outStockBtn';
       let statusText = uStatus === 'Active' ? '🟢 Active' : '🔴 Inactive';
@@ -1667,6 +1674,13 @@
     let password = document.getElementById("staffPassword").value.trim();
     let role = document.getElementById("staffRoleInput").value.trim();
     if (!username || !password || !role) { alert("Enter Username, Password and Role!"); return; }
+    
+    let lowerRoleCreate = role.toLowerCase();
+    if (myRole === "manager" && (lowerRoleCreate === "admin" || lowerRoleCreate === "manager")) {
+      alert("⚠️ Manager can only create non-admin and non-manager staff roles!");
+      return;
+    }
+
     await supabaseClient.from('admins').insert([{ email: username, password: password, role: role }]);
     alert("✅ Staff Added!");
     document.getElementById("staffUsername").value = "";
@@ -1797,9 +1811,9 @@
             <\/script>
       </body>
       </html>
-    `);
-    printWindow.document.close();
+  `);
+  printWindow.document.close();
   };
 </script>
-</body>
+</body> 
 </html>
