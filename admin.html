@@ -588,11 +588,22 @@
     }
   };
 
-  window.loadOrders = async function() {
+ window.loadOrders = async function() {
     try {
       let { data, error } = await supabaseClient.from('orders').select('*');
       if (!error && data) {
-        let newSorted = data.sort((a, b) => {
+        let isOrderTaker = (window.myRole === "order_taker" || window.myRole === "ordertaker");
+
+        // यदि अर्डर टेकर हो भने केवल काम गर्न बाँकी वा सक्रिय अर्डरहरू मात्र फिल्टर गर्ने
+        let processedData = data;
+        if (isOrderTaker) {
+          processedData = data.filter(o => {
+            let st = String(o.status || "").trim().toLowerCase();
+            return st !== "delivered" && st !== "completed";
+          });
+        }
+
+        let newSorted = processedData.sort((a, b) => {
           let idA = parseInt(a.id || a.order_no?.replace(/\D/g, '')) || 0;
           let idB = parseInt(b.id || b.order_no?.replace(/\D/g, '')) || 0;
           if (idA !== idB) return idB - idA;
