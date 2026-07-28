@@ -239,7 +239,7 @@
   <div id="staffManagementBox" class="staff-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
     <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">👥 Staff & Access Management</h3>
     
-    <!-- यदि Manager हो भने यो 'Add New Staff' सेक्सन लुक्नेछ, Admin मात्र देखिनेछ -->
+    <!-- 🛑 यो सेक्सन Manager हुँदा लुक्नेछ र Admin हुँदा मात्र देखिनेछ -->
     <div id="addNewStaffFormBox" style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd;">
       <h4 style="margin-bottom: 10px; color: #333;">+ Add New Staff</h4>
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
@@ -401,7 +401,7 @@
 
           <!-- Save & Print Button -->
           <button onclick="window.saveAndPrintSalaryVoucher()" style="background: #4CAF50; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px;">💾 Save & Print Salary Voucher</button>
-  </div>
+      </div>
 
       <!-- 3. Salary Statements Export & Report -->
       <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
@@ -1577,7 +1577,7 @@
     let { data } = await supabaseClient.from('admins').select('*').order('id', { ascending: true });
     let staffData = (data && data.length > 0) ? data : staffListCache;
     
-    // मुख्य Admin र Manager बाहेकका अन्य स्टाफहरू मात्र फिल्टर गर्ने
+    // 🛑 एडमिन र म्यानेजरको खाता तालिकामा नदेखिने गरी फिल्टर गरिएको
     let filteredStaff = staffData.filter(staff => {
       let r = String(staff.role || '').trim().toLowerCase();
       return r !== 'admin' && r !== 'manager';
