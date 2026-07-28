@@ -65,7 +65,7 @@
     <h2>🔐 STAFF LOGIN</h2>
     <input id="username" type="text" placeholder="Username / Email" autocomplete="off" value="admin@ugratara.com">
     <input id="password" type="password" placeholder="Password" autocomplete="off" value="123456">
-    <button id="loginBtn" onclick="window.handleLogin()">Login</button>
+    <button id="loginBtn" onclick="handleLoginClick()">Login</button>
   </div>
 </div>
 
@@ -544,8 +544,8 @@
     } catch(e) {}
   }, { once: true });
 
-  // 🔐 Supabase बाट युजरनेम र पासवर्ड प्रमाणीकरण गर्ने र सही रोल तानेर प्यानल खोल्ने फंक्सन (फिक्स गरिएको)
-  window.handleLogin = async function() {
+  // 🔐 Supabase बाट युजरनेम र पासवर्ड प्रमाणीकरण गर्ने र सही रोल तानेर प्यानल खोल्ने मुख्य फंक्सन
+  async function handleLoginClick() {
     var u = document.getElementById("username").value.trim().toLowerCase();
     var p = document.getElementById("password").value.trim();
     if(u === "" || p === "") { alert("कृपया युजरनेम र पासवर्ड लेख्नुहोस्!"); return; }
@@ -555,7 +555,7 @@
     btn.disabled = true;
 
     try {
-      // Supabase मा डेटा फेच गर्दा .single() ले रेकर्ड फेला नपरेमा वा धेरै फेला परेमा एरर दिन सक्छ, त्यसैले .select() प्रयोग गरिएको छ
+      // Supabase बाट admins टेबलमा रेकर्ड तानेर जाँच गर्ने
       let { data, error } = await supabaseClient
         .from('admins')
         .select('*')
@@ -566,11 +566,10 @@
 
       let matchedStaff = null;
       if (!error && data && data.length > 0) {
-        // पासवर्ड मिलान चेक गर्ने
         matchedStaff = data.find(staff => String(staff.password).trim() === p);
       }
 
-      // यदि डेटाबेस टेबलमा भेटिएन भने हार्डकोडेड एडमिन क्रेडेंशियल्स चेक गर्ने
+      // यदि डेटाबेसमा भेटिएन भने इमर्जेन्सी एडमिन क्रेडेंशियल्स चेक गर्ने
       if (!matchedStaff) {
         if (u === "admin@ugratara.com" && p === "123456") {
           matchedStaff = { email: "admin@ugratara.com", role: "admin" };
@@ -598,7 +597,9 @@
       btn.disabled = false;
       alert("⚠️ लगइन गर्दा त्रुटि भयो: " + err.message);
     }
-  };
+  }
+
+  window.handleLogin = handleLoginClick;
 
   window.loadOrders = async function() {
     try {
