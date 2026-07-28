@@ -239,8 +239,7 @@
   <div id="staffManagementBox" class="staff-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
     <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">👥 Staff & Access Management</h3>
     
-    <!-- 🛑 यो सेक्सन Manager हुँदा लुक्नेछ र Admin हुँदा मात्र देखिनेछ -->
-    <div id="addNewStaffFormBox" style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd;">
+    <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd;">
       <h4 style="margin-bottom: 10px; color: #333;">+ Add New Staff</h4>
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
         <input id="staffUsername" type="text" placeholder="Username / Email" style="flex: 1; min-width: 180px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
@@ -1228,7 +1227,7 @@
         </div>
       `}
     </div>`;
-    
+     
     if(document.getElementById("printableInvoiceArea")) {
         document.getElementById("printableInvoiceArea").innerHTML = invoiceHtml;
         document.getElementById("printModalBox").style.display = "flex";
@@ -1299,7 +1298,7 @@
     if(document.getElementById("dashTodaySales")) document.getElementById("dashTodaySales").innerText = "RM " + todaySales.toFixed(2);
     if(document.getElementById("dashMonthSales")) document.getElementById("dashMonthSales").innerText = "RM " + monthSales.toFixed(2);
     if(document.getElementById("dashAvgOrder")) document.getElementById("dashAvgOrder").innerText = "RM " + avgOrderValue.toFixed(2);
-    
+     
     window.drawMonthlySalesChart(orders);
     window.drawHourlySalesChart(orders);
   };
@@ -1389,19 +1388,9 @@
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("adminContent").style.display = "block";
     window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toUpperCase();
-    
+     
     let roleBadge = document.getElementById("userRoleBadge");
     if(roleBadge) roleBadge.innerText = window.myRole;
-
-    // 🛑 यदि लगइन गर्ने युजर 'MANAGER' हो भने 'Add New Staff' फार्म लुकाउने, ADMIN हो भने देखाउने
-    let addStaffBox = document.getElementById("addNewStaffFormBox");
-    if (addStaffBox) {
-      if (window.myRole === "MANAGER") {
-        addStaffBox.style.display = "none";
-      } else {
-        addStaffBox.style.display = "block";
-      }
-    }
 
     let dashBox = document.getElementById("salesDashboardBox");
     if(dashBox) dashBox.style.display = "flex";
@@ -1576,15 +1565,8 @@
     if (!staffTable) return;
     let { data } = await supabaseClient.from('admins').select('*').order('id', { ascending: true });
     let staffData = (data && data.length > 0) ? data : staffListCache;
-    
-    // 🛑 एडमिन र म्यानेजरको खाता तालिकामा नदेखिने गरी फिल्टर गरिएको
-    let filteredStaff = staffData.filter(staff => {
-      let r = String(staff.role || '').trim().toLowerCase();
-      return r !== 'admin' && r !== 'manager';
-    });
-
     let html = "";
-    filteredStaff.forEach(staff => {
+    staffData.forEach(staff => {
       let uName = staff.email || staff.username || '';
       let uPass = staff.password || '';
       let uRole = staff.role || '';
@@ -1628,12 +1610,6 @@
     let newRole = prompt("Edit Role:", oldRole);
     if (newRole === null) return;
 
-    let checkRole = String(newRole).trim().toLowerCase();
-    if (checkRole === 'admin' || checkRole === 'manager') {
-      alert("⚠️ सुरक्षाको कारणले Admin वा Manager रोल राख्न पाइँदैन!");
-      return;
-    }
-
     await supabaseClient.from('admins').update({ email: newEmail, password: newPass, role: newRole }).eq('id', staffId);
     alert("✅ Staff Updated Successfully!");
     window.loadStaffList();
@@ -1644,13 +1620,6 @@
     let password = document.getElementById("staffPassword").value.trim();
     let role = document.getElementById("staffRoleInput").value.trim();
     if (!username || !password || !role) { alert("Enter Username, Password and Role!"); return; }
-
-    let checkRole = String(role).trim().toLowerCase();
-    if (checkRole === 'admin' || checkRole === 'manager') {
-      alert("⚠️ सुरक्षाको कारणले Admin वा MANAGER रोल राख्न मिल्दैन!");
-      return;
-    }
-
     await supabaseClient.from('admins').insert([{ email: username, password: password, role: role }]);
     alert("✅ Staff Added!");
     document.getElementById("staffUsername").value = "";
