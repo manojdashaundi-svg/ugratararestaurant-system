@@ -218,11 +218,12 @@
       let { data, error } = await supabaseClient.from('admins').select('*').eq('email', u).single();
       if (!error && data) {
         if (String(data.password).trim() === p) {
+          let assignedRole = String(data.role || "order_taker").toLowerCase();
           sessionStorage.setItem("ADMIN_LOGIN", "true");
-          sessionStorage.setItem("USER_ROLE", "order_taker");
-          localStorage.setItem("adminRole", "order_taker");
+          sessionStorage.setItem("USER_ROLE", assignedRole);
+          localStorage.setItem("adminRole", assignedRole);
           sessionStorage.setItem("LOGGED_USER", u);
-          myRole = "order_taker";
+          myRole = assignedRole;
           currentLoggedInUser = u;
           btn.innerText = "Login";
           btn.disabled = false;
@@ -478,7 +479,9 @@
   window.showAdminPanel = function() {
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("adminContent").style.display = "block";
-    window.myRole = "order_taker";
+    
+    let roleBadge = document.getElementById("userRoleBadge");
+    if(roleBadge) roleBadge.innerText = myRole.toUpperCase();
 
     window.loadOrders();
     window.setupRealtimeOrders();
@@ -493,7 +496,7 @@
   window.logout = function() { sessionStorage.clear(); window.location.reload(); };
 
   if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
-    myRole = "order_taker";
+    myRole = sessionStorage.getItem("USER_ROLE") || "order_taker";
     currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
     window.showAdminPanel();
   } else {
