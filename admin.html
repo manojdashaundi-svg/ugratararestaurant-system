@@ -588,7 +588,7 @@
     }
   };
 
- window.loadOrders = async function() {
+  window.loadOrders = async function() {
     try {
       let { data, error } = await supabaseClient.from('orders').select('*');
       if (!error && data) {
@@ -619,67 +619,6 @@
       window.calculateDashboardStats(activeOrdersCache);
       window.renderActiveOrdersTable(activeOrdersCache);
     } catch (err) {}
-  };
-
-  window.showAdminPanel = function() {
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("adminContent").style.display = "block";
-    window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
-     
-    let roleBadge = document.getElementById("userRoleBadge");
-    if(roleBadge) roleBadge.innerText = window.myRole.toUpperCase();
-
-    let isOrderTaker = (window.myRole === "order_taker" || window.myRole === "ordertaker");
-
-    let dashBox = document.getElementById("salesDashboardBox");
-    if(dashBox) dashBox.style.display = isOrderTaker ? "none" : "flex";
-
-    let monthlyChart = document.getElementById("monthlySalesChartDiv");
-    if(monthlyChart) monthlyChart.style.display = isOrderTaker ? "none" : "block";
-
-    let hourlyChart = document.getElementById("hourlySalesChartDiv");
-    if(hourlyChart) hourlyChart.style.display = isOrderTaker ? "none" : "block";
-
-    let allSections = document.querySelectorAll("body > div#adminContent > div");
-    allSections.forEach(sec => {
-      let text = sec.innerText || "";
-      if (text.includes("Sales Report Generator") || 
-          text.includes("Expense & Profit Tracker") || 
-          text.includes("Staff Salary Sheet") || 
-          text.includes("Monthly Sales Insights") || 
-          text.includes("Today's Hourly Sales")) {
-        sec.style.display = isOrderTaker ? "none" : "block";
-      }
-    });
-
-    let menuBox = document.getElementById("menuManagementBox");
-    if(menuBox) menuBox.style.display = isOrderTaker ? "none" : "block";
-
-    let invBox = document.querySelector(".inventory-section");
-    if(invBox) invBox.style.display = isOrderTaker ? "none" : "block";
-
-    let staffBox = document.getElementById("staffManagementBox");
-    if(staffBox) staffBox.style.display = isOrderTaker ? "none" : "block";
-
-    let salarySec = document.querySelector(".salary-section");
-    if(salarySec) salarySec.style.display = isOrderTaker ? "none" : "block";
-
-    window.loadOrders();
-    window.setupRealtimeOrders();
-    window.loadAdminChats();
-
-    if(!isOrderTaker) {
-      window.loadMenuList();
-      window.loadStaffList();
-      window.loadExpenseSummary();
-      window.loadInventoryData();
-      window.loadSalaryStaffDropdown();
-    }
-
-    setInterval(() => {
-      window.loadOrders();
-      window.loadAdminChats();
-    }, 2000);
   };
 
   window.showAdminPanel = function() {
@@ -856,14 +795,13 @@
     } catch(err) {}
   };
 
- window.renderActiveOrdersTable = function(ordersToRender) {
+  window.renderActiveOrdersTable = function(ordersToRender) {
     var tableBody = document.getElementById("ordersTable");
     if(!tableBody) return;
     
     let html = "";
     let isOrderTaker = (window.myRole === "order_taker" || window.myRole === "ordertaker");
 
-    // यदि ORDER_TAKER हो भने 'preparing' स्टेटस भएका अर्डरहरूलाई रेन्डर गर्ने सूचीबाट पूर्ण रूपमा फिल्टर गरेर हटाउने
     let filteredOrders = ordersToRender;
     if (isOrderTaker) {
       filteredOrders = ordersToRender.filter(o => {
@@ -902,7 +840,11 @@
         if (status === "pending" || status === "order received" || status === "") {
             actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
         } else if (status === "preparing") {
-            actionButtons = ``;
+            if (isOrderTaker) {
+                actionButtons = ``;
+            } else {
+                actionButtons = `<button class="rdyBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Ready', 'bill')">🍳 Ready & Bill</button>`;
+            }
         } else if (status === "ready") {
             actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no || o.id}', 'Out for Delivery')">🚚 Dispatch</button>`;
         } else if (status === "out for delivery") {
@@ -1520,75 +1462,11 @@
     }
   };
 
-  window.showAdminPanel = function() {
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("adminContent").style.display = "block";
-    window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
-     
-    let roleBadge = document.getElementById("userRoleBadge");
-    if(roleBadge) roleBadge.innerText = window.myRole.toUpperCase();
-
-    let isOrderTaker = (window.myRole === "order_taker" || window.myRole === "ordertaker");
-
-    // ड्यासबोर्ड कार्डहरू लुकाउने/देखाउने
-    let dashBox = document.getElementById("salesDashboardBox");
-    if(dashBox) dashBox.style.display = isOrderTaker ? "none" : "flex";
-
-    let monthlyChart = document.getElementById("monthlySalesChartDiv");
-    if(monthlyChart) monthlyChart.style.display = isOrderTaker ? "none" : "block";
-
-    let hourlyChart = document.getElementById("hourlySalesChartDiv");
-    if(hourlyChart) hourlyChart.style.display = isOrderTaker ? "none" : "block";
-
-    // Sales Report, Expense, Salary र अन्य बक्सहरूलाई कन्टेनरको कक्षा (class) वा टेक्स्टका आधारमा लुकाउने
-    let allSections = document.querySelectorAll("body > div#adminContent > div");
-    allSections.forEach(sec => {
-      let text = sec.innerText || "";
-      if (text.includes("Sales Report Generator") || 
-          text.includes("Expense & Profit Tracker") || 
-          text.includes("Staff Salary Sheet") || 
-          text.includes("Monthly Sales Insights") || 
-          text.includes("Today's Hourly Sales")) {
-        sec.style.display = isOrderTaker ? "none" : "block";
-      }
-    });
-
-    let menuBox = document.getElementById("menuManagementBox");
-    if(menuBox) menuBox.style.display = isOrderTaker ? "none" : "block";
-
-    let invBox = document.querySelector(".inventory-section");
-    if(invBox) invBox.style.display = isOrderTaker ? "none" : "block";
-
-    let staffBox = document.getElementById("staffManagementBox");
-    if(staffBox) staffBox.style.display = isOrderTaker ? "none" : "block";
-
-    let salarySec = document.querySelector(".salary-section");
-    if(salarySec) salarySec.style.display = isOrderTaker ? "none" : "block";
-
-    // अर्डर र च्याट सधैं चालु राख्ने
-    window.loadOrders();
-    window.setupRealtimeOrders();
-    window.loadAdminChats();
-
-    if(!isOrderTaker) {
-      window.loadMenuList();
-      window.loadStaffList();
-      window.loadExpenseSummary();
-      window.loadInventoryData();
-      window.loadSalaryStaffDropdown();
-    }
-
-    setInterval(() => {
-      window.loadOrders();
-      window.loadAdminChats();
-    }, 2000);
-  };
-  
   window.logout = function() { sessionStorage.clear(); window.location.reload(); };
 
   if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
     myRole = sessionStorage.getItem("USER_ROLE") || "admin";
-    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
+    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER"] || "";
     window.showAdminPanel();
   } else {
     document.getElementById("loginScreen").style.display = "flex";
@@ -1738,7 +1616,6 @@
     let { data } = await supabaseClient.from('admins').select('*').order('id', { ascending: true });
     let staffData = (data && data.length > 0) ? data : staffListCache;
     
-    // 🔍 म्यानेजर लगइन हुँदा एडमिन र म्यानेजरहरू लुकाउने र साधारण कर्मचारी मात्र देखाउने फिल्टर
     let currentRole = String(sessionStorage.getItem("USER_ROLE") || "").toLowerCase();
     if (currentRole === "manager") {
       staffData = staffData.filter(staff => {
@@ -1929,7 +1806,7 @@
             </div>
             <script>
                 window.onload = function() { window.print(); window.close(); }
-            <\/script>
+            </script>
       </body>
       </html>
   `);
