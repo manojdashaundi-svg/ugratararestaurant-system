@@ -1565,16 +1565,6 @@
     if (!staffTable) return;
     let { data } = await supabaseClient.from('admins').select('*').order('id', { ascending: true });
     let staffData = (data && data.length > 0) ? data : staffListCache;
-    
-    // 🔍 म्यानेजर लगइन हुँदा एडमिन र म्यानेजरहरू लुकाउने र साधारण कर्मचारी मात्र देखाउने फिल्टर
-    let currentRole = String(sessionStorage.getItem("USER_ROLE") || "").toLowerCase();
-    if (currentRole === "manager") {
-      staffData = staffData.filter(staff => {
-        let r = String(staff.role || "").toLowerCase();
-        return r !== "admin" && r !== "manager";
-      });
-    }
-
     let html = "";
     staffData.forEach(staff => {
       let uName = staff.email || staff.username || '';
@@ -1596,9 +1586,6 @@
         </td>
       </tr>`;
     });
-    staffTable.innerHTML = html || `<tr><td colspan="5">No staff found.</td></tr>`;
-  };
-  
     staffTable.innerHTML = html || `<tr><td colspan="5">No staff found.</td></tr>`;
   };
 
