@@ -518,6 +518,7 @@
     }
   });
 
+  // 🔔 चर्को र प्रस्ट तीन पटक बज्ने डिजिटल घण्टी (Web Audio API + Audio Fallback)
   window.playTringTringBell = function() {
     try {
       window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -528,23 +529,23 @@
         window.audioCtx.resume();
       }
       
-      // चर्को र प्रस्ट तीन पटक घण्टी बज्ने Web Audio API सिंथेटिक फलब्याक तथा मुख्य घण्टी
       const playBeep = (timeOffset, freq) => {
         let osc = window.audioCtx.createOscillator();
         let gain = window.audioCtx.createGain();
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, window.audioCtx.currentTime + timeOffset);
         gain.gain.setValueAtTime(1.0, window.audioCtx.currentTime + timeOffset);
-        gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + timeOffset + 0.35);
+        gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + timeOffset + 0.4);
         osc.connect(gain);
         gain.connect(window.audioCtx.destination);
         osc.start(window.audioCtx.currentTime + timeOffset);
-        osc.stop(window.audioCtx.currentTime + timeOffset + 0.35);
+        osc.stop(window.audioCtx.currentTime + timeOffset + 0.4);
       };
 
-      playBeep(0, 1046.50); // High C
-      playBeep(0.25, 1318.51); // High E
-      playBeep(0.50, 1567.98); // High G
+      // तीन पटक चर्को स्वरमा घण्टी बज्ने (Tring Tring Tring)
+      playBeep(0.0, 1200);
+      playBeep(0.2, 1400);
+      playBeep(0.4, 1600);
 
       const audio = document.getElementById("notificationAudio");
       if (audio) {
