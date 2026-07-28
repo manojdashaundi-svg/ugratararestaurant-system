@@ -723,13 +723,14 @@
     } catch(err) {}
   };
 
-  window.renderActiveOrdersTable = function(ordersToRender) {
+ window.renderActiveOrdersTable = function(ordersToRender) {
     var tableBody = document.getElementById("ordersTable");
     if(!tableBody) return;
     
     let html = "";
     let limitedOrders = ordersToRender.slice(0, 10);
     let totalOrdersCount = limitedOrders.length;
+    let isOrderTaker = (window.myRole === "order_taker" || window.myRole === "ordertaker");
 
     if(totalOrdersCount === 0) {
       html = `<tr><td colspan="9" style="padding:20px;">No Active Orders Found.</td></tr>`;
@@ -744,14 +745,15 @@
         let delivHtml = (o.proof_img && o.proof_img !== "None" && o.proof_img !== "") ?  
           `<img src="${o.proof_img}" class="proof-thumb" onclick="window.openImageViewer('${o.proof_img}')">` : `None`;
         
-        let statusSelect = `<select id="status_${o.order_no || o.id}">
-          <option value="Pending" ${status==="pending"?"selected":""}>Pending</option>
-          <option value="Preparing" ${status==="preparing"?"selected":""}>Preparing</option>
-          <option value="Ready" ${status==="ready"?"selected":""}>Ready</option>
-          <option value="Out for Delivery" ${status==="out for delivery"?"selected":""}>Out for Delivery</option>
-          <option value="Delivered" ${status==="delivered"?"selected":""}>Delivered</option>
-        </select> 
-        <button class="updateBtn" onclick="window.manualUpdate('${o.order_no || o.id}')">Go</button>`;
+        let statusSelect = isOrderTaker ? `<b style="text-transform: uppercase; color: #e91e63;">${o.status || 'Pending'}</b>` : 
+          `<select id="status_${o.order_no || o.id}">
+            <option value="Pending" ${status==="pending"?"selected":""}>Pending</option>
+            <option value="Preparing" ${status==="preparing"?"selected":""}>Preparing</option>
+            <option value="Ready" ${status==="ready"?"selected":""}>Ready</option>
+            <option value="Out for Delivery" ${status==="out for delivery"?"selected":""}>Out for Delivery</option>
+            <option value="Delivered" ${status==="delivered"?"selected":""}>Delivered</option>
+          </select> 
+          <button class="updateBtn" onclick="window.manualUpdate('${o.order_no || o.id}')">Go</button>`;
 
         let actionButtons = "";
         if (status === "pending" || status === "order received" || status === "") {
