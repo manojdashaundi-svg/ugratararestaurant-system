@@ -494,16 +494,12 @@
   // 🔔 सुपर भरपर्दो अडियो फंक्सन (HTML5 Audio + Web Audio API दुवै प्रयोग गरिएको)
   window.playTringTringBell = function() {
     try {
-      // १. HTML5 Audio एलिमेन्ट प्ले गर्ने प्रयास
       const audio = document.getElementById("notificationAudio");
       if (audio) {
         audio.currentTime = 0;
-        audio.play().catch(err => {
-          console.log("HTML5 audio autoplay blocked, using Web Audio API fallback");
-        });
+        audio.play().catch(err => {});
       }
 
-      // २. Web Audio API मार्फत सिन्थेसाइज्ड बिप साउन्ड बजाउने
       window.AudioContext = window.AudioContext || window.webkitAudioContext;
       if (!window.audioCtx) {
         window.audioCtx = new AudioContext();
@@ -528,9 +524,7 @@
       playBeep(0.0, 1200);
       playBeep(0.2, 1400);
       playBeep(0.4, 1600);
-    } catch(e) {
-      console.log("Audio play error: ", e);
-    }
+    } catch(e) {}
   };
 
   window.testBellSound = function() {
@@ -538,7 +532,6 @@
     alert("🔔 डिजिटल घण्टी सुचारु भयो!");
   };
 
-  // 🖱️ माउस क्लिक वा इन्टरनएक्सन हुँदा अडियो कन्टेक्स्ट अनलक गर्ने
   document.addEventListener('click', function() {
     try {
       window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -579,12 +572,11 @@
       if (!error && data) {
         let newSorted = data.sort((a, b) => {
           let idA = parseInt(a.id || a.order_no?.replace(/\D/g, '')) || 0;
-    <i> let idB = parseInt(b.id || b.order_no?.replace(/\D/g, '')) || 0;</i>
+          let idB = parseInt(b.id || b.order_no?.replace(/\D/g, '')) || 0;
           if (idA !== idB) return idB - idA;
           return new Date(b.time || 0) - new Date(a.time || 0);
         });
 
-        // यदि क्यास गरिएको अर्डर संख्या भन्दा नयाँ अर्डर संख्या बढी छ भने घण्टी बजाउने
         if (activeOrdersCache.length > 0 && newSorted.length > activeOrdersCache.length) {
           window.playTringTringBell();
         }
@@ -596,7 +588,6 @@
     } catch (err) {}
   };
 
-  // 🔄 Supabase Realtime Subscription for Orders & Chats with Instant Fast Notification Sound
   window.setupRealtimeOrders = function() {
     try {
       supabaseClient
@@ -1393,7 +1384,6 @@
     window.loadInventoryData();
     window.loadSalaryStaffDropdown();
 
-    // 🔄 Auto-polling interval every 2 seconds for instant lightning-fast chat updates
     setInterval(() => {
       window.loadOrders();
       window.loadAdminChats();
