@@ -8,11 +8,6 @@
   <script src="https://www.gstatic.com/charts/loader.js"></script>
   <!-- Supabase JS Client Library -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    try {
-      google.charts.load('current', {'packages':['corechart']});
-    } catch(e) { console.log("Google Charts load error: " + e); }
-  </script>
   <style>
     body{ font-family:Arial,sans-serif; background:#f5f5f5; margin:0; padding:20px; }
     h2{ color:#e91e63; }
@@ -26,12 +21,7 @@
     .rcvBtn { background:#4CAF50; color:white; border:none; padding:8px 12px; border-radius:6px; font-weight:bold; cursor:pointer; }
     .rdyBtn { background:#9C27B0; color:white; border:none; padding:8px 12px; border-radius:6px; font-weight:bold; cursor:pointer; }
     .updateBtn { background:#2196F3; color:white; border:none; padding:8px 12px; border-radius:6px; font-weight:bold; cursor:pointer; }
-    .addBtn { background:#e91e63; color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; }
-    .editBtn { background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
-    .removeBtn { background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
-    .staff-section, .menu-section, .inventory-section, .salary-section, .chat-section { background:#fff; padding:20px; border-radius:10px; margin-top:40px; border:1px solid #ddd; display:block; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
-    .excelBtn { background:#1F7246; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
-    .pdfBtn { background:#E01A22; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
+    .chat-section { background:#fff; padding:20px; border-radius:10px; margin-top:40px; border:1px solid #ddd; display:block; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
     .login-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f5f5f5; display:flex; justify-content:center; align-items:center; z-index:99999; }
     .login-card { background:#fff; padding:30px; border-radius:12px; box-shadow:0 5px 15px rgba(0,0,0,0.1); width:100%; max-width:360px; text-align:center; }
     .login-card input { width:100%; padding:12px; margin:10px 0; border:1px solid #ddd; border-radius:8px; font-size:16px; }
@@ -46,11 +36,6 @@
     .print-modal { position: fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); display:none; justify-content:center; align-items:center; z-index:999999; }
     .print-box { background:#fff; padding:25px; border-radius:12px; width:320px; max-height:85vh; overflow-y:auto; box-shadow:0 5px 20px rgba(0,0,0,0.3); }
     .print-area { font-family: 'Courier New', Courier, monospace; font-size:14px; color:#000; line-height:1.4; }
-
-    .chart-container { background:#fff; padding:15px; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.05); margin:20px 0; border:1px solid #ddd; width:100%; height: 280px; display:block; }
-    .inStockBtn { background:#4CAF50; color:white; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; display: inline-flex; align-items: center; gap: 5px; }
-    .outStockBtn { background:#ff9800; color:white; border:none; padding:6px 12px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
-    .menu-thumb { width: 60px; height: 60px; object-fit: cover; border-radius: 8px; border: 1px solid #ddd; }
   </style>
 </head>
 <body>
@@ -74,64 +59,9 @@
   <button id="globalLogoutBtn" class="logout" onclick="window.logout()">Logout</button>
   
   <h2>
-    🍴 UGRATARA Admin Panel (<span id="userRoleBadge" style="color:#e91e63;">...</span>)
+    🍴 UGRATARA Admin Panel (<span id="userRoleBadge" style="color:#e91e63;">ORDER_TAKER</span>)
     <span id="emailAutomationStatusBadge" class="automation-badge" style="display: inline-block;">Supabase: 🟢 Active</span>
   </h2>
-
-  <!-- 📊 ड्यासबोर्ड कार्डहरू -->
-  <div id="salesDashboardBox" style="display: none; gap: 12px; margin: 20px 0; flex-wrap: wrap;">
-    <div style="flex: 1; min-width: 140px; background: #fff; padding: 15px; border-radius: 10px; border-left: 5px solid #2196F3; text-align: center;">
-      <span style="font-size: 13px; color: #777; font-weight: bold;">Total Orders</span>
-      <h2 id="dashTotalOrders" style="margin: 5px 0 0 0; color: #2196F3; font-size: 24px;">0</h2>
-    </div>
-    <div style="flex: 1; min-width: 140px; background: #fff; padding: 15px; border-radius: 10px; border-left: 5px solid #4CAF50; text-align: center;">
-      <span style="font-size: 13px; color: #777; font-weight: bold;">Total Revenue</span>
-      <h2 id="dashTotalRevenue" style="margin: 5px 0 0 0; color: #4CAF50; font-size: 24px;">RM 0</h2>
-    </div>
-    <div style="flex: 1; min-width: 140px; background: #fff; padding: 15px; border-radius: 10px; border-left: 5px solid #FF9800; text-align: center;">
-      <span style="font-size: 13px; color: #777; font-weight: bold;">Today's Sales</span>
-      <h2 id="dashTodaySales" style="margin: 5px 0 0 0; color: #FF9800; font-size: 24px;">RM 0</h2>
-    </div>
-    <div style="flex: 1; min-width: 140px; background: #fff; padding: 15px; border-radius: 10px; border-left: 5px solid #9C27B0; text-align: center;">
-      <span style="font-size: 13px; color: #777; font-weight: bold;">This Month Sales</span>
-      <h2 id="dashMonthSales" style="margin: 5px 0 0 0; color: #9C27B0; font-size: 24px;">RM 0</h2>
-    </div>
-    <div style="flex: 1; min-width: 140px; background: #fff; padding: 15px; border-radius: 10px; border-left: 5px solid #E91E63; text-align: center;">
-      <span style="font-size: 13px; color: #777; font-weight: bold;">Avg Order Value</span>
-      <h2 id="dashAvgOrder" style="margin: 5px 0 0 0; color: #E91E63; font-size: 24px;">RM 0</h2>
-    </div>
-  </div>
-
-  <!-- 📈 Monthly Sales Insights & Chart Section -->
-  <div class="chart-container" id="monthlySalesChartDiv" style="display: none; width: 100%; height: 320px; background: #fff; padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-    <h3 style="color: #e91e63; margin-bottom: 10px; font-size: 16px;">Monthly Sales Insights & Growth (RM)</h3>
-    <div id="monthlySalesChart" style="width: 100%; height: 250px;"></div>
-  </div>
-  
-  <!-- 📈 Today's Hourly Sales Trend Chart Section -->
-  <div class="chart-container" id="hourlySalesChartDiv" style="display: none; width: 100%; height: 320px; background: #fff; padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-    <h3 style="color: #e91e63; margin-bottom: 10px; font-size: 16px;">Today's Hourly Sales Trend (RM)</h3>
-    <div id="hourlySalesChart" style="width: 100%; height: 250px;"></div>
-  </div>
-
-  <!-- 📊 Sales Report Generator & Export Section -->
-  <div id="salesReportGeneratorSection" style="display: none; background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-    <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">📊 Sales Report Generator & Export</h3>
-    <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
-      <div>
-        <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Start Date:</label>
-        <input type="date" id="reportStartDate" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px;">
-      </div>
-      <div>
-        <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">End Date:</label>
-        <input type="date" id="reportEndDate" style="padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px;">
-      </div>
-      <div style="display: flex; gap: 10px; margin-top: 5px;">
-        <button class="excelBtn" onclick="window.exportExcelReport()" style="background: #1F7246; color: white; border: none; padding: 11px 18px; border-radius: 8px; font-weight: bold; cursor: pointer;">📥 Export Excel (.CSV)</button>
-        <button class="pdfBtn" onclick="window.printPdfReport()" style="background: #E01A22; color: white; border: none; padding: 11px 18px; border-radius: 8px; font-weight: bold; cursor: pointer;">🖨️ Print / Download PDF</button>
-      </div>
-    </div>
-  </div>
 
   <!-- 🛒 मुख्य अर्डर तालिका -->
   <div id="mainOrdersTableSection">
@@ -161,268 +91,7 @@
     </div>
   </div>
 
-  <!-- 🍔 मेनु म्यानेजमेन्ट सेक्सन -->
-  <div id="menuManagementBox" class="menu-section" style="display:none;">
-    <h3>🍔 Menu & Product Management</h3>
-    <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #ddd;">
-      <h4>+ Add New Product</h4>
-      <input id="prodId" type="text" placeholder="Item ID">
-      <input id="prodName" type="text" placeholder="Product Name">
-      <input id="prodPrice" type="number" placeholder="Price">
-      <input id="prodImg" type="text" placeholder="Image URL">
-      <input id="prodDesc" type="text" placeholder="Description">
-      <input id="prodCat" type="text" placeholder="Category">
-      <button id="addProductBtn" class="addBtn" onclick="window.createNewProduct()">+ Add Product</button>
-    </div>
-    <h4>Current Food Items</h4>
-    <div style="overflow-x: auto; width:100%;">
-      <table>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Food Name</th>
-            <th>Price</th>
-            <th>Image</th>
-            <th>Description</th>
-            <th>Category</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody id="menuTableList"></tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- 📦 Inventory Management Section -->
-  <div id="inventoryManagementBox" class="inventory-section" style="display:none;">
-    <h3>📦 Inventory Management</h3>
-    <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #ddd;">
-      <div style="margin-bottom: 15px;">
-        <select id="inventoryItemSelect" onchange="window.onInventoryItemSelect()" style="width: 100%; max-width: 450px; padding: 10px; font-size: 14px; font-weight: bold; border-radius: 6px; border: 1px solid #ccc;">
-          <option value="">-- Item ID छान्नुहोस् --</option>
-        </select>
-      </div>
-      <div style="margin-bottom: 8px; font-size: 15px; font-weight: bold; color: #333;" id="invDisplayName">Name: -</div>
-      <div style="margin-bottom: 12px; font-size: 15px; font-weight: bold; color: #333;" id="invDisplayCategory">Category: -</div>
-      <div style="margin-bottom: 12px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-        <label style="font-weight: bold; color: #555;">Current Stock:</label>
-        <input id="invCurrentStock" type="number" placeholder="Enter Current Stock" style="width: 180px; padding: 8px;">
-      </div>
-      <div style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
-        <label style="font-weight: bold; color: #555;">Alert Limit:</label>
-        <input id="invAlertLimit" type="number" value="50" style="width: 180px; padding: 8px;">
-      </div>
-      <button onclick="window.saveInventoryStock()" style="background:#4CAF50; color:white; border:none; padding:10px 20px; border-radius:6px; font-weight:bold; cursor:pointer; font-size: 15px;">Save Stock</button>
-    </div>
-
-    <h3 style="color: #e91e63; margin-top: 25px;">⚠️ Stock Alert Items</h3>
-    <div style="overflow-x: auto; width:100%;">
-      <table>
-        <thead>
-          <tr>
-            <th>ItemID</th>
-            <th>ItemName</th>
-            <th>Category</th>
-            <th>Current</th>
-            <th>Limit</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody id="inventoryTableList">
-          <tr><td colspan="6" style="padding: 15px;">Loading Inventory...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <!-- 👥 Staff & Access Management Section -->
-  <div id="staffManagementBox" class="staff-section" style="display:none; background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-    <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">👥 Staff & Access Management</h3>
-    
-    <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd;">
-      <h4 style="margin-bottom: 10px; color: #333;">+ Add New Staff</h4>
-      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <input id="staffUsername" type="text" placeholder="Username / Email" style="flex: 1; min-width: 180px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-        <input id="staffPassword" type="password" placeholder="Password" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-        <input id="staffRoleInput" type="text" placeholder="Role (e.g. Driver, Cook, Salesman)" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
-        <button class="addBtn" onclick="window.createNewStaff()" style="background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add Staff</button>
-      </div>
-    </div>
-
-    <h4 style="margin-bottom: 10px; color: #333;">Current Staff Members</h4>
-    <div style="overflow-x: auto; width: 100%;">
-      <table>
-       <thead>
-      <tr>
-        <th>Username</th>
-        <th>Password</th>
-        <th>Role</th>
-        <th>Status</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-        <tbody id="staffTableList">
-          <tr><td colspan="5" style="padding: 15px;">Loading staff members...</td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-
-  <div id="expenseTrackerBox" style="display:none; background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
-      <h3 style="margin-bottom: 15px; color: #333;">💰 Expense & Profit Tracker</h3>
-      
-      <!-- खर्च थप्ने इनपुट बक्सहरू -->
-      <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center;">
-          <input type="date" id="expenseDateInput" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-          <input type="text" id="expenseCategory" placeholder="Category (e.g. Rent, Salary)" style="padding: 8px; flex: 1; border: 1px solid #ccc; border-radius: 4px;">
-          <input type="number" id="expenseAmount" placeholder="Amount (RM)" style="padding: 8px; width: 130px; border: 1px solid #ccc; border-radius: 4px;">
-          <input type="text" id="expenseDescription" placeholder="Description" style="padding: 8px; flex: 2; border: 1px solid #ccc; border-radius: 4px;">
-          <button onclick="window.addExpense()" style="background: #e91e63; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer;">+ Add Expense</button>
-      </div>
-
-      <!-- 📊 Expense Report Generator & Export सेक्सन -->
-      <div style="margin-bottom: 20px;">
-          <h4 style="color: #333; margin-bottom: 10px;">📊 Expense Report Generator & Export</h4>
-          <div style="display: flex; gap: 15px; align-items: center; background: #f9f9f9; padding: 15px; border-radius: 6px; flex-wrap: wrap;">
-              <div>
-                  <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">Start Date:</label>
-                  <input type="date" id="expenseStartDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-              </div>
-              <div>
-                  <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">End Date:</label>
-                  <input type="date" id="expenseEndDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-              </div>
-              <div style="display: flex; gap: 10px; align-items: flex-end; margin-top: 20px;">
-                  <button onclick="window.exportExpenseExcel()" style="background: #2e7d32; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📥 Export Excel (.CSV)</button>
-                  <button onclick="window.printExpensePDF()" style="background: #d32f2f; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">🖨️ Print / Download PDF</button>
-              </div>
-          </div>
-      </div>
-
-      <!-- Total Summary देखाउने सेक्सन -->
-      <div style="border-top: 2px solid #eee; padding-top: 15px; font-size: 16px; display: flex; flex-direction: column; gap: 8px;">
-          <div style="color: #1976D2; font-weight: bold;">जम्मा Total Revenue: <span id="summaryRevenue">RM 147.00</span></div>
-          <div style="color: #D32F2F; font-weight: bold;">जम्मा Total Expense: <span id="summaryExpense">RM 0.00</span></div>
-          <div style="color: #388E3C; font-weight: bold; font-size: 18px;">जम्मा Net Profit: <span id="summaryNetProfit">RM 0.00</span></div>
-      </div>
-  </div>
-
-  <!-- 💰 Staff Salary Sheet & Voucher System -->
-  <div id="salaryManagementBox" class="salary-section" style="display:none; background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-      <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">💰 Staff Salary Sheet & Voucher System</h3>
-      
-      <!-- 1. Add New Staff & Designation -->
-      <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd;">
-          <h4 style="margin-bottom: 10px; color: #333;">+ Add New Staff & Designation</h4>
-          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-              <input id="salStaffName" type="text" placeholder="Full Name (e.g. Shova Kumari)" style="flex: 2; min-width: 200px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-              <input id="salStaffDesig" type="text" placeholder="Designation (e.g. Cleaner, Store Keeper)" style="flex: 2; min-width: 200px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-              <button class="addBtn" onclick="window.addNewSalaryStaff()" style="background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add Staff</button>
-          </div>
-      </div>
-
-      <!-- 2. Create Salary Voucher -->
-      <div style="background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e91e63;">
-          <h4 style="margin-bottom: 15px; color: #e91e63;">🧾 Create Salary Voucher</h4>
-          
-          <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
-              <div style="flex: 2; min-width: 250px;">
-                  <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Employee Name:</label>
-                  <select id="voucherEmpSelect" onchange="window.onVoucherEmpChange()" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
-                      <option value="">-- कामदार रोज्नुहोस् --</option>
-                  </select>
-              </div>
-              <div style="flex: 2; min-width: 250px;">
-                  <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Designation:</label>
-                  <input id="voucherDesignation" type="text" placeholder="Designation" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
-              </div>
-          </div>
-
-          <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
-              <div style="flex: 1; min-width: 100px;">
-                  <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Day:</label>
-                  <input id="voucherDay" type="number" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
-              </div>
-              <div style="flex: 1; min-width: 100px;">
-                  <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Month:</label>
-                  <input id="voucherMonth" type="number" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
-              </div>
-              <div style="flex: 1; min-width: 100px;">
-                  <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Year:</label>
-                  <input id="voucherYear" type="number" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
-              </div>
-          </div>
-
-          <!-- Earnings & Allowances -->
-          <div style="margin-bottom: 15px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                  <label style="font-weight: bold; color: #333;">Earnings & Allowances:</label>
-                  <button onclick="window.addEarningRow()" style="background: #e91e63; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">+ Add Earnings</button>
-              </div>
-              <div id="earningsContainer" style="display: flex; flex-direction: column; gap: 8px;">
-                  <div style="display: flex; gap: 10px; align-items: center;" class="earning-row">
-                      <input type="text" value="MONTHLY BASIC SALARY PAYED" style="flex: 3; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                      <input type="number" value="0" oninput="window.calculateNetSalary()" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="earning-amount">
-                      <button onclick="window.removeRow(this)" style="background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">✕</button>
-                  </div>
-              </div>
-          </div>
-
-          <!-- Deductions -->
-          <div style="margin-bottom: 15px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                  <label style="font-weight: bold; color: #333;">Deductions:</label>
-                  <button onclick="window.addDeductionRow()" style="background: #e91e63; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">+ Add Deduction</button>
-              </div>
-              <div id="deductionsContainer" style="display: flex; flex-direction: column; gap: 8px;">
-                  <div style="display: flex; gap: 10px; align-items: center;" class="deduction-row">
-                      <input type="text" placeholder="Deduction Description" style="flex: 3; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="deduction-desc">
-                      <input type="number" value="0" oninput="window.calculateNetSalary()" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="deduction-amount">
-                      <button onclick="window.removeRow(this)" style="background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">✕</button>
-                  </div>
-              </div>
-          </div>
-
-          <!-- Payment Mode -->
-          <div style="margin-bottom: 20px;">
-              <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Payment Mode:</label>
-              <select id="voucherPaymentMode" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
-                  <option value="💵 CASH PAYMENT">💵 CASH PAYMENT</option>
-                  <option value="🏦 BANK CASH / CHECK DEPOSITE">🏦 BANK CASH / CHECK DEPOSITE</option>
-                  <option value="📱 MOBILE BANKING TRANSFER">📱 MOBILE BANKING TRANSFER</option>
-              </select>
-          </div>
-
-          <!-- NET Salary Display -->
-          <div style="background: #fff5f5; border: 1px dashed #e91e63; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 18px; font-weight: bold; color: #e91e63;">
-              NET Salary: RM <span id="displayNetSalary">0.00</span>
-          </div>
-
-          <!-- Save & Print Button -->
-          <button onclick="window.saveAndPrintSalaryVoucher()" style="background: #4CAF50; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px;">💾 Save & Print Salary Voucher</button>
-      </div>
-
-      <!-- 3. Salary Statements Export & Report -->
-      <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
-          <h4 style="color: #333; margin-bottom: 10px;">📊 Salary Statements Export & Report</h4>
-          <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-              <div>
-                  <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">Start Date:</label>
-                  <input type="date" id="salaryStartDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-              </div>
-              <div>
-                  <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">End Date:</label>
-                  <input type="date" id="salaryEndDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-              </div>
-              <div style="display: flex; gap: 10px; align-items: flex-end; margin-top: 20px;">
-                  <button onclick="window.exportSalaryExcel()" class="excelBtn" style="background: #2e7d32; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📥 Download Excel (.CSV)</button>
-                  <button onclick="window.printSalaryPDF()" class="pdfBtn" style="background: #d32f2f; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📄 Print / PDF Report</button>
-              </div>
-          </div>
-      </div>
-  </div>
-
-  <!-- 💬 Live Support Chat Center Section (Moved to Bottom) -->
+  <!-- 💬 Live Support Chat Center Section -->
   <div class="chat-section">
     <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">💬 Live Support Chat Center</h3>
     <div style="display: flex; gap: 20px; flex-wrap: wrap;">
@@ -466,7 +135,7 @@
   </div>
 </div>
 
-<!-- 🖼️ Image Viewer Modal (Payment Slip & Delivery Proof ठूलो ब्यानरमा हेर्नका लागि थप गरिएको) -->
+<!-- 🖼️ Image Viewer Modal -->
 <div id="imageViewerModal" class="image-viewer-modal" onclick="window.closeImageViewer()">
   <div class="image-viewer-box" onclick="event.stopPropagation()">
     <img id="viewerTargetImage" src="" alt="Proof Banner">
@@ -482,16 +151,8 @@
   var myRole = "order_taker";
   var currentLoggedInUser = "";
   var activeOrdersCache = JSON.parse(localStorage.getItem("cached_active_orders") || "[]");
-  var menuItemsCache = [
-    { id: 1, name: "Chicken Momo", price: 12, category: "Momo", description: "Fresh juicy chicken momo", status: "In Stock", image: "" },
-    { id: 2, name: "Veg Chowmein", price: 10, category: "Chowmein", description: "Delicious stir-fried noodles", status: "In Stock", image: "" }
-  ];
-  var staffListCache = [
-    { email: "admin@ugratara.com", password: "123456", role: "admin", status: "Active" }
-  ];
   var selectedChatSession = null;
 
-  // 🔔 सुपर भरपर्दो अडियो फंक्सन (HTML5 Audio + Web Audio API दुवै प्रयोग गरिएको)
   window.playTringTringBell = function() {
     try {
       const audio = document.getElementById("notificationAudio");
@@ -557,12 +218,11 @@
       let { data, error } = await supabaseClient.from('admins').select('*').eq('email', u).single();
       if (!error && data) {
         if (String(data.password).trim() === p) {
-          let assignedRole = String(data.role || "order_taker").toLowerCase();
           sessionStorage.setItem("ADMIN_LOGIN", "true");
-          sessionStorage.setItem("USER_ROLE", assignedRole);
-          localStorage.setItem("adminRole", assignedRole);
+          sessionStorage.setItem("USER_ROLE", "order_taker");
+          localStorage.setItem("adminRole", "order_taker");
           sessionStorage.setItem("LOGGED_USER", u);
-          myRole = assignedRole;
+          myRole = "order_taker";
           currentLoggedInUser = u;
           btn.innerText = "Login";
           btn.disabled = false;
@@ -572,7 +232,6 @@
       }
     } catch(e) {}
 
-    // Default fallback for order_taker or master admin forcing order_taker mode
     if (u === "admin@ugratara.com" && p === "123456") {
         sessionStorage.setItem("ADMIN_LOGIN", "true");
         sessionStorage.setItem("USER_ROLE", "order_taker");
@@ -729,14 +388,16 @@
     var tableBody = document.getElementById("ordersTable");
     if(!tableBody) return;
     
-    // Show all loaded orders without restrictive status filtering so active orders appear correctly
-    let targetOrders = ordersToRender;
+    // Filter orders to only show those requiring: Kot & Received, Ready & Bill / Dispatch (Out for Delivery / Upload Proof)
+    let targetOrders = ordersToRender.filter(o => {
+      let st = String(o.status || 'pending').toLowerCase();
+      return st === 'pending' || st === 'preparing' || st === 'ready' || st === 'out for delivery';
+    });
 
     let html = "";
     let limitedOrders = targetOrders.slice(0, 10);
-    let totalOrdersCount = limitedOrders.length;
 
-    if(totalOrdersCount === 0) {
+    if(limitedOrders.length === 0) {
       html = `<tr><td colspan="9" style="padding:20px;">No Active Orders Found.</td></tr>`;
     } else {
       limitedOrders.forEach(function(o, index){
@@ -754,7 +415,6 @@
           <option value="Preparing" ${status==="preparing"?"selected":""}>Preparing</option>
           <option value="Ready" ${status==="ready"?"selected":""}>Ready</option>
           <option value="Out for Delivery" ${status==="out for delivery"?"selected":""}>Out for Delivery</option>
-          <option value="Delivered" ${status==="delivered"?"selected":""}>Delivered</option>
         </select> 
         <button class="updateBtn" onclick="window.manualUpdate('${o.order_no || o.id}')">Go</button>`;
 
@@ -767,8 +427,6 @@
             actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no || o.id}', 'Out for Delivery')">🚚 Dispatch</button>`;
         } else if (status === "out for delivery") {
             actionButtons = `Upload Proof:<br><input type="file" accept="image/*" capture="environment" onchange="window.uploadDeliveryProof('${o.order_no || o.id}', this)" style="width:110px;">`;
-        } else {
-            actionButtons = `Completed`;
         }
 
         let displayOrderNo = o.order_no && String(o.order_no).startsWith("ORD") ? o.order_no : ("ORD" + (1001 + index));
@@ -821,9 +479,6 @@
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("adminContent").style.display = "block";
     window.myRole = "order_taker";
-    
-    let roleBadge = document.getElementById("userRoleBadge");
-    if(roleBadge) roleBadge.innerText = "ORDER_TAKER";
 
     window.loadOrders();
     window.setupRealtimeOrders();
