@@ -544,7 +544,7 @@
     } catch(e) {}
   }, { once: true });
 
-  // 🔐 फिक्स गरिएको शतप्रतिशत काम गर्ने लगइन लजिक
+  // 🔐 Supabase बाट युजरनेम र पासवर्ड प्रमाणीकरण गर्ने र सही रोल तानेर प्यानल खोल्ने फंक्सन
   window.handleLogin = async function() {
     var u = document.getElementById("username").value.trim().toLowerCase();
     var p = document.getElementById("password").value.trim();
@@ -557,31 +557,20 @@
     try {
       let { data, error } = await supabaseClient
         .from('admins')
-        .select('*');
+        .select('*')
+        .ilike('email', u)
+        .eq('password', p)
+        .single();
 
       btn.innerText = "Login";
       btn.disabled = false;
 
-      let matchedStaff = null;
-      if (!error && data && data.length > 0) {
-        matchedStaff = data.find(staff => String(staff.email || staff.username || "").trim().toLowerCase() === u && String(staff.password || "").trim() === p);
-      }
-
-      // यदि डेटाबेसमा मिलेन वा अफलाइन छ भने इमर्जेन्सी ब्याकअप
-      if (!matchedStaff) {
-        if (u === "admin@ugratara.com" && p === "123456") {
-          matchedStaff = { email: "admin@ugratara.com", role: "admin" };
-        } else if (u === "manager@ugratara.com" && p === "123456") {
-          matchedStaff = { email: "manager@ugratara.com", role: "manager" };
-        }
-      }
-
-      if (!matchedStaff) {
+      if (error || !data) {
         alert("❌ गलत युजरनेम वा पासवर्ड! कृपया फेरि प्रयास गर्नुहोस्।");
         return;
       }
 
-      let assignedRole = matchedStaff.role ? String(matchedStaff.role).trim() : "admin";
+      let assignedRole = data.role ? String(data.role).trim() : "admin";
 
       sessionStorage.setItem("ADMIN_LOGIN", "true");
       sessionStorage.setItem("USER_ROLE", assignedRole);
@@ -942,15 +931,6 @@
     let name = document.getElementById("salStaffName").value.trim();
     let desig = document.getElementById("salStaffDesig").value.trim();
     if (!name || !desig) { alert("⚠️ कृपया पूरा नाम र पद (Designation) लेख्नुहोस्!"); return; }
-
-    let currentRole = String(sessionStorage.getItem("USER_ROLE") || "").toLowerCase();
-    if (currentRole === "manager") {
-      let d = desig.toLowerCase();
-      if (d === "admin" || d === "manager") {
-        alert("⚠️ म्यानेजरले 'Admin' वा 'Manager' पद भएका कर्मचारी थप्न मिल्दैन!");
-        return;
-      }
-    }
 
     await supabaseClient.from('staff_manager').insert([{ staff_name: name, designation: desig }]);
     await supabaseClient.from('admins').insert([{ email: name, password: '123', role: desig }]);
@@ -1585,15 +1565,6 @@
     if (!staffTable) return;
     let { data } = await supabaseClient.from('admins').select('*').order('id', { ascending: true });
     let staffData = (data && data.length > 0) ? data : staffListCache;
-    
-    let currentRole = String(sessionStorage.getItem("USER_ROLE") || "").toLowerCase();
-    if (currentRole === "manager") {
-      staffData = staffData.filter(staff => {
-        let r = String(staff.role || "").toLowerCase();
-        return r !== "admin" && r !== "manager";
-      });
-    }
-
     let html = "";
     staffData.forEach(staff => {
       let uName = staff.email || staff.username || '';
@@ -1639,15 +1610,6 @@
     let newRole = prompt("Edit Role:", oldRole);
     if (newRole === null) return;
 
-    let currentRole = String(sessionStorage.getItem("USER_ROLE") || "").toLowerCase();
-    if (currentRole === "manager") {
-      let r = newRole.trim().toLowerCase();
-      if (r === "admin" || r === "manager") {
-        alert("⚠️ म्यानेजरले 'Admin' वा 'Manager' रोल राख्न मिल्दैन!");
-        return;
-      }
-    }
-
     await supabaseClient.from('admins').update({ email: newEmail, password: newPass, role: newRole }).eq('id', staffId);
     alert("✅ Staff Updated Successfully!");
     window.loadStaffList();
@@ -1658,16 +1620,6 @@
     let password = document.getElementById("staffPassword").value.trim();
     let role = document.getElementById("staffRoleInput").value.trim();
     if (!username || !password || !role) { alert("Enter Username, Password and Role!"); return; }
-
-    let currentRole = String(sessionStorage.getItem("USER_ROLE") || "").toLowerCase();
-    if (currentRole === "manager") {
-      let r = role.toLowerCase();
-      if (r === "admin" || r === "manager") {
-        alert("⚠️ म्यानेजरले 'Admin' वा 'Manager' रोल भएका नयाँ युजरहरू थप्न मिल्दैन!");
-        return;
-      }
-    }
-
     await supabaseClient.from('admins').insert([{ email: username, password: password, role: role }]);
     alert("✅ Staff Added!");
     document.getElementById("staffUsername").value = "";
@@ -1795,7 +1747,7 @@
             </div>
             <script>
                 window.onload = function() { window.print(); window.close(); }
-            </script>
+            <\/script>
       </body>
       </html>
   `);
