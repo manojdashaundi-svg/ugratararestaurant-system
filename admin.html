@@ -79,7 +79,7 @@
   </h2>
 
   <!-- 📊 ड्यासबोर्ड कार्डहरू -->
-  <div id="salesDashboardBox" style="display: flex; gap: 12px; margin: 20px 0; flex-wrap: wrap;">
+  <div id="salesDashboardBox" style="display: none; gap: 12px; margin: 20px 0; flex-wrap: wrap;">
     <div style="flex: 1; min-width: 140px; background: #fff; padding: 15px; border-radius: 10px; border-left: 5px solid #2196F3; text-align: center;">
       <span style="font-size: 13px; color: #777; font-weight: bold;">Total Orders</span>
       <h2 id="dashTotalOrders" style="margin: 5px 0 0 0; color: #2196F3; font-size: 24px;">0</h2>
@@ -103,19 +103,19 @@
   </div>
 
   <!-- 📈 Monthly Sales Insights & Chart Section -->
-  <div class="chart-container" id="monthlySalesChartDiv" style="width: 100%; height: 320px; background: #fff; padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <div class="chart-container" id="monthlySalesChartDiv" style="display: none; width: 100%; height: 320px; background: #fff; padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
     <h3 style="color: #e91e63; margin-bottom: 10px; font-size: 16px;">Monthly Sales Insights & Growth (RM)</h3>
     <div id="monthlySalesChart" style="width: 100%; height: 250px;"></div>
   </div>
   
   <!-- 📈 Today's Hourly Sales Trend Chart Section -->
-  <div class="chart-container" id="hourlySalesChartDiv" style="width: 100%; height: 320px; background: #fff; padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <div class="chart-container" id="hourlySalesChartDiv" style="display: none; width: 100%; height: 320px; background: #fff; padding: 15px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
     <h3 style="color: #e91e63; margin-bottom: 10px; font-size: 16px;">Today's Hourly Sales Trend (RM)</h3>
     <div id="hourlySalesChart" style="width: 100%; height: 250px;"></div>
   </div>
 
   <!-- 📊 Sales Report Generator & Export Section -->
-  <div style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <div id="salesReportGeneratorSection" style="display: none; background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
     <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">📊 Sales Report Generator & Export</h3>
     <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
       <div>
@@ -162,7 +162,7 @@
   </div>
 
   <!-- 🍔 मेनु म्यानेजमेन्ट सेक्सन -->
-  <div id="menuManagementBox" class="menu-section">
+  <div id="menuManagementBox" class="menu-section" style="display:none;">
     <h3>🍔 Menu & Product Management</h3>
     <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:15px; border:1px solid #ddd;">
       <h4>+ Add New Product</h4>
@@ -194,7 +194,7 @@
   </div>
 
   <!-- 📦 Inventory Management Section -->
-  <div id="inventoryManagementBox" class="inventory-section">
+  <div id="inventoryManagementBox" class="inventory-section" style="display:none;">
     <h3>📦 Inventory Management</h3>
     <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #ddd;">
       <div style="margin-bottom: 15px;">
@@ -236,7 +236,7 @@
   </div>
 
   <!-- 👥 Staff & Access Management Section -->
-  <div id="staffManagementBox" class="staff-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <div id="staffManagementBox" class="staff-section" style="display:none; background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
     <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">👥 Staff & Access Management</h3>
     
     <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd;">
@@ -268,7 +268,7 @@
     </div>
   </div>
 
-  <div id="expenseTrackerBox" style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
+  <div id="expenseTrackerBox" style="display:none; background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
       <h3 style="margin-bottom: 15px; color: #333;">💰 Expense & Profit Tracker</h3>
       
       <!-- खर्च थप्ने इनपुट बक्सहरू -->
@@ -308,7 +308,7 @@
   </div>
 
   <!-- 💰 Staff Salary Sheet & Voucher System -->
-  <div id="salaryManagementBox" class="salary-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <div id="salaryManagementBox" class="salary-section" style="display:none; background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
       <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">💰 Staff Salary Sheet & Voucher System</h3>
       
       <!-- 1. Add New Staff & Designation -->
@@ -479,7 +479,7 @@
   const SUPABASE_ANON_KEY = 'sb_publishable_YxubnsG5x3QD_OaPzEEy_w_wzLVLSlW';
   const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  var myRole = "admin";
+  var myRole = "order_taker";
   var currentLoggedInUser = "";
   var activeOrdersCache = JSON.parse(localStorage.getItem("cached_active_orders") || "[]");
   var menuItemsCache = [
@@ -557,7 +557,7 @@
       let { data, error } = await supabaseClient.from('admins').select('*').eq('email', u).single();
       if (!error && data) {
         if (String(data.password).trim() === p) {
-          let assignedRole = String(data.role || "admin").toLowerCase();
+          let assignedRole = String(data.role || "order_taker").toLowerCase();
           sessionStorage.setItem("ADMIN_LOGIN", "true");
           sessionStorage.setItem("USER_ROLE", assignedRole);
           localStorage.setItem("adminRole", assignedRole);
@@ -572,13 +572,13 @@
       }
     } catch(e) {}
 
-    // Default fallback for master admin
+    // Default fallback for order_taker or master admin forcing order_taker mode
     if (u === "admin@ugratara.com" && p === "123456") {
         sessionStorage.setItem("ADMIN_LOGIN", "true");
-        sessionStorage.setItem("USER_ROLE", "admin");
-        localStorage.setItem("adminRole", "admin");
+        sessionStorage.setItem("USER_ROLE", "order_taker");
+        localStorage.setItem("adminRole", "order_taker");
         sessionStorage.setItem("LOGGED_USER", u);
-        myRole = "admin";
+        myRole = "order_taker";
         currentLoggedInUser = u;
         btn.innerText = "Login";
         btn.disabled = false;
@@ -608,7 +608,6 @@
         activeOrdersCache = newSorted;
         localStorage.setItem("cached_active_orders", JSON.stringify(activeOrdersCache));
       }
-      window.calculateDashboardStats(activeOrdersCache);
       window.renderActiveOrdersTable(activeOrdersCache);
     } catch (err) {}
   };
@@ -730,8 +729,15 @@
     var tableBody = document.getElementById("ordersTable");
     if(!tableBody) return;
     
+    // केवल ती अर्डरहरू फिल्टर गर्ने जसमा 'Kot & Received', 'Ready & Bill', वा 'Dispatch / Out for Delivery' एक्शनहरू उपलब्ध छन् (अर्थात Pending, Preparing, Ready, Out for Delivery)
+    let targetOrders = ordersToRender.filter(o => {
+      let rawStatus = o.status ? String(o.status).trim() : "Pending";
+      let status = rawStatus.toLowerCase();
+      return status === "pending" || status === "order received" || status === "" || status === "preparing" || status === "ready" || status === "out for delivery";
+    });
+
     let html = "";
-    let limitedOrders = ordersToRender.slice(0, 10);
+    let limitedOrders = targetOrders.slice(0, 10);
     let totalOrdersCount = limitedOrders.length;
 
     if(totalOrdersCount === 0) {
@@ -752,21 +758,18 @@
           <option value="Preparing" ${status==="preparing"?"selected":""}>Preparing</option>
           <option value="Ready" ${status==="ready"?"selected":""}>Ready</option>
           <option value="Out for Delivery" ${status==="out for delivery"?"selected":""}>Out for Delivery</option>
-          <option value="Delivered" ${status==="delivered"?"selected":""}>Delivered</option>
         </select> 
         <button class="updateBtn" onclick="window.manualUpdate('${o.order_no || o.id}')">Go</button>`;
 
         let actionButtons = "";
         if (status === "pending" || status === "order received" || status === "") {
-            actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
+            actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Preparing', 'kot')">🎫 Kot & Received</button>`;
         } else if (status === "preparing") {
             actionButtons = `<button class="rdyBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Ready', 'bill')">🍳 Ready & Bill</button>`;
         } else if (status === "ready") {
             actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no || o.id}', 'Out for Delivery')">🚚 Dispatch</button>`;
         } else if (status === "out for delivery") {
             actionButtons = `Upload Proof:<br><input type="file" accept="image/*" capture="environment" onchange="window.uploadDeliveryProof('${o.order_no || o.id}', this)" style="width:110px;">`;
-        } else if (status === "delivered") {
-            actionButtons = `<span style="color:green; font-weight:bold;">✅ Delivered</span>`;
         }
 
         let displayOrderNo = o.order_no && String(o.order_no).startsWith("ORD") ? o.order_no : ("ORD" + (1001 + index));
@@ -806,378 +809,42 @@
     alert("✅ Chat successfully passed to: " + roleName);
   };
 
-  window.loadInventoryData = async function() {
-    let { data: menuData, error: menuErr } = await supabaseClient.from('menu_items').select('*').order('id', { ascending: true });
-    if (!menuErr && menuData && menuData.length > 0) {
-      menuItemsCache = menuData;
-    }
+  window.openImageViewer = function(imgUrl) {
+    document.getElementById("viewerTargetImage").src = imgUrl;
+    document.getElementById("imageViewerModal").style.display = "flex";
+  };
 
-    let selectEl = document.getElementById("inventoryItemSelect");
-    if (selectEl) {
-      let opts = `<option value="">-- Item ID छान्नुहोस् --</option>`;
-      menuItemsCache.forEach(m => {
-        opts += `<option value="${m.id}">${m.id} - ${m.name || ''} (${m.category || 'General'})</option>`;
-      });
-      selectEl.innerHTML = opts;
-    }
+  window.closeImageViewer = function() {
+    document.getElementById("imageViewerModal").style.display = "none";
+  };
 
-    let { data: invData } = await supabaseClient.from('inventory').select('*');
-    let inventoryTable = document.getElementById("inventoryTableList");
-    if (!inventoryTable) return;
-
-    let html = "";
-    let inventoryList = (invData && invData.length > 0) ? invData : menuItemsCache.map(m => ({ id: m.id, name: m.name, category: m.category || 'General', current_stock: 100, alert_limit: 50 }));
+  window.showAdminPanel = function() {
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("adminContent").style.display = "block";
+    window.myRole = "order_taker";
     
-    inventoryList.forEach(inv => {
-      let current = parseFloat(inv.current_stock) || 0;
-      let limit = parseFloat(inv.alert_limit) || 50;
-      
-      if (current <= limit) {
-        html += `<tr>
-          <td><b>${inv.id || inv.item_id || '-'}</b></td>
-          <td><b>${inv.name || inv.item_name || '-'}</b></td>
-          <td><b>${inv.category || '-'}</b></td>
-          <td style="font-weight:bold; color:#d32f2f;">${current}</td>
-          <td>${limit}</td>
-          <td><span style="background:#ffe0e0; color:#d32f2f; padding:4px 10px; border-radius:4px; font-weight:bold;">🔴 Low Stock</span></td>
-        </tr>`;
-      }
-    });
+    let roleBadge = document.getElementById("userRoleBadge");
+    if(roleBadge) roleBadge.innerText = "ORDER_TAKER";
 
-    inventoryTable.innerHTML = html || `<tr><td colspan="6" style="padding: 15px; color:#555;">All stocks are sufficient!</td></tr>`;
+    window.loadOrders();
+    window.setupRealtimeOrders();
+    window.loadAdminChats();
+
+    setInterval(() => {
+      window.loadOrders();
+      window.loadAdminChats();
+    }, 2000);
   };
 
-  window.onInventoryItemSelect = async function() {
-    let selectEl = document.getElementById("inventoryItemSelect");
-    let selectedId = selectEl.value;
-    if (!selectedId) {
-      document.getElementById("invDisplayName").innerText = "Name: -";
-      document.getElementById("invDisplayCategory").innerText = "Category: -";
-      document.getElementById("invCurrentStock").value = "";
-      document.getElementById("invAlertLimit").value = "50";
-      return;
-    }
+  window.logout = function() { sessionStorage.clear(); window.location.reload(); };
 
-    let matchedItem = menuItemsCache.find(m => String(m.id) === String(selectedId));
-    if (matchedItem) {
-      document.getElementById("invDisplayName").innerText = "Name: " + (matchedItem.name || '-');
-      document.getElementById("invDisplayCategory").innerText = "Category: " + (matchedItem.category || '-');
-      document.getElementById("invCurrentStock").value = "100";
-      document.getElementById("invAlertLimit").value = "50";
-    }
-  };
-
-  window.saveInventoryStock = async function() {
-    let selectEl = document.getElementById("inventoryItemSelect");
-    let selectedId = selectEl.value;
-    let currentStockVal = parseFloat(document.getElementById("invCurrentStock").value);
-    let alertLimitVal = parseFloat(document.getElementById("invAlertLimit").value);
-
-    if (!selectedId) { alert("⚠️ कृपया पहिले Item ID छान्नुहोस्!"); return; }
-    if (isNaN(currentStockVal)) { alert("⚠️ कृपया सही Current Stock हाल्नुहोस्!"); return; }
-
-    let matchedItem = menuItemsCache.find(m => String(m.id) === String(selectedId));
-    if (!matchedItem) return;
-
-    let payload = {
-      id: parseInt(selectedId),
-      name: matchedItem.name,
-      category: matchedItem.category || 'General',
-      current_stock: currentStockVal,
-      alert_limit: isNaN(alertLimitVal) ? 50 : alertLimitVal
-    };
-
-    await supabaseClient.from('inventory').upsert(payload, { onConflict: 'id' });
-    alert("✅ Stock Saved Successfully!");
-    document.getElementById("inventoryItemSelect").value = "";
-    document.getElementById("invDisplayName").innerText = "Name: -";
-    document.getElementById("invDisplayCategory").innerText = "Category: -";
-    document.getElementById("invCurrentStock").value = "";
-    document.getElementById("invAlertLimit").value = "50";
-    window.loadInventoryData();
-  };
-
-  window.loadSalaryStaffDropdown = async function() {
-    let { data, error } = await supabaseClient.from('staff_manager').select('*');
-    if (!error && data && data.length > 0) {
-      staffListCache = data.map(s => ({ email: s.staff_name, role: s.designation }));
-    }
-
-    let selectEl = document.getElementById("voucherEmpSelect");
-    if (!selectEl) return;
-    let opts = `<option value="">-- कामदार रोज्नुहोस् --</option>`;
-    staffListCache.forEach(s => {
-      let name = s.email || s.staff_name || '';
-      let desig = s.role || s.designation || '';
-      opts += `<option value="${name}" data-desig="${desig}">${name} (${desig})</option>`;
-    });
-    selectEl.innerHTML = opts;
-
-    let now = new Date();
-    if(document.getElementById("voucherDay")) document.getElementById("voucherDay").value = now.getDate();
-    if(document.getElementById("voucherMonth")) document.getElementById("voucherMonth").value = now.getMonth() + 1;
-    if(document.getElementById("voucherYear")) document.getElementById("voucherYear").value = now.getFullYear();
-
-    window.calculateNetSalary();
-  };
-
-  window.onVoucherEmpChange = function() {
-    let selectEl = document.getElementById("voucherEmpSelect");
-    let selectedOpt = selectEl.options[selectEl.selectedIndex];
-    let desig = selectedOpt.getAttribute("data-desig") || "";
-    if(document.getElementById("voucherDesignation")) {
-      document.getElementById("voucherDesignation").value = desig;
-    }
-  };
-
-  window.addNewSalaryStaff = async function() {
-    let name = document.getElementById("salStaffName").value.trim();
-    let desig = document.getElementById("salStaffDesig").value.trim();
-    if (!name || !desig) { alert("⚠️ कृपया पूरा नाम र पद (Designation) लेख्नुहोस्!"); return; }
-
-    await supabaseClient.from('staff_manager').insert([{ staff_name: name, designation: desig }]);
-    await supabaseClient.from('admins').insert([{ email: name, password: '123', role: desig }]);
-
-    alert("✅ Staff Added Successfully!");
-    document.getElementById("salStaffName").value = "";
-    document.getElementById("salStaffDesig").value = "";
-    window.loadSalaryStaffDropdown();
-    window.loadStaffList();
-  };
-
-  window.addEarningRow = function() {
-    let container = document.getElementById("earningsContainer");
-    let div = document.createElement("div");
-    div.className = "earning-row";
-    div.style.display = "flex";
-    div.style.gap = "10px";
-    div.style.alignItems = "center";
-    div.innerHTML = `
-      <input type="text" placeholder="Allowance Description" style="flex: 3; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-      <input type="number" value="0" oninput="window.calculateNetSalary()" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="earning-amount">
-      <button onclick="window.removeRow(this)" style="background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">✕</button>
-    `;
-    container.appendChild(div);
-  };
-
-  window.addDeductionRow = function() {
-    let container = document.getElementById("deductionsContainer");
-    let div = document.createElement("div");
-    div.className = "deduction-row";
-    div.style.display = "flex";
-    div.style.gap = "10px";
-    div.style.alignItems = "center";
-    div.innerHTML = `
-      <input type="text" placeholder="Deduction Description" style="flex: 3; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="deduction-desc">
-      <input type="number" value="0" oninput="window.calculateNetSalary()" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="deduction-amount">
-      <button onclick="window.removeRow(this)" style="background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">✕</button>
-    `;
-    container.appendChild(div);
-  };
-
-  window.removeRow = function(btn) {
-    btn.closest('div').remove();
-    window.calculateNetSalary();
-  };
-
-  window.calculateNetSalary = function() {
-    let totalEarnings = 0;
-    let earningAmounts = document.querySelectorAll(".earning-amount");
-    earningAmounts.forEach(input => {
-      totalEarnings += parseFloat(input.value) || 0;
-    });
-
-    let totalDeductions = 0;
-    let deductionAmounts = document.querySelectorAll(".deduction-amount");
-    deductionAmounts.forEach(input => {
-      totalDeductions += parseFloat(input.value) || 0;
-    });
-
-    let net = totalEarnings - totalDeductions;
-    if(document.getElementById("displayNetSalary")) {
-      document.getElementById("displayNetSalary").innerText = net.toFixed(2);
-    }
-    return net;
-  };
-
-  window.saveAndPrintSalaryVoucher = async function() {
-    let empName = document.getElementById("voucherEmpSelect").value;
-    let desig = document.getElementById("voucherDesignation").value.trim();
-    let day = document.getElementById("voucherDay").value;
-    let month = document.getElementById("voucherMonth").value;
-    let year = document.getElementById("voucherYear").value;
-    let paymentMode = document.getElementById("voucherPaymentMode").value;
-
-    if (!empName) { alert("⚠️ कृपया कामदारको नाम छान्नुहोस्!"); return; }
-
-    let netSalary = window.calculateNetSalary();
-    let dateStr = `${year}-${String(month).padStart(2,'0')}-${String(day).padStart(2,'0')}`;
-    let voucherNo = Math.floor(10 + Math.random() * 90);
-
-    let earningsText = "";
-    document.querySelectorAll(".earning-row").forEach(row => {
-      let desc = row.querySelector("input[type='text']").value;
-      let amt = row.querySelector(".earning-amount").value;
-      earningsText += `${desc}: RM ${amt}; `;
-    });
-
-    await supabaseClient.from('expenses').insert([{
-      date: dateStr,
-      category: 'Staff Salary',
-      amount: netSalary,
-      description: `Voucher #${voucherNo} - ${empName} (${desig}) | Mode: ${paymentMode} | ${earningsText}`
-    }]);
-
-    alert("✅ Salary Voucher Saved & Added Successfully!");
-    window.loadExpenseSummary();
-
-    let singleVoucherHtml = `
-      <div style="font-family: Arial, sans-serif; font-size: 11px; color: #000; padding: 14px 18px; border: 1.5px solid #000; background: #fff; height: 44.5vh; box-sizing: border-box; display: flex; flex-direction: column; justify-content: space-between;">
-        <div>
-          <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 6px; margin-bottom: 8px;">
-            <h3 style="margin: 0; font-size: 14.5px; font-weight: bold;">GLOBAL UGRATARA (A) SDN. BHD.</h3>
-            <p style="margin: 2px 0 0 0; font-size: 10px;">41 & 45, TKT 4, JALAN LEBOH PUDU, 50050, WP. KUALA LUMPUR</p>
-          </div>
-          <div style="text-align: center; font-weight: bold; text-decoration: underline; margin-bottom: 8px; font-size: 12.5px;">SALARY VOUCHER</div>
-          <div style="display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 11.5px;">
-            <div><b>Employee Name :</b> ${empName}</div>
-            <div><b>Date :</b> ${day}/${month}/${year}</div>
-          </div>
-          <div style="margin-bottom: 8px; font-size: 11.5px;"><b>Designation :</b> ${desig}</div>
-          <div style="background: #000; color: #fff; padding: 3px 6px; font-weight: bold; margin-bottom: 8px; font-size: 11px;">VOUCHER NO. ${voucherNo}</div>
-          <table style="width: 100%; border-collapse: collapse; margin-bottom: 8px; font-size: 11.5px;">
-            <thead>
-              <tr><th style="border: 1px solid #000; padding: 5px; text-align: left; background:#f0f0f0;">Earnings</th><th style="border: 1px solid #000; padding: 5px; text-align: right; background:#f0f0f0; width: 70px;">RM</th></tr>
-            </thead>
-            <tbody>
-              <tr><td style="border: 1px solid #000; padding: 5px;">1. MONTHLY BASIC SALARY PAYED</td><td style="border: 1px solid #000; padding: 5px; text-align: right;">${netSalary.toFixed(2)}</td></tr>
-            </tbody>
-           <table/>
-          <div style="text-align: right; font-weight: bold; margin-bottom: 8px; font-size: 12.5px;">NET Salary: RM ${netSalary.toFixed(2)}</div>
-          <div style="font-weight: bold; font-size: 11px;">☑ ${paymentMode}</div>
-        </div>
-        <div style="display: flex; justify-content: space-between; font-size: 10.5px; align-items: flex-end; border-top: 1px dotted #999; padding-top: 6px;">
-          <div>Hotel Copy / Staff Copy</div>
-          <div style="border-top: 1px solid #000; width: 150px; text-align: center; padding-top: 2px;">Employee Signature</div>
-        </div>
-      </div>
-    `;
-
-    let fullA4PrintHtml = `
-      <html>
-      <head>
-        <title>Salary Voucher Print</title>
-        <style>
-          @page { size: A4 portrait; margin: 5mm 8mm; }
-          body { font-family: Arial, sans-serif; margin: 0; padding: 0; background: #fff; }
-          .cut-line { border-top: 2px dashed #000; margin-top: 13mm; margin-bottom: 10mm; text-align: center; font-size: 1px; color: transparent; }
-        </style>
-      </head>
-      <body>
-        ${singleVoucherHtml}
-        <div class="cut-line">----------------------------------------------------------------------------------------------------------------------------------------</div>
-        ${singleVoucherHtml}
-        <script>
-          window.onload = function() { window.print(); window.close(); }
-        <\/script>
-      </body>
-      </html>
-    `;
-    
-    let printWin = window.open('', '_blank', 'height=700,width=800');
-    printWin.document.write(fullA4PrintHtml);
-    printWin.document.close();
-  };
-
-  window.exportSalaryExcel = async function() {
-    let startDate = document.getElementById("salaryStartDate").value;
-    let endDate = document.getElementById("salaryEndDate").value;
-
-    let { data } = await supabaseClient.from('expenses').select('*').eq('category', 'Staff Salary');
-    let filtered = (data || []).filter(item => {
-      if (!startDate || !endDate) return true;
-      let itemDt = new Date(item.date);
-      return itemDt >= new Date(startDate) && itemDt <= new Date(endDate);
-    });
-
-    let csv = ["Date,Category,Amount (RM),Description"];
-    filtered.forEach(item => {
-      csv.push(`"${item.date}","${item.category}",${item.amount},"${(item.description || '').replace(/"/g, '""')}"`);
-    });
-
-    let blob = new Blob([csv.join("\n")], { type: "text/csv" });
-    let link = document.createElement("a");
-    link.download = "Salary_Statement_Report.csv";
-    link.href = window.URL.createObjectURL(blob);
-    link.click();
-  };
-
-  window.printSalaryPDF = async function() {
-    let startDate = document.getElementById("salaryStartDate").value;
-    let endDate = document.getElementById("salaryEndDate").value;
-
-    let { data } = await supabaseClient.from('expenses').select('*').eq('category', 'Staff Salary');
-    let filtered = (data || []).filter(item => {
-      if (!startDate || !endDate) return true;
-      let itemDt = new Date(item.date);
-      return itemDt >= new Date(startDate) && itemDt <= new Date(endDate);
-    });
-
-    let total = 0;
-    let rows = "";
-    filtered.forEach((item, idx) => {
-      let amt = parseFloat(item.amount) || 0;
-      total += amt;
-      rows += `
-        <tr>
-          <td style="border:1px solid #ddd; padding:8px; text-align:center;">${idx + 1}</td>
-          <td style="border:1px solid #ddd; padding:8px; text-align:center;">${item.date}</td>
-          <td style="border:1px solid #ddd; padding:8px;">${item.description}</td>
-          <td style="border:1px solid #ddd; padding:8px; text-align:right; color:#d32f2f;"><b>RM ${amt.toFixed(2)}</b></td>
-        </tr>
-      `;
-    });
-
-    let pWin = window.open('', '_blank', 'height=700,width=900');
-    pWin.document.write(`
-      <html>
-      <head>
-        <title>Salary Report Statement</title>
-        <style>
-          body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
-          .header { text-align: center; border-bottom: 2px solid #e91e63; padding-bottom: 10px; margin-bottom: 20px; }
-          table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-          th { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; text-align: left; }
-          .summary { margin-top: 20px; text-align: right; font-size: 16px; background: #fff5f5; padding: 12px; border: 1px solid #ffe0e0; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h2>UGRATARA RESTAURANT</h2>
-          <p>📊 <b>Staff Salary Statement Report</b> (${startDate || 'All Time'} to ${endDate || 'All Time'})</p>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th style="width:40px; text-align:center;">S.N.</th>
-              <th style="text-align:center;">Date</th>
-              <th>Description / Employee Details</th>
-              <th style="text-align:right;">Amount (RM)</th>
-            </tr>
-          </thead>
-          <tbody>${rows}</tbody>
-        </table>
-        <div class="summary">
-          <span style="color: #d32f2f; font-weight: bold;">Total Salary Paid: RM ${total.toFixed(2)}</span>
-        </div>
-        <script>
-          window.onload = function() { window.print(); window.close(); }
-        <\/script>
-      </body>
-      </html>
-    `);
-    pWin.document.close();
-  };
+  if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
+    myRole = "order_taker";
+    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
+    window.showAdminPanel();
+  } else {
+    document.getElementById("loginScreen").style.display = "flex";
+  }
 
   window.triggerInstantAction = async function(orderNo, nextStatus, printType) {
     await supabaseClient.from('orders').update({ status: nextStatus }).eq('order_no', orderNo);
@@ -1275,544 +942,6 @@
         window.loadOrders();
     };
     reader.readAsDataURL(file);
-  };
-
-  window.calculateDashboardStats = function(orders) {
-    let totalOrders = orders.length;
-    let totalRevenue = 0, todaySales = 0, monthSales = 0;
-    let now = new Date(), currentDay = now.getDate(), currentMonth = now.getMonth(), currentYear = now.getFullYear();
-
-    orders.forEach(o => {
-      let amount = parseFloat(o.total) || 0;
-      totalRevenue += amount;
-      if (o.time) {
-        let orderDate = new Date(o.time);
-        if (isNaN(orderDate.getTime())) orderDate = new Date(o.time.replace(/at/gi, "").trim());
-        if (!isNaN(orderDate.getTime())) {
-          if (orderDate.getDate() === currentDay && orderDate.getMonth() === currentMonth && orderDate.getFullYear() === currentYear) todaySales += amount;
-          if (orderDate.getMonth() === currentMonth && orderDate.getFullYear() === currentYear) monthSales += amount;
-        }
-      }
-    });
-
-    let avgOrderValue = totalOrders > 0 ? (totalRevenue / totalOrders) : 0;
-    if(document.getElementById("dashTotalOrders")) document.getElementById("dashTotalOrders").innerText = totalOrders;
-    if(document.getElementById("dashTotalRevenue")) document.getElementById("dashTotalRevenue").innerText = "RM " + totalRevenue.toFixed(2);
-    if(document.getElementById("dashTodaySales")) document.getElementById("dashTodaySales").innerText = "RM " + todaySales.toFixed(2);
-    if(document.getElementById("dashMonthSales")) document.getElementById("dashMonthSales").innerText = "RM " + monthSales.toFixed(2);
-    if(document.getElementById("dashAvgOrder")) document.getElementById("dashAvgOrder").innerText = "RM " + avgOrderValue.toFixed(2);
-    
-    window.drawMonthlySalesChart(orders);
-    window.drawHourlySalesChart(orders);
-  };
-
-  window.loadMenuList = async function() {
-    let { data } = await supabaseClient.from('menu_items').select('*').order('id', { ascending: true });
-    if (data && data.length > 0) menuItemsCache = data;
-
-    var menuList = document.getElementById("menuTableList");
-    if(!menuList) return;
-    let html = "";
-    menuItemsCache.forEach((r, index) => {
-      let stockStatus = r.status || "In Stock";
-      let stockBtnClass = stockStatus === "In Stock" ? "inStockBtn" : "outStockBtn";
-      let stockText = stockStatus === "In Stock" ? "🟢 In Stock" : "🔴 Out of Stock";
-      html += `<tr>
-        <td><b>${index + 1}</b></td>
-        <td><b>${r.name || ''}</b></td>
-        <td style="color:#e91e63; font-weight:bold;">RM ${r.price || 0}</td>
-        <td>${r.image ? `<img src="${r.image}" class="menu-thumb">` : 'No Image'}</td>
-        <td>${r.description || ''}</td>
-        <td><b>${r.category || ''}</b></td>
-        <td>
-          <button class="${stockBtnClass}" onclick="window.toggleStock(${r.id}, '${stockStatus}')">${stockText}</button>
-          <button class="editBtn" onclick="window.editProduct(${r.id}, '${r.name}', ${r.price}, '${r.image || ''}', '${r.description || ''}', '${r.category || ''}')">✏️ Edit</button>
-          <button class="removeBtn" onclick="window.deleteProduct(${r.id})">❌ Delete</button>
-        </td>
-      </tr>`;
-    });
-    menuList.innerHTML = html;
-  };
-
-  window.toggleStock = async function(rowId, currentStatus) {
-    let newStatus = currentStatus === "In Stock" ? "Out of Stock" : "In Stock";
-    await supabaseClient.from('menu_items').update({ status: newStatus }).eq('id', rowId);
-    window.loadMenuList();
-  };
-
-  window.createNewProduct = async function() {
-    var name = document.getElementById("prodName").value.trim();
-    var price = parseFloat(document.getElementById("prodPrice").value) || 0;
-    if(!name || !price) { alert("Enter Name and Price!"); return; }
-    await supabaseClient.from('menu_items').insert([{ name: name, price: price, image: document.getElementById("prodImg").value.trim(), description: document.getElementById("prodDesc").value.trim(), category: document.getElementById("prodCat").value.trim(), status: "In Stock" }]);
-    alert("✅ Product Added!");
-    window.loadMenuList();
-    window.loadInventoryData();
-  };
-
-  window.editProduct = async function(rowId, oldName, oldPrice, oldImg, oldDesc, oldCat) {
-    var newName = prompt("Edit Food Name:", oldName); if(newName === null) return;
-    var newPrice = parseFloat(prompt("Edit Price (RM):", oldPrice)); if(isNaN(newPrice)) newPrice = oldPrice;
-    var newImg = prompt("Edit Image URL:", oldImg); if(newImg === null) newImg = oldImg;
-    var newDesc = prompt("Edit Description:", oldDesc); if(newDesc === null) newDesc = oldDesc;
-    var newCat = prompt("Edit Category:", oldCat); if(newCat === null) newCat = oldCat;
-
-    await supabaseClient.from('menu_items').update({ 
-      name: newName, 
-      price: newPrice, 
-      image: newImg, 
-      description: newDesc, 
-      category: newCat 
-    }).eq('id', rowId);
-
-    alert("✅ Product Updated Successfully!");
-    window.loadMenuList();
-    window.loadInventoryData();
-  };
-
-  window.deleteProduct = async function(rowId) {
-    if(confirm("Delete item?")) {
-      await supabaseClient.from('menu_items').delete().eq('id', rowId);
-      window.loadMenuList();
-      window.loadInventoryData();
-    }
-  };
-
-  window.openImageViewer = function(imgUrl) {
-    document.getElementById("viewerTargetImage").src = imgUrl;
-    document.getElementById("imageViewerModal").style.display = "flex";
-  };
-
-  window.closeImageViewer = function() {
-    document.getElementById("imageViewerModal").style.display = "none";
-  };
-
-  window.showAdminPanel = function() {
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("adminContent").style.display = "block";
-    window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
-    
-    let roleBadge = document.getElementById("userRoleBadge");
-    if(roleBadge) roleBadge.innerText = myRole.toUpperCase();
-
-    // 🛡️ भूमिका (Role) अनुसार सेक्सनहरू नियन्त्रण गर्ने कोड
-    let dashBox = document.getElementById("salesDashboardBox");
-    let monthlyChartDiv = document.getElementById("monthlySalesChartDiv");
-    let hourlyChartDiv = document.getElementById("hourlySalesChartDiv");
-    let salesReportDiv = document.getElementById("salesReportGeneratorSection");
-    let menuBox = document.getElementById("menuManagementBox");
-    let inventoryBox = document.getElementById("inventoryManagementBox");
-    let staffBox = document.getElementById("staffManagementBox");
-    let expenseBox = document.getElementById("expenseTrackerBox");
-    let salaryBox = document.getElementById("salaryManagementBox");
-
-    if (myRole === "admin") {
-        if(dashBox) dashBox.style.display = "flex";
-        if(monthlyChartDiv) monthlyChartDiv.style.display = "block";
-        if(hourlyChartDiv) hourlyChartDiv.style.display = "block";
-        if(menuBox) menuBox.style.display = "block";
-        if(inventoryBox) inventoryBox.style.display = "block";
-        if(staffBox) staffBox.style.display = "block";
-        if(expenseBox) expenseBox.style.display = "block";
-        if(salaryBox) salaryBox.style.display = "block";
-    } else if (myRole === "manager") {
-        if(dashBox) dashBox.style.display = "flex";
-        if(monthlyChartDiv) monthlyChartDiv.style.display = "block";
-        if(hourlyChartDiv) hourlyChartDiv.style.display = "block";
-        if(menuBox) menuBox.style.display = "block";
-        if(inventoryBox) inventoryBox.style.display = "block";
-        if(staffBox) staffBox.style.display = "block";
-        if(expenseBox) expenseBox.style.display = "block";
-        if(salaryBox) salaryBox.style.display = "block";
-    } else if (myRole === "order_taker" || myRole === "cook") {
-        if(dashBox) dashBox.style.display = "none";
-        if(monthlyChartDiv) monthlyChartDiv.style.display = "none";
-        if(hourlyChartDiv) hourlyChartDiv.style.display = "none";
-        if(menuBox) menuBox.style.display = "block";
-        if(inventoryBox) inventoryBox.style.display = "none";
-        if(staffBox) staffBox.style.display = "none";
-        if(expenseBox) expenseBox.style.display = "none";
-        if(salaryBox) salaryBox.style.display = "none";
-    } else if (myRole === "delivery") {
-        if(dashBox) dashBox.style.display = "none";
-        if(monthlyChartDiv) monthlyChartDiv.style.display = "none";
-        if(hourlyChartDiv) hourlyChartDiv.style.display = "none";
-        if(menuBox) menuBox.style.display = "none";
-        if(inventoryBox) inventoryBox.style.display = "none";
-        if(staffBox) staffBox.style.display = "none";
-        if(expenseBox) expenseBox.style.display = "none";
-        if(salaryBox) salaryBox.style.display = "none";
-    }
-
-    window.loadMenuList();
-    window.loadOrders();
-    window.setupRealtimeOrders();
-    window.loadAdminChats();
-    window.loadStaffList();
-    window.loadExpenseSummary();
-    window.loadInventoryData();
-    window.loadSalaryStaffDropdown();
-
-    setInterval(() => {
-      window.loadOrders();
-      window.loadAdminChats();
-    }, 2000);
-  };
-
-  window.logout = function() { sessionStorage.clear(); window.location.reload(); };
-
-  if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
-    myRole = sessionStorage.getItem("USER_ROLE") || "admin";
-    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
-    window.showAdminPanel();
-  } else {
-    document.getElementById("loginScreen").style.display = "flex";
-  }
-
-  window.drawMonthlySalesChart = function(orders) {
-    if (typeof google === 'undefined' || !google.visualization) return;
-    let monthlyDataMap = {};
-    orders.forEach(o => {
-      let amount = parseFloat(o.total) || 0;
-      if (o.time) {
-        let orderDate = new Date(o.time);
-        if (isNaN(orderDate.getTime())) orderDate = new Date(o.time.replace(/at/gi, "").trim());
-        if (!isNaN(orderDate.getTime())) {
-          let key = `${orderDate.getFullYear()}-${String(orderDate.getMonth() + 1).padStart(2, '0')}`;
-          monthlyDataMap[key] = (monthlyDataMap[key] || 0) + amount;
-        }
-      }
-    });
-    let chartArray = [['Months (Year-MM)', 'Revenue (RM)']];
-    Object.keys(monthlyDataMap).sort().forEach(k => chartArray.push([k, monthlyDataMap[k]]));
-    if (chartArray.length === 1) chartArray.push(['No Data', 0]);
-    new google.visualization.ColumnChart(document.getElementById('monthlySalesChart')).draw(google.visualization.arrayToDataTable(chartArray), { legend: { position: 'none' }, colors: ['#8E24AA'] });
-  };
-
-  window.drawHourlySalesChart = function(orders) {
-    if (typeof google === 'undefined' || !google.visualization) return;
-    let hourlyMap = {};
-    for (let i = 0; i < 24; i++) hourlyMap[i < 10 ? `0${i}:00` : `${i}:00`] = 0;
-    let now = new Date();
-    orders.forEach(o => {
-      let amount = parseFloat(o.total) || 0;
-      if (o.time) {
-        let orderDate = new Date(o.time);
-        if (isNaN(orderDate.getTime())) orderDate = new Date(o.time.replace(/at/gi, "").trim());
-        if (!isNaN(orderDate.getTime()) && orderDate.getDate() === now.getDate() && orderDate.getMonth() === now.getMonth() && orderDate.getFullYear() === now.getFullYear()) {
-          let hour = orderDate.getHours();
-          let hourKey = hour < 10 ? `0${hour}:00` : `${hour}:00`;
-          hourlyMap[hourKey] += amount;
-        }
-      }
-    });
-    let chartArray = [['Time (Hours)', 'Revenue (RM)']];
-    Object.keys(hourlyMap).sort().forEach(h => chartArray.push([h, hourlyMap[h]]));
-    new google.visualization.LineChart(document.getElementById('hourlySalesChart')).draw(google.visualization.arrayToDataTable(chartArray), { legend: { position: 'none' }, colors: ['#E91E63'], curveType: 'function' });
-  };
-
-  window.exportExcelReport = function() {
-    let filteredOrders = activeOrdersCache;
-    let csvContent = "data:text/csv;charset=utf-8,Order Date,Order No,Customer Name,Phone,Address,Items,Total (RM),Status\r\n";
-    filteredOrders.forEach(o => {
-      csvContent += `"${o.time || ''}","${o.order_no || ''}","${o.customer_name || ''}","${o.phone || ''}","${(o.address || '').replace(/"/g, '""')}","${(o.items || '').replace(/\n/g, ' ')}","${o.total || '0'}","${o.status || ''}"\r\n`;
-    });
-    let link = document.createElement("a");
-    link.setAttribute("href", encodeURI(csvContent));
-    link.setAttribute("download", `Sales_Report_${new Date().toISOString().slice(0,10)}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  window.printPdfReport = function() {
-    let startDate = document.getElementById("reportStartDate").value;
-    let endDate = document.getElementById("reportEndDate").value;
-
-    let filteredOrders = activeOrdersCache;
-    if (startDate && endDate) {
-      let start = new Date(startDate);
-      let end = new Date(endDate);
-      end.setHours(23, 59, 59);
-
-      filteredOrders = activeOrdersCache.filter(o => {
-        let oDate = new Date(o.time);
-        return oDate >= start && oDate <= end;
-      });
-    }
-
-    let totalRev = 0;
-    let tableRows = "";
-
-    filteredOrders.forEach((o, index) => {
-      let amt = parseFloat(o.total) || 0;
-      totalRev += amt;
-      tableRows += `
-        <tr>
-          <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${index + 1}</td>
-          <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${o.time || ''}</td>
-          <td style="padding: 8px; border: 1px solid #ddd; text-align: center;"><b>${o.order_no || ''}</b></td>
-          <td style="padding: 8px; border: 1px solid #ddd;">${o.customer_name || ''}</td>
-          <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${o.status || ''}</td>
-          <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #1976D2;"><b>RM ${amt.toFixed(2)}</b></td>
-        </tr>
-      `;
-    });
-
-    let printWindow = window.open('', '_blank', 'height=700,width=900');
-    printWindow.document.write(`
-      <html>
-      <head>
-        <title>Sales Report Statement</title>
-        <style>
-          body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
-          .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e91e63; padding-bottom: 10px; }
-          .header h2 { margin: 0; color: #e91e63; font-size: 24px; }
-          .header p { margin: 5px 0 0 0; color: #666; font-size: 14px; }
-          table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-          th { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; text-align: left; }
-          td { border: 1px solid #ddd; padding: 8px; }
-          .summary-box { margin-top: 20px; text-align: right; font-size: 16px; background: #f0f7ff; padding: 12px; border-radius: 6px; border: 1px solid #cce5ff; }
-        </style>
-      </head>
-      <body>
-        <div class="header">
-          <h2>UGRATARA RESTAURANT</h2>
-          <p>📊 <b>Sales Report Statement</b> (${startDate || 'All Time'} to ${endDate || 'All Time'})</p>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th style="width: 40px; text-align: center;">S.N.</th>
-              <th style="text-align: center;">Date & Time</th>
-              <th style="text-align: center;">Order No</th>
-              <th>Customer Name</th>
-              <th style="text-align: center;">Status</th>
-              <th style="text-align: right;">Total Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${tableRows}
-          </tbody>
-        </table>
-        <div class="summary-box">
-          <span style="color: #1976D2; font-weight: bold;">Total Revenue: RM ${totalRev.toFixed(2)}</span>
-        </div>
-        <script>
-          window.onload = function() { window.print(); window.close(); }
-        <\/script>
-      </body>
-      </html>
-    `);
-    printWindow.document.close();
-  };
-
-  window.loadStaffList = async function() {
-    let staffTable = document.getElementById("staffTableList");
-    if (!staffTable) return;
-    let { data } = await supabaseClient.from('admins').select('*').order('id', { ascending: true });
-    let staffData = (data && data.length > 0) ? data : staffListCache;
-    let html = "";
-    staffData.forEach(staff => {
-      let uName = staff.email || staff.username || '';
-      let uPass = staff.password || '';
-      let uRole = staff.role || '';
-      
-      // Filter out admin and manager roles from the list when viewed by a manager if needed, or enforce global filtering
-      let lowerRole = uRole.toLowerCase();
-      if (myRole === "manager" && (lowerRole === "admin" || lowerRole === "manager")) {
-        return;
-      }
-
-      let uStatus = staff.status || 'Active';
-      let statusBtnClass = uStatus === 'Active' ? 'inStockBtn' : 'outStockBtn';
-      let statusText = uStatus === 'Active' ? '🟢 Active' : '🔴 Inactive';
-
-      html += `<tr>
-        <td><b>${uName}</b></td>
-        <td>${uPass}</td>
-        <td><b>${uRole}</b></td>
-        <td>${uStatus}</td>
-        <td>
-          <button class="${statusBtnClass}" onclick="window.toggleStaffStatus(this, '${uStatus}')" style="padding:5px 8px; font-size:12px;">${statusText}</button>
-          <button class="editBtn" onclick="window.editStaff(${staff.id || 1}, '${uName}', '${uPass}', '${uRole}')">✏️ Edit</button>
-          <button class="removeBtn" onclick="window.deleteStaff(${staff.id || 1})">❌ Delete</button>
-        </td>
-      </tr>`;
-    });
-    staffTable.innerHTML = html || `<tr><td colspan="5">No staff found.</td></tr>`;
-  };
-
-  window.toggleStaffStatus = function(btnElement, currentStatus) {
-    let newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
-    let row = btnElement.closest('tr');
-    if (row) {
-      let statusCell = row.cells[3];
-      if (statusCell) statusCell.innerText = newStatus;
-      
-      btnElement.innerText = newStatus === 'Active' ? '🟢 Active' : '🔴 Inactive';
-      btnElement.className = newStatus === 'Active' ? 'inStockBtn' : 'outStockBtn';
-      btnElement.setAttribute('onclick', `window.toggleStaffStatus(this, '${newStatus}')`);
-    }
-  };
-
-  window.editStaff = async function(staffId, oldEmail, oldPass, oldRole) {
-    let newEmail = prompt("Edit Username / Email:", oldEmail);
-    if (newEmail === null) return;
-    let newPass = prompt("Edit Password:", oldPass);
-    if (newPass === null) return;
-    let newRole = prompt("Edit Role:", oldRole);
-    if (newRole === null) return;
-
-    await supabaseClient.from('admins').update({ email: newEmail, password: newPass, role: newRole }).eq('id', staffId);
-    alert("✅ Staff Updated Successfully!");
-    window.loadStaffList();
-  };
-
-  window.createNewStaff = async function() {
-    let username = document.getElementById("staffUsername").value.trim();
-    let password = document.getElementById("staffPassword").value.trim();
-    let role = document.getElementById("staffRoleInput").value.trim();
-    if (!username || !password || !role) { alert("Enter Username, Password and Role!"); return; }
-    
-    let lowerRoleCreate = role.toLowerCase();
-    if (myRole === "manager" && (lowerRoleCreate === "admin" || lowerRoleCreate === "manager")) {
-      alert("⚠️ Manager can only create non-admin and non-manager staff roles!");
-      return;
-    }
-
-    await supabaseClient.from('admins').insert([{ email: username, password: password, role: role }]);
-    alert("✅ Staff Added!");
-    document.getElementById("staffUsername").value = "";
-    document.getElementById("staffPassword").value = "";
-    document.getElementById("staffRoleInput").value = "";
-    window.loadStaffList();
-    window.loadSalaryStaffDropdown();
-  };
-
-  window.deleteStaff = async function(staffId) {
-    if (confirm("Delete staff?")) {
-      await supabaseClient.from('admins').delete().eq('id', staffId);
-      window.loadStaffList();
-    }
-  };
-
-  window.addExpense = async function() {
-    let dateVal = document.getElementById("expenseDateInput").value;
-    let category = document.getElementById("expenseCategory").value.trim();
-    let amount = parseFloat(document.getElementById("expenseAmount").value);
-    let description = document.getElementById("expenseDescription").value.trim();
-
-    if (!dateVal || !category || isNaN(amount)) {
-        alert("⚠️ कृपया मिति, श्रेणी र रकम सही तरिकाले भर्नुहोस्!");
-        return;
-    }
-
-    await supabaseClient.from('expenses').insert([{ date: dateVal, category: category, amount: amount, description: description }]);
-    alert("✅ Expense Added Successfully!");
-    document.getElementById("expenseDateInput").value = "";
-    document.getElementById("expenseCategory").value = "";
-    document.getElementById("expenseAmount").value = "";
-    document.getElementById("expenseDescription").value = "";
-    window.loadExpenseSummary();
-  };
-
-  window.loadExpenseSummary = async function() {
-    try {
-        let { data } = await supabaseClient.from('expenses').select('*');
-        let totalExpense = 0;
-        (data || []).forEach(item => {
-            totalExpense += parseFloat(item.amount) || 0;
-        });
-
-        document.getElementById("summaryExpense").innerText = "RM " + totalExpense.toFixed(2);
-
-        let totalRevenue = 147.00;
-        let netProfit = totalRevenue - totalExpense;
-        let netProfitEl = document.getElementById("summaryNetProfit");
-        netProfitEl.innerText = "RM " + netProfit.toFixed(2);
-        netProfitEl.style.color = netProfit >= 0 ? "#388E3C" : "#D32F2F";
-    } catch (err) {}
-  };
-
-  window.exportExpenseExcel = async function() {
-    let { data } = await supabaseClient.from('expenses').select('*');
-    let csv = ["Date,Category,Amount (RM),Description"];
-    (data || []).forEach(item => {
-        csv.push(`"${item.date}","${item.category}",${item.amount},"${item.description || ''}"`);
-    });
-
-    let csvFile = new Blob([csv.join("\n")], { type: "text/csv" });
-    let downloadLink = document.createElement("a");
-    downloadLink.download = "Expense_Report.csv";
-    downloadLink.href = window.URL.createObjectURL(csvFile);
-    downloadLink.click();
-  };
-
-  window.printExpensePDF = async function() {
-    let { data } = await supabaseClient.from('expenses').select('*');
-    let totalExp = 0;
-    let tableRows = "";
-
-    (data || []).forEach((item, index) => {
-        let amt = parseFloat(item.amount) || 0;
-        totalExp += amt;
-        tableRows += `
-            <tr>
-                <td style="padding: 8px; border: 1px solid #ddd; text-align: center;">${index + 1}</td>
-                <td style="padding: 8px; border: 1px solid #ddd;">${item.date || ''}</td>
-                <td style="padding: 8px; border: 1px solid #ddd;"><b>${item.category || ''}</b></td>
-                <td style="padding: 8px; border: 1px solid #ddd;">${item.description || ''}</td>
-                <td style="padding: 8px; border: 1px solid #ddd; text-align: right; color: #d32f2f;"><b>RM ${amt.toFixed(2)}</b></td>
-            </tr>
-        `;
-    });
-
-    let printWindow = window.open('', '_blank', 'height=700,width=900');
-    printWindow.document.write(`
-        <html>
-        <head>
-            <title>Expense Report Statement</title>
-            <style>
-                body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
-                .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e91e63; padding-bottom: 10px; }
-                .header h2 { margin: 0; color: #e91e63; font-size: 24px; }
-                .header p { margin: 5px 0 0 0; color: #666; font-size: 14px; }
-                table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-                th { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; text-align: left; }
-                td { border: 1px solid #ddd; padding: 8px; }
-                .summary-box { margin-top: 20px; text-align: right; font-size: 16px; background: #fff5f5; padding: 12px; border-radius: 6px; border: 1px solid #ffe0e0; }
-            </style>
-        </head>
-        <body>
-            <div class="header">
-                <h2>UGRATARA RESTAURANT</h2>
-                <p>📊 <b>Expense Report Statement</b> (All Time)</p>
-            </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 40px; text-align: center;">S.N.</th>
-                        <th>Date</th>
-                        <th>Category</th>
-                        <th>Description</th>
-                        <th style="text-align: right;">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${tableRows}
-                </tbody>
-            </table>
-            <div class="summary-box">
-                <span style="color: #d32f2f; font-weight: bold;">Total Expense: RM ${totalExp.toFixed(2)}</span>
-            </div>
-            <script>
-                window.onload = function() { window.print(); window.close(); }
-            <\/script>
-      </body>
-      </html>
-  `);
-  printWindow.document.close();
   };
 </script>
 </body> 
