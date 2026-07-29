@@ -65,7 +65,7 @@
     <h2>🔐 STAFF LOGIN</h2>
     <input id="username" type="text" placeholder="Username / Email" autocomplete="off" value="admin@ugratara.com">
     <input id="password" type="password" placeholder="Password" autocomplete="off" value="123456">
-    <button id="loginBtn">Login</button>
+    <button id="loginBtn" onclick="window.handleLogin()">Login</button>
   </div>
 </div>
 
@@ -115,7 +115,7 @@
   </div>
 
   <!-- 📊 Sales Report Generator & Export Section -->
-  <div id="salesReportSection" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <div style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
     <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">📊 Sales Report Generator & Export</h3>
     <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
       <div>
@@ -194,7 +194,7 @@
   </div>
 
   <!-- 📦 Inventory Management Section -->
-  <div id="inventorySectionBox" class="inventory-section">
+  <div class="inventory-section">
     <h3>📦 Inventory Management</h3>
     <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #ddd;">
       <div style="margin-bottom: 15px;">
@@ -268,7 +268,7 @@
     </div>
   </div>
 
-  <div id="expenseTrackerBox" style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
+  <div style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
       <h3 style="margin-bottom: 15px; color: #333;">💰 Expense & Profit Tracker</h3>
       
       <!-- खर्च थप्ने इनपुट बक्सहरू -->
@@ -308,7 +308,7 @@
   </div>
 
   <!-- 💰 Staff Salary Sheet & Voucher System -->
-  <div id="salarySectionBox" class="salary-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <div class="salary-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
       <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">💰 Staff Salary Sheet & Voucher System</h3>
       
       <!-- 1. Add New Staff & Designation -->
@@ -423,7 +423,7 @@
   </div>
 
   <!-- 💬 Live Support Chat Center Section (Moved to Bottom) -->
-  <div id="chatSectionBox" class="chat-section">
+  <div class="chat-section">
     <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">💬 Live Support Chat Center</h3>
     <div style="display: flex; gap: 20px; flex-wrap: wrap;">
       <div style="flex: 1; min-width: 280px; border-right: 1px solid #ddd; padding-right: 10px;">
@@ -544,8 +544,8 @@
     } catch(e) {}
   }, { once: true });
 
-  // 🔐 १००% भरपर्दो र सुरक्षित लगइन कार्यान्वयन (Event Listener मार्फत जोडिएको)
-  async function executeLoginAction() {
+  // 🔐 Supabase बाट युजरनेम र पासवर्ड प्रमाणीकरण गर्ने र सही रोल तानेर प्यानल खोल्ने फंक्सन
+  window.handleLogin = async function() {
     var u = document.getElementById("username").value.trim().toLowerCase();
     var p = document.getElementById("password").value.trim();
     if(u === "" || p === "") { alert("कृपया युजरनेम र पासवर्ड लेख्नुहोस्!"); return; }
@@ -554,62 +554,39 @@
     btn.innerText = "Verifying...";
     btn.disabled = true;
 
-    let assignedRole = "admin";
-    
-    if (u === "admin@ugratara.com" && p === "123456") {
-      assignedRole = "admin";
-    } else {
-      try {
-        let { data, error } = await supabaseClient
-          .from('admins')
-          .select('*')
-          .ilike('email', u)
-          .eq('password', p);
+    try {
+      let { data, error } = await supabaseClient
+        .from('admins')
+        .select('*')
+        .ilike('email', u)
+        .eq('password', p)
+        .single();
 
-        if (!error && data && data.length > 0) {
-          assignedRole = data[0].role ? String(data[0].role).trim() : "admin";
-        } else {
-          let matchedStaff = staffListCache.find(s => String(s.email).toLowerCase() === u && s.password === p);
-          if (matchedStaff) {
-            assignedRole = matchedStaff.role || "Staff";
-          } else {
-            btn.innerText = "Login";
-            btn.disabled = false;
-            alert("❌ गलत युजरनेम वा पासवर्ड! कृपया फेरि प्रयास गर्नुहोस्।");
-            return;
-          }
-        }
-      } catch(err) {
-        if (!(u === "admin@ugratara.com" && p === "123456")) {
-          btn.innerText = "Login";
-          btn.disabled = false;
-          alert("⚠️ लगइन गर्दा त्रुटि भयो: " + err.message);
-          return;
-        }
+      btn.innerText = "Login";
+      btn.disabled = false;
+
+      if (error || !data) {
+        alert("❌ गलत युजरनेम वा पासवर्ड! कृपया फेरि प्रयास गर्नुहोस्।");
+        return;
       }
+
+      let assignedRole = data.role ? String(data.role).trim() : "admin";
+
+      sessionStorage.setItem("ADMIN_LOGIN", "true");
+      sessionStorage.setItem("USER_ROLE", assignedRole);
+      localStorage.setItem("adminRole", assignedRole);
+      sessionStorage.setItem("LOGGED_USER", u);
+      
+      myRole = assignedRole;
+      currentLoggedInUser = u;
+
+      window.showAdminPanel();
+    } catch(err) {
+      btn.innerText = "Login";
+      btn.disabled = false;
+      alert("⚠️ लगइन गर्दा त्रुटि भयो: " + err.message);
     }
-
-    btn.innerText = "Login";
-    btn.disabled = false;
-
-    sessionStorage.setItem("ADMIN_LOGIN", "true");
-    sessionStorage.setItem("USER_ROLE", assignedRole);
-    localStorage.setItem("adminRole", assignedRole);
-    sessionStorage.setItem("LOGGED_USER", u);
-    
-    myRole = assignedRole;
-    currentLoggedInUser = u;
-
-    window.showAdminPanel();
-  }
-
-  // DOM पूर्ण लोड भएपछि लगइन बटनमा इभेन्ट लिसनर जोड्ने सुरक्षित तरिका
-  document.addEventListener("DOMContentLoaded", function() {
-    let loginBtnEl = document.getElementById("loginBtn");
-    if (loginBtnEl) {
-      loginBtnEl.addEventListener("click", executeLoginAction);
-    }
-  });
+  };
 
   window.loadOrders = async function() {
     try {
@@ -750,26 +727,8 @@
     var tableBody = document.getElementById("ordersTable");
     if(!tableBody) return;
     
-    let currentRoleLower = String(sessionStorage.getItem("USER_ROLE") || "").toLowerCase();
-    let processedOrders = ordersToRender;
-
-    // 🎯 ORDER_TAKER को लागि सख्त फिल्टर: केवल Pending / Order Received मात्र देखाउने
-    if (currentRoleLower.includes("order_taker") || currentRoleLower.includes("ordertaker")) {
-      processedOrders = ordersToRender.filter(o => {
-        let st = String(o.status || "").trim().toLowerCase();
-        return st === "pending" || st === "order received" || st === "";
-      });
-    } 
-    // 🚚 DELIVERY को लागि सख्त फिल्टर: केवल Ready वा Out for Delivery मात्र देखाउने
-    else if (currentRoleLower.includes("delivery")) {
-      processedOrders = ordersToRender.filter(o => {
-        let st = String(o.status || "").trim().toLowerCase();
-        return st === "ready" || st === "out for delivery";
-      });
-    }
-
     let html = "";
-    let limitedOrders = processedOrders.slice(0, 10);
+    let limitedOrders = ordersToRender.slice(0, 10);
     let totalOrdersCount = limitedOrders.length;
 
     if(totalOrdersCount === 0) {
@@ -785,47 +744,26 @@
         let delivHtml = (o.proof_img && o.proof_img !== "None" && o.proof_img !== "") ?  
           `<img src="${o.proof_img}" class="proof-thumb" onclick="window.openImageViewer('${o.proof_img}')">` : `None`;
         
-        let statusSelect = "";
-        if (currentRoleLower.includes("order_taker") || currentRoleLower.includes("ordertaker") || currentRoleLower.includes("delivery")) {
-          statusSelect = `<span style="font-weight:bold; color:#e91e63;">${rawStatus}</span>`;
-        } else {
-          statusSelect = `<select id="status_${o.order_no || o.id}">
-            <option value="Pending" ${status==="pending"?"selected":""}>Pending</option>
-            <option value="Preparing" ${status==="preparing"?"selected":""}>Preparing</option>
-            <option value="Ready" ${status==="ready"?"selected":""}>Ready</option>
-            <option value="Out for Delivery" ${status==="out for delivery"?"selected":""}>Out for Delivery</option>
-            <option value="Delivered" ${status==="delivered"?"selected":""}>Delivered</option>
-          </select> 
-          <button class="updateBtn" onclick="window.manualUpdate('${o.order_no || o.id}')">Go</button>`;
-        }
+        let statusSelect = `<select id="status_${o.order_no || o.id}">
+          <option value="Pending" ${status==="pending"?"selected":""}>Pending</option>
+          <option value="Preparing" ${status==="preparing"?"selected":""}>Preparing</option>
+          <option value="Ready" ${status==="ready"?"selected":""}>Ready</option>
+          <option value="Out for Delivery" ${status==="out for delivery"?"selected":""}>Out for Delivery</option>
+          <option value="Delivered" ${status==="delivered"?"selected":""}>Delivered</option>
+        </select> 
+        <button class="updateBtn" onclick="window.manualUpdate('${o.order_no || o.id}')">Go</button>`;
 
         let actionButtons = "";
-        if (currentRoleLower.includes("order_taker") || currentRoleLower.includes("ordertaker")) {
-            if (status === "pending" || status === "order received" || status === "") {
-                actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
-            } else {
-                actionButtons = `<span style="color:#666;">In Progress</span>`;
-            }
-        } else if (currentRoleLower.includes("delivery")) {
-            if (status === "ready") {
-                actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no || o.id}', 'Out for Delivery')">🚚 Dispatch</button>`;
-            } else if (status === "out for delivery") {
-                actionButtons = `Upload Proof:<br><input type="file" accept="image/*" capture="environment" onchange="window.uploadDeliveryProof('${o.order_no || o.id}', this)" style="width:110px;">`;
-            } else {
-                actionButtons = `<span style="color:#666;">Waiting for Ready</span>`;
-            }
-        } else {
-            if (status === "pending" || status === "order received" || status === "") {
-                actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
-            } else if (status === "preparing") {
-                actionButtons = `<button class="rdyBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Ready', 'bill')">🍳 Ready & Bill</button>`;
-            } else if (status === "ready") {
-                actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no || o.id}', 'Out for Delivery')">🚚 Dispatch</button>`;
-            } else if (status === "out for delivery") {
-                actionButtons = `Upload Proof:<br><input type="file" accept="image/*" capture="environment" onchange="window.uploadDeliveryProof('${o.order_no || o.id}', this)" style="width:110px;">`;
-            } else if (status === "delivered") {
-                actionButtons = `<span style="color:green; font-weight:bold;">✅ Delivered</span>`;
-            }
+        if (status === "pending" || status === "order received" || status === "") {
+            actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
+        } else if (status === "preparing") {
+            actionButtons = `<button class="rdyBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Ready', 'bill')">🍳 Ready & Bill</button>`;
+        } else if (status === "ready") {
+            actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no || o.id}', 'Out for Delivery')">🚚 Dispatch</button>`;
+        } else if (status === "out for delivery") {
+            actionButtons = `Upload Proof:<br><input type="file" accept="image/*" capture="environment" onchange="window.uploadDeliveryProof('${o.order_no || o.id}', this)" style="width:110px;">`;
+        } else if (status === "delivered") {
+            actionButtons = `<span style="color:green; font-weight:bold;">✅ Delivered</span>`;
         }
 
         let displayOrderNo = o.order_no && String(o.order_no).startsWith("ORD") ? o.order_no : ("ORD" + (1001 + index));
@@ -1447,69 +1385,33 @@
   };
 
   window.showAdminPanel = function() {
-    let loginScreen = document.getElementById("loginScreen");
-    let adminContent = document.getElementById("adminContent");
-    
-    if (loginScreen) loginScreen.style.display = "none";
-    if (adminContent) adminContent.style.display = "block";
-
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("adminContent").style.display = "block";
     window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toUpperCase();
      
     let roleBadge = document.getElementById("userRoleBadge");
     if(roleBadge) roleBadge.innerText = window.myRole;
 
-    let roleLower = window.myRole.toLowerCase();
-
-    // 🎯 भूमिका अनुसार सेक्सनहरू लुकाउने वा देखाउने व्यवस्थापन
     let dashBox = document.getElementById("salesDashboardBox");
-    let monthlyChart = document.getElementById("monthlySalesChartDiv");
-    let hourlyChart = document.getElementById("hourlySalesChartDiv");
-    let salesReportSec = document.getElementById("salesReportSection");
+    if(dashBox) dashBox.style.display = "flex";
     let menuBox = document.getElementById("menuManagementBox");
-    let invBox = document.getElementById("inventorySectionBox");
-    let staffBox = document.getElementById("staffManagementBox");
-    let expenseBox = document.getElementById("expenseTrackerBox");
-    let salaryBox = document.getElementById("salarySectionBox");
-    let chatBox = document.getElementById("chatSectionBox");
-    let ordersBox = document.getElementById("mainOrdersTableSection");
+    if(menuBox) menuBox.style.display = "block";
 
-    if (roleLower.includes("order_taker") || roleLower.includes("ordertaker") || roleLower.includes("delivery")) {
-      if(dashBox) dashBox.style.display = "none";
-      if(monthlyChart) monthlyChart.style.display = "none";
-      if(hourlyChart) hourlyChart.style.display = "none";
-      if(salesReportSec) salesReportSec.style.display = "none";
-      if(menuBox) menuBox.style.display = "none";
-      if(invBox) invBox.style.display = "none";
-      if(staffBox) staffBox.style.display = "none";
-      if(expenseBox) expenseBox.style.display = "none";
-      if(salaryBox) salaryBox.style.display = "none";
-      if(ordersBox) ordersBox.style.display = "block"; // Active Orders देखाउने
-      if(chatBox) chatBox.style.display = "block";   // Live Support Chat देखाउने
-    } else {
-      // Full Admin र Manager को लागि सबै सेक्सनहरू देखाउने
-      if(dashBox) dashBox.style.display = "flex";
-      if(monthlyChart) monthlyChart.style.display = "block";
-      if(hourlyChart) hourlyChart.style.display = "block";
-      if(salesReportSec) salesReportSec.style.display = "block";
-      if(menuBox) menuBox.style.display = "block";
-      if(invBox) invBox.style.display = "block";
-      if(staffBox) staffBox.style.display = "block";
-      if(expenseBox) expenseBox.style.display = "block";
-      if(salaryBox) salaryBox.style.display = "block";
-      if(ordersBox) ordersBox.style.display = "block";
-      if(chatBox) chatBox.style.display = "block";
-      window.loadMenuList();
-      window.loadStaffList();
-      window.loadExpenseSummary();
-      window.loadInventoryData();
-      window.loadSalaryStaffDropdown();
-    }
-
+    window.loadMenuList();
     window.loadOrders();
     window.setupRealtimeOrders();
     window.loadAdminChats();
+    window.loadStaffList();
+    window.loadExpenseSummary();
+    window.loadInventoryData();
+    window.loadSalaryStaffDropdown();
+
+    setInterval(() => {
+      window.loadOrders();
+      window.loadAdminChats();
+    }, 2000);
   };
-  
+
   window.logout = function() { sessionStorage.clear(); window.location.reload(); };
 
   if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
@@ -1517,8 +1419,7 @@
     currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
     window.showAdminPanel();
   } else {
-    let loginScreen = document.getElementById("loginScreen");
-    if(loginScreen) loginScreen.style.display = "flex";
+    document.getElementById("loginScreen").style.display = "flex";
   }
 
   window.drawMonthlySalesChart = function(orders) {
@@ -1665,6 +1566,7 @@
     let { data } = await supabaseClient.from('admins').select('*').order('id', { ascending: true });
     let staffData = (data && data.length > 0) ? data : staffListCache;
     
+    // 🔍 म्यानेजर लगइन हुँदा एडमिन र म्यानेजरहरू लुकाउने र साधारण कर्मचारी मात्र देखाउने फिल्टर
     let currentRole = String(sessionStorage.getItem("USER_ROLE") || "").toLowerCase();
     if (currentRole === "manager") {
       staffData = staffData.filter(staff => {
@@ -1855,7 +1757,7 @@
             </div>
             <script>
                 window.onload = function() { window.print(); window.close(); }
-            </script>
+            <\/script>
       </body>
       </html>
   `);
