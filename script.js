@@ -394,3 +394,37 @@ window.deleteStaff = async function(id) {
     alert("स्टाफ सफलतापूर्वक हटाइयो!");
     window.loadStaffList();
 };
+
+// 🔔 ग्राहकको च्याटमा एडमिनको रिप्लाई आउँदा घण्टी बज्ने फंक्सन
+function playCustomerNotificationSound() {
+  try {
+    let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    let osc = audioCtx.createOscillator();
+    let gain = audioCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+    gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.3);
+  } catch(e) {}
+}
+
+// 🌐 Supabase Realtime लाइभ म्यासेज सुन्ने र एडमिनको म्यासेज आउँदा घण्टी बजाउने
+document.addEventListener("DOMContentLoaded", function () {
+    let client = getSupabaseClient();
+    if (client && typeof client.channel === 'function') {
+        try {
+            client
+              .channel('public:customer_chat_notification')
+              .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, payload => {
+                if (payload.new && payload.new.sender === 'Admin') {
+                  playCustomerNotificationSound();
+                }
+              })
+              .subscribe();
+        } catch(e) {}
+    }
+});
