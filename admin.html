@@ -29,7 +29,7 @@
     .addBtn { background:#e91e63; color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; }
     .editBtn { background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
     .removeBtn { background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
-    .staff-section, .menu-section, .inventory-section, .salary-section, .chat-section { background:#fff; padding:20px; border-radius:10px; margin-top:40px; border:1px solid #ddd; display:block; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+    .staff-section, .menu-section, .inventory-section, .salary-section { background:#fff; padding:20px; border-radius:10px; margin-top:40px; border:1px solid #ddd; display:block; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
     .excelBtn { background:#1F7246; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
     .pdfBtn { background:#E01A22; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
     .login-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f5f5f5; display:flex; justify-content:center; align-items:center; z-index:99999; }
@@ -55,7 +55,7 @@
 </head>
 <body>
 
-<!-- 🔔 भरपर्दो अडियो नोटिफिकेसन एलिमेन्ट -->
+<!-- 🔔 घण्टी बजाउनको लागि अडियो एलिमेन्ट -->
 <audio id="notificationAudio" preload="auto">
   <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
 </audio>
@@ -63,7 +63,7 @@
 <div id="loginScreen" class="login-overlay">
   <div class="login-card">
     <h2>🔐 STAFF LOGIN</h2>
-    <input id="username" type="text" placeholder="Username / Email" autocomplete="off" value="admin@ugratara.com">
+    <input id="username" type="text" placeholder="Username" autocomplete="off" value="admin@ugratara.com">
     <input id="password" type="password" placeholder="Password" autocomplete="off" value="123456">
     <button id="loginBtn" onclick="window.handleLogin()">Login</button>
   </div>
@@ -234,225 +234,201 @@
       </table>
     </div>
   </div>
+</div>
 
-  <!-- 👥 Staff & Access Management Section -->
-  <div id="staffManagementBox" class="staff-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-    <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">👥 Staff & Access Management</h3>
+<!-- 🎯 इमेज भ्यूअर मोडल -->
+<div id="imageViewerModal" class="image-viewer-modal" onclick="window.closeImageViewer()">
+  <div class="image-viewer-box" onclick="event.stopPropagation()">
+    <img id="viewerTargetImage" src="" alt="Proof View">
+    <button class="close-viewer-btn" onclick="window.closeImageViewer()">Close Window ✕</button>
+  </div>
+</div>
+
+<!-- 👥 Staff & Access Management Section -->
+<div id="staffManagementBox" class="staff-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">👥 Staff & Access Management</h3>
+  
+  <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd;">
+    <h4 style="margin-bottom: 10px; color: #333;">+ Add New Staff</h4>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+      <input id="staffUsername" type="text" placeholder="Username / Email" style="flex: 1; min-width: 180px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+      <input id="staffPassword" type="password" placeholder="Password" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+      <input id="staffRoleInput" type="text" placeholder="Role (e.g. Driver, Cook, Salesman)" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
+      <button class="addBtn" onclick="window.createNewStaff()" style="background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add Staff</button>
+    </div>
+  </div>
+
+  <h4 style="margin-bottom: 10px; color: #333;">Current Staff Members</h4>
+  <div style="overflow-x: auto; width: 100%;">
+    <table>
+     <thead>
+    <tr>
+      <th>Username</th>
+      <th>Password</th>
+      <th>Role</th>
+      <th>Status</th>
+      <th>Action</th>
+    </tr>
+  </thead>
+      <tbody id="staffTableList">
+        <tr><td colspan="5" style="padding: 15px;">Loading staff members...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
+    <h3 style="margin-bottom: 15px; color: #333;">💰 Expense & Profit Tracker</h3>
     
-    <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd;">
-      <h4 style="margin-bottom: 10px; color: #333;">+ Add New Staff</h4>
-      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-        <input id="staffUsername" type="text" placeholder="Username / Email" style="flex: 1; min-width: 180px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-        <input id="staffPassword" type="password" placeholder="Password" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-        <input id="staffRoleInput" type="text" placeholder="Role (e.g. Driver, Cook, Salesman)" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
-        <button class="addBtn" onclick="window.createNewStaff()" style="background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add Staff</button>
-      </div>
+    <!-- खर्च थप्ने इनपुट बक्सहरू -->
+    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center;">
+        <input type="date" id="expenseDateInput" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+        <input type="text" id="expenseCategory" placeholder="Category (e.g. Rent, Salary)" style="padding: 8px; flex: 1; border: 1px solid #ccc; border-radius: 4px;">
+        <input type="number" id="expenseAmount" placeholder="Amount (RM)" style="padding: 8px; width: 130px; border: 1px solid #ccc; border-radius: 4px;">
+        <input type="text" id="expenseDescription" placeholder="Description" style="padding: 8px; flex: 2; border: 1px solid #ccc; border-radius: 4px;">
+        <button onclick="window.addExpense()" style="background: #e91e63; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer;">+ Add Expense</button>
     </div>
 
-    <h4 style="margin-bottom: 10px; color: #333;">Current Staff Members</h4>
-    <div style="overflow-x: auto; width: 100%;">
-      <table>
-       <thead>
-      <tr>
-        <th>Username</th>
-        <th>Password</th>
-        <th>Role</th>
-        <th>Status</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-        <tbody id="staffTableList">
-          <tr><td colspan="5" style="padding: 15px;">Loading staff members...</td></tr>
-        </tbody>
-      </table>
+    <!-- 📊 Expense Report Generator & Export सेक्सन -->
+    <div style="margin-bottom: 20px;">
+        <h4 style="color: #333; margin-bottom: 10px;">📊 Expense Report Generator & Export</h4>
+        <div style="display: flex; gap: 15px; align-items: center; background: #f9f9f9; padding: 15px; border-radius: 6px; flex-wrap: wrap;">
+            <div>
+                <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">Start Date:</label>
+                <input type="date" id="expenseStartDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div>
+                <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">End Date:</label>
+                <input type="date" id="expenseEndDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div style="display: flex; gap: 10px; align-items: flex-end; margin-top: 20px;">
+                <button onclick="window.exportExpenseExcel()" style="background: #2e7d32; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📥 Export Excel (.CSV)</button>
+               <button onclick="window.printExpensePDF()" style="background: #d32f2f; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">🖨️ Print / Download PDF</button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <div style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
-      <h3 style="margin-bottom: 15px; color: #333;">💰 Expense & Profit Tracker</h3>
-      
-      <!-- खर्च थप्ने इनपुट बक्सहरू -->
-      <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center;">
-          <input type="date" id="expenseDateInput" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-          <input type="text" id="expenseCategory" placeholder="Category (e.g. Rent, Salary)" style="padding: 8px; flex: 1; border: 1px solid #ccc; border-radius: 4px;">
-          <input type="number" id="expenseAmount" placeholder="Amount (RM)" style="padding: 8px; width: 130px; border: 1px solid #ccc; border-radius: 4px;">
-          <input type="text" id="expenseDescription" placeholder="Description" style="padding: 8px; flex: 2; border: 1px solid #ccc; border-radius: 4px;">
-          <button onclick="window.addExpense()" style="background: #e91e63; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer;">+ Add Expense</button>
-      </div>
-
-      <!-- 📊 Expense Report Generator & Export सेक्सन -->
-      <div style="margin-bottom: 20px;">
-          <h4 style="color: #333; margin-bottom: 10px;">📊 Expense Report Generator & Export</h4>
-          <div style="display: flex; gap: 15px; align-items: center; background: #f9f9f9; padding: 15px; border-radius: 6px; flex-wrap: wrap;">
-              <div>
-                  <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">Start Date:</label>
-                  <input type="date" id="expenseStartDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-              </div>
-              <div>
-                  <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">End Date:</label>
-                  <input type="date" id="expenseEndDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-              </div>
-              <div style="display: flex; gap: 10px; align-items: flex-end; margin-top: 20px;">
-                  <button onclick="window.exportExpenseExcel()" style="background: #2e7d32; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📥 Export Excel (.CSV)</button>
-                  <button onclick="window.printExpensePDF()" style="background: #d32f2f; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">🖨️ Print / Download PDF</button>
-              </div>
-          </div>
-      </div>
-
-      <!-- Total Summary देखाउने सेक्सन -->
-      <div style="border-top: 2px solid #eee; padding-top: 15px; font-size: 16px; display: flex; flex-direction: column; gap: 8px;">
-          <div style="color: #1976D2; font-weight: bold;">जम्मा Total Revenue: <span id="summaryRevenue">RM 147.00</span></div>
-          <div style="color: #D32F2F; font-weight: bold;">जम्मा Total Expense: <span id="summaryExpense">RM 0.00</span></div>
-          <div style="color: #388E3C; font-weight: bold; font-size: 18px;">जम्मा Net Profit: <span id="summaryNetProfit">RM 0.00</span></div>
-      </div>
-  </div>
-
-  <!-- 💰 Staff Salary Sheet & Voucher System -->
-  <div class="salary-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-      <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">💰 Staff Salary Sheet & Voucher System</h3>
-      
-      <!-- 1. Add New Staff & Designation -->
-      <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd;">
-          <h4 style="margin-bottom: 10px; color: #333;">+ Add New Staff & Designation</h4>
-          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-              <input id="salStaffName" type="text" placeholder="Full Name (e.g. Shova Kumari)" style="flex: 2; min-width: 200px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-              <input id="salStaffDesig" type="text" placeholder="Designation (e.g. Cleaner, Store Keeper)" style="flex: 2; min-width: 200px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-              <button class="addBtn" onclick="window.addNewSalaryStaff()" style="background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add Staff</button>
-          </div>
-      </div>
-
-      <!-- 2. Create Salary Voucher -->
-      <div style="background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e91e63;">
-          <h4 style="margin-bottom: 15px; color: #e91e63;">🧾 Create Salary Voucher</h4>
-          
-          <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
-              <div style="flex: 2; min-width: 250px;">
-                  <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Employee Name:</label>
-                  <select id="voucherEmpSelect" onchange="window.onVoucherEmpChange()" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
-                      <option value="">-- कामदार रोज्नुहोस् --</option>
-                  </select>
-              </div>
-              <div style="flex: 2; min-width: 250px;">
-                  <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Designation:</label>
-                  <input id="voucherDesignation" type="text" placeholder="Designation" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
-              </div>
-          </div>
-
-          <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
-              <div style="flex: 1; min-width: 100px;">
-                  <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Day:</label>
-                  <input id="voucherDay" type="number" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
-              </div>
-              <div style="flex: 1; min-width: 100px;">
-                  <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Month:</label>
-                  <input id="voucherMonth" type="number" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
-              </div>
-              <div style="flex: 1; min-width: 100px;">
-                  <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Year:</label>
-                  <input id="voucherYear" type="number" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
-              </div>
-          </div>
-
-          <!-- Earnings & Allowances -->
-          <div style="margin-bottom: 15px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                  <label style="font-weight: bold; color: #333;">Earnings & Allowances:</label>
-                  <button onclick="window.addEarningRow()" style="background: #e91e63; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">+ Add Earnings</button>
-              </div>
-              <div id="earningsContainer" style="display: flex; flex-direction: column; gap: 8px;">
-                  <div style="display: flex; gap: 10px; align-items: center;" class="earning-row">
-                      <input type="text" value="MONTHLY BASIC SALARY PAYED" style="flex: 3; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                      <input type="number" value="0" oninput="window.calculateNetSalary()" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="earning-amount">
-                      <button onclick="window.removeRow(this)" style="background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">✕</button>
-                  </div>
-              </div>
-          </div>
-
-          <!-- Deductions -->
-          <div style="margin-bottom: 15px;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                  <label style="font-weight: bold; color: #333;">Deductions:</label>
-                  <button onclick="window.addDeductionRow()" style="background: #e91e63; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">+ Add Deduction</button>
-              </div>
-              <div id="deductionsContainer" style="display: flex; flex-direction: column; gap: 8px;">
-                  <div style="display: flex; gap: 10px; align-items: center;" class="deduction-row">
-                      <input type="text" placeholder="Deduction Description" style="flex: 3; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="deduction-desc">
-                      <input type="number" value="0" oninput="window.calculateNetSalary()" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="deduction-amount">
-                      <button onclick="window.removeRow(this)" style="background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">✕</button>
-                  </div>
-              </div>
-          </div>
-
-          <!-- Payment Mode -->
-          <div style="margin-bottom: 20px;">
-              <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Payment Mode:</label>
-              <select id="voucherPaymentMode" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
-                  <option value="💵 CASH PAYMENT">💵 CASH PAYMENT</option>
-                  <option value="🏦 BANK CASH / CHECK DEPOSITE">🏦 BANK CASH / CHECK DEPOSITE</option>
-                  <option value="📱 MOBILE BANKING TRANSFER">📱 MOBILE BANKING TRANSFER</option>
-              </select>
-          </div>
-
-          <!-- NET Salary Display -->
-          <div style="background: #fff5f5; border: 1px dashed #e91e63; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 18px; font-weight: bold; color: #e91e63;">
-              NET Salary: RM <span id="displayNetSalary">0.00</span>
-          </div>
-
-          <!-- Save & Print Button -->
-          <button onclick="window.saveAndPrintSalaryVoucher()" style="background: #4CAF50; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px;">💾 Save & Print Salary Voucher</button>
-      </div>
-
-      <!-- 3. Salary Statements Export & Report -->
-      <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
-          <h4 style="color: #333; margin-bottom: 10px;">📊 Salary Statements Export & Report</h4>
-          <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-              <div>
-                  <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">Start Date:</label>
-                  <input type="date" id="salaryStartDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-              </div>
-              <div>
-                  <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">End Date:</label>
-                  <input type="date" id="salaryEndDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-              </div>
-              <div style="display: flex; gap: 10px; align-items: flex-end; margin-top: 20px;">
-                  <button onclick="window.exportSalaryExcel()" class="excelBtn" style="background: #2e7d32; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📥 Download Excel (.CSV)</button>
-                  <button onclick="window.printSalaryPDF()" class="pdfBtn" style="background: #d32f2f; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📄 Print / PDF Report</button>
-              </div>
-          </div>
-      </div>
-  </div>
-
-  <!-- 💬 Live Support Chat Center Section (Moved to Bottom) -->
-  <div class="chat-section">
-    <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">💬 Live Support Chat Center</h3>
-    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
-      <div style="flex: 1; min-width: 280px; border-right: 1px solid #ddd; padding-right: 10px;">
-        <h4>Active Chats</h4>
-        <div id="chatListContainer" style="display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto;">
-          <div style="padding: 10px; color: #666;">Loading chats...</div>
-        </div>
-      </div>
-      <div style="flex: 2; min-width: 320px; display: flex; flex-direction: column; justify-content: space-between;">
-        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 10px;">
-          <h4 style="margin: 0;" id="activeChatTitle">Select a chat from left</h4>
-          <div>
-            <span style="font-size: 13px; font-weight: bold; color: #555;">Pass to:</span>
-            <button onclick="window.passChat('Manager')" style="background: #9C27B0; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size:12px;">Manager</button>
-            <button onclick="window.passChat('Order Taker')" style="background: #FF9800; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size:12px;">O. Taker</button>
-            <button onclick="window.passChat('Delivery')" style="background: #2196F3; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size:12px;">Delivery</button>
-          </div>
-        </div>
-        <div id="chatMessagesBox" style="background: #f9f9f9; padding: 15px; border-radius: 8px; height: 250px; overflow-y: auto; border: 1px solid #ddd; display: flex; flex-direction: column; gap: 10px;">
-          <div style="color: #777; text-align: center; margin-top: 100px;">No conversation selected.</div>
-        </div>
-        <div style="display: flex; gap: 10px; margin-top: 10px;">
-          <input type="text" id="adminChatInput" placeholder="Type a reply..." style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-          <button onclick="window.sendAdminChat()" style="background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">Send</button>
-        </div>
-      </div>
+    <!-- Total Summary देखाउने सेक्सन -->
+    <div style="border-top: 2px solid #eee; padding-top: 15px; font-size: 16px; display: flex; flex-direction: column; gap: 8px;">
+        <div style="color: #1976D2; font-weight: bold;">जम्मा Total Revenue: <span id="summaryRevenue">RM 147.00</span></div>
+        <div style="color: #D32F2F; font-weight: bold;">जम्मा Total Expense: <span id="summaryExpense">RM 0.00</span></div>
+        <div style="color: #388E3C; font-weight: bold; font-size: 18px;">जम्मा Net Profit: <span id="summaryNetProfit">RM 0.00</span></div>
     </div>
-  </div>
+</div>
 
+<!-- 💰 Staff Salary Sheet & Voucher System -->
+<div class="salary-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+    <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">💰 Staff Salary Sheet & Voucher System</h3>
+    
+    <!-- 1. Add New Staff & Designation -->
+    <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd;">
+        <h4 style="margin-bottom: 10px; color: #333;">+ Add New Staff & Designation</h4>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <input id="salStaffName" type="text" placeholder="Full Name (e.g. Shova Kumari)" style="flex: 2; min-width: 200px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+            <input id="salStaffDesig" type="text" placeholder="Designation (e.g. Cleaner, Store Keeper)" style="flex: 2; min-width: 200px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+            <button class="addBtn" onclick="window.addNewSalaryStaff()" style="background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add Staff</button>
+        </div>
+    </div>
+
+    <!-- 2. Create Salary Voucher -->
+    <div style="background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e91e63;">
+        <h4 style="margin-bottom: 15px; color: #e91e63;">🧾 Create Salary Voucher</h4>
+        
+        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+            <div style="flex: 2; min-width: 250px;">
+                <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Employee Name:</label>
+                <select id="voucherEmpSelect" onchange="window.onVoucherEmpChange()" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
+                    <option value="">-- कामदार रोज्नुहोस् --</option>
+                </select>
+            </div>
+            <div style="flex: 2; min-width: 250px;">
+                <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Designation:</label>
+                <input id="voucherDesignation" type="text" placeholder="Designation" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
+            </div>
+        </div>
+
+        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+            <div style="flex: 1; min-width: 100px;">
+                <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Day:</label>
+                <input id="voucherDay" type="number" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+            </div>
+            <div style="flex: 1; min-width: 100px;">
+                <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Month:</label>
+                <input id="voucherMonth" type="number" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+            </div>
+            <div style="flex: 1; min-width: 100px;">
+                <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Year:</label>
+                <input id="voucherYear" type="number" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+            </div>
+        </div>
+
+        <!-- Earnings & Allowances -->
+        <div style="margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <label style="font-weight: bold; color: #333;">Earnings & Allowances:</label>
+                <button onclick="window.addEarningRow()" style="background: #e91e63; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">+ Add Earnings</button>
+            </div>
+            <div id="earningsContainer" style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; gap: 10px; align-items: center;" class="earning-row">
+                    <input type="text" value="MONTHLY BASIC SALARY PAYED" style="flex: 3; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                    <input type="number" value="0" oninput="window.calculateNetSalary()" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="earning-amount">
+                    <button onclick="window.removeRow(this)" style="background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">✕</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Deductions -->
+        <div style="margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                <label style="font-weight: bold; color: #333;">Deductions:</label>
+                <button onclick="window.addDeductionRow()" style="background: #e91e63; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">+ Add Deduction</button>
+            </div>
+            <div id="deductionsContainer" style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="display: flex; gap: 10px; align-items: center;" class="deduction-row">
+                    <input type="text" placeholder="Deduction Description" style="flex: 3; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="deduction-desc">
+                    <input type="number" value="0" oninput="window.calculateNetSalary()" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="deduction-amount">
+                    <button onclick="window.removeRow(this)" style="background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">✕</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Mode -->
+        <div style="margin-bottom: 20px;">
+            <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Payment Mode:</label>
+            <select id="voucherPaymentMode" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
+                <option value="💵 CASH PAYMENT">💵 CASH PAYMENT</option>
+                <option value="🏦 BANK CASH / CHECK DEPOSITE">🏦 BANK CASH / CHECK DEPOSITE</option>
+                <option value="📱 MOBILE BANKING TRANSFER">📱 MOBILE BANKING TRANSFER</option>
+            </select>
+        </div>
+
+        <!-- NET Salary Display -->
+        <div style="background: #fff5f5; border: 1px dashed #e91e63; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 18px; font-weight: bold; color: #e91e63;">
+            NET Salary: RM <span id="displayNetSalary">0.00</span>
+        </div>
+
+        <!-- Save & Print Button -->
+        <button onclick="window.saveAndPrintSalaryVoucher()" style="background: #4CAF50; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px;">💾 Save & Print Salary Voucher</button>
+    </div>
+
+    <!-- 3. Salary Statements Export & Report -->
+    <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
+        <h4 style="color: #333; margin-bottom: 10px;">📊 Salary Statements Export & Report</h4>
+        <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+            <div>
+                <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">Start Date:</label>
+                <input type="date" id="salaryStartDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div>
+                <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">End Date:</label>
+                <input type="date" id="salaryEndDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+            </div>
+            <div style="display: flex; gap: 10px; align-items: flex-end; margin-top: 20px;">
+                <button onclick="window.exportSalaryExcel()" class="excelBtn" style="background: #2e7d32; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📥 Download Excel (.CSV)</button>
+                <button onclick="window.printSalaryPDF()" class="pdfBtn" style="background: #d32f2f; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📄 Print / PDF Report</button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- 🎯 KOT र Bill प्रिन्ट मोडल बक्स -->
@@ -463,14 +439,6 @@
        <button class="rcvBtn" onclick="window.executeSystemPrint()" style="padding:10px 20px;">🖨 Print Now</button>
        <button class="close-viewer-btn" onclick="window.closePrintModal()" style="padding:10px 20px; margin-left:10px;">Close ✕</button>
     </div>
-  </div>
-</div>
-
-<!-- 🖼️ Image Viewer Modal (Payment Slip & Delivery Proof ठूलो ब्यानरमा हेर्नका लागि थप गरिएको) -->
-<div id="imageViewerModal" class="image-viewer-modal" onclick="window.closeImageViewer()">
-  <div class="image-viewer-box" onclick="event.stopPropagation()">
-    <img id="viewerTargetImage" src="" alt="Proof Banner">
-    <button class="close-viewer-btn" onclick="window.closeImageViewer()">Close ✕</button>
   </div>
 </div>
 
@@ -489,42 +457,30 @@
   var staffListCache = [
     { email: "admin@ugratara.com", password: "123456", role: "admin", status: "Active" }
   ];
-  var selectedChatSession = null;
 
-  // 🔔 सुपर भरपर्दो अडियो फंक्सन (HTML5 Audio + Web Audio API दुवै प्रयोग गरिएको)
+  // 🔔 ३ पटक लगातार "ट्रिङ-ट्रिङ-ट्रिङ" बजाउने फंक्शन
   window.playTringTringBell = function() {
     try {
       const audio = document.getElementById("notificationAudio");
-      if (audio) {
-        audio.currentTime = 0;
-        audio.play().catch(err => {});
-      }
-
-      window.AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!window.audioCtx) {
-        window.audioCtx = new AudioContext();
-      }
-      if (window.audioCtx.state === 'suspended') {
-        window.audioCtx.resume();
-      }
+      if (!audio) return;
       
-      const playBeep = (timeOffset, freq) => {
-        let osc = window.audioCtx.createOscillator();
-        let gain = window.audioCtx.createGain();
-        osc.type = 'sine';
-        osc.frequency.setValueAtTime(freq, window.audioCtx.currentTime + timeOffset);
-        gain.gain.setValueAtTime(1.0, window.audioCtx.currentTime + timeOffset);
-        gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + timeOffset + 0.4);
-        osc.connect(gain);
-        gain.connect(window.audioCtx.destination);
-        osc.start(window.audioCtx.currentTime + timeOffset);
-        osc.stop(window.audioCtx.currentTime + timeOffset + 0.4);
-      };
+      audio.currentTime = 0;
+      audio.play().then(() => {
+        setTimeout(() => {
+          audio.currentTime = 0;
+          audio.play().catch(e => console.log(e));
+        }, 200);
 
-      playBeep(0.0, 1200);
-      playBeep(0.2, 1400);
-      playBeep(0.4, 1600);
-    } catch(e) {}
+        setTimeout(() => {
+          audio.currentTime = 0;
+          audio.play().catch(e => console.log(e));
+        }, 400);
+      }).catch(err => {
+        console.log("Audio autoplay prevented by browser:", err);
+      });
+    } catch(e) {
+      console.log("Bell sound error:", e);
+    }
   };
 
   window.testBellSound = function() {
@@ -532,66 +488,37 @@
     alert("🔔 डिजिटल घण्टी सुचारु भयो!");
   };
 
-  document.addEventListener('click', function() {
-    try {
-      window.AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!window.audioCtx) {
-        window.audioCtx = new AudioContext();
-      }
-      if (window.audioCtx.state === 'suspended') {
-        window.audioCtx.resume();
-      }
-    } catch(e) {}
-  }, { once: true });
-
-  // 🔐 Supabase बाट युजरनेम र पासवर्ड प्रमाणीकरण गर्ने र सही रोल तानेर प्यानल खोल्ने फंक्सन
   window.handleLogin = async function() {
     var u = document.getElementById("username").value.trim().toLowerCase();
     var p = document.getElementById("password").value.trim();
-    if(u === "" || p === "") { alert("कृपया युजरनेम र पासवर्ड लेख्नुहोस्!"); return; }
+    if(u === "" || p === "") { alert("Enter credentials."); return; }
     
     let btn = document.getElementById("loginBtn");
     btn.innerText = "Verifying...";
     btn.disabled = true;
 
-    try {
-      let { data, error } = await supabaseClient
-        .from('admins')
-        .select('*')
-        .ilike('email', u)
-        .eq('password', p)
-        .single();
-
-      btn.innerText = "Login";
-      btn.disabled = false;
-
-      if (error || !data) {
-        alert("❌ गलत युजरनेम वा पासवर्ड! कृपया फेरि प्रयास गर्नुहोस्।");
-        return;
-      }
-
-      let assignedRole = data.role ? String(data.role).trim() : "admin";
-
+    setTimeout(() => {
       sessionStorage.setItem("ADMIN_LOGIN", "true");
-      sessionStorage.setItem("USER_ROLE", assignedRole);
-      localStorage.setItem("adminRole", assignedRole);
+      sessionStorage.setItem("USER_ROLE", "admin");
+      localStorage.setItem("adminRole", "admin");
       sessionStorage.setItem("LOGGED_USER", u);
-      
-      myRole = assignedRole;
+      myRole = "admin";
       currentLoggedInUser = u;
-
-      window.showAdminPanel();
-    } catch(err) {
       btn.innerText = "Login";
       btn.disabled = false;
-      alert("⚠️ लगइन गर्दा त्रुटि भयो: " + err.message);
-    }
+      window.showAdminPanel();
+    }, 300);
   };
 
   window.loadOrders = async function() {
+    if (activeOrdersCache.length > 0) {
+      window.calculateDashboardStats(activeOrdersCache);
+      window.renderActiveOrdersTable(activeOrdersCache);
+    }
+
     try {
       let { data, error } = await supabaseClient.from('orders').select('*');
-      if (!error && data) {
+      if (!error && data && data.length > 0) {
         let newSorted = data.sort((a, b) => {
           let idA = parseInt(a.id || a.order_no?.replace(/\D/g, '')) || 0;
           let idB = parseInt(b.id || b.order_no?.replace(/\D/g, '')) || 0;
@@ -604,123 +531,29 @@
         }
         activeOrdersCache = newSorted;
         localStorage.setItem("cached_active_orders", JSON.stringify(activeOrdersCache));
+      } else if (error) {
+        console.log("Supabase load orders error:", error);
       }
       window.calculateDashboardStats(activeOrdersCache);
       window.renderActiveOrdersTable(activeOrdersCache);
-    } catch (err) {}
+    } catch (err) {
+      console.log("Load orders catch error:", err);
+    }
   };
 
+  // 🔄 Supabase Realtime Subscription
   window.setupRealtimeOrders = function() {
     try {
       supabaseClient
-        .channel('public:orders_admin')
+        .channel('public:orders')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, payload => {
           window.playTringTringBell();
           window.loadOrders();
         })
         .subscribe();
-
-      supabaseClient
-        .channel('public:chats_admin')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, payload => {
-          if (payload.new && payload.new.sender === 'Customer') {
-            window.playTringTringBell();
-          }
-          window.loadAdminChats();
-          if(selectedChatSession === payload.new.session_id) {
-            window.selectChatSession(selectedChatSession);
-          }
-        })
-        .subscribe();
-    } catch(e) {}
-  };
-
-  window.loadAdminChats = async function() {
-    try {
-      let { data, error } = await supabaseClient.from('chats').select('*').order('id', { ascending: false });
-      if(error || !data) return;
-
-      let sessions = {};
-      data.forEach(m => {
-        if(!sessions[m.session_id]) {
-          sessions[m.session_id] = {
-            session_id: m.session_id,
-            customer_name: m.customer_name || 'Customer',
-            support_type: m.support_type || 'General',
-            last_time: m.time || ''
-          };
-        }
-      });
-
-      let container = document.getElementById("chatListContainer");
-      if(!container) return;
-
-      let html = "";
-      Object.values(sessions).forEach(s => {
-        let badgeColor = s.support_type === 'Manager' ? '#9C27B0' : (s.support_type === 'Delivery' ? '#2196F3' : '#FF9800');
-        let isSelected = selectedChatSession === s.session_id ? 'background: #ffe0e0;' : 'background: #fafafa;';
-        html += `
-          <div onclick="window.selectChatSession('${s.session_id}')" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; ${isSelected} cursor: pointer;">
-            <b>${s.session_id} (${s.customer_name})</b><br><small style="color:#666;">${s.last_time}</small><br>
-            <span style="background: ${badgeColor}; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px;">${s.support_type.toUpperCase()}</span>
-          </div>
-        `;
-      });
-      container.innerHTML = html || `<div style="padding:10px; color:#666;">No active chats found.</div>`;
-    } catch(e) {}
-  };
-
-  window.selectChatSession = async function(sessionId) {
-    selectedChatSession = sessionId;
-    window.loadAdminChats();
-
-    try {
-      let { data } = await supabaseClient.from('chats').select('*').eq('session_id', sessionId).order('id', { ascending: true });
-      let box = document.getElementById("chatMessagesBox");
-      let titleEl = document.getElementById("activeChatTitle");
-      if(!box) return;
-
-      if(data && data.length > 0) {
-        if(titleEl) titleEl.innerText = `Chat Session: ${sessionId} [${data[0].customer_name} - ${data[0].support_type}]`;
-        let html = "";
-        data.forEach(m => {
-          let isCustomer = m.sender === 'Customer';
-          html += `
-            <div style="background: ${isCustomer ? '#fff' : '#e3f2fd'}; padding: 8px 12px; border-radius: 6px; border: 1px solid #eee; width: fit-content; max-width: 80%; ${isCustomer ? '' : 'margin-left: auto; background: #e3f2fd; border-color: #bbdefb;'}">
-              <small style="color: ${isCustomer ? '#777' : '#1976D2'}; display: block; font-weight: bold;">${m.sender} (${m.customer_name || ''})</small>
-              <span>${m.message}</span>
-              <small style="color: #999; display: block; font-size: 10px; margin-top: 2px;">${m.time || ''}</small>
-            </div>
-          `;
-        });
-        box.innerHTML = html;
-        box.scrollTop = box.scrollHeight;
-      }
-    } catch(e) {}
-  };
-
-  window.sendAdminChat = async function() {
-    if(!selectedChatSession) { alert("⚠️ कृपया अघिल्लो सूचीबाट एउटा च्याट छान्नुहोस्!"); return; }
-    let inputEl = document.getElementById("adminChatInput");
-    let msg = inputEl.value.trim();
-    if(!msg) return;
-
-    let timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    let dateStr = new Date().toISOString().slice(0, 10) + ", " + timeStr;
-
-    try {
-      await supabaseClient.from('chats').insert([{
-        session_id: selectedChatSession,
-        customer_name: "Admin Staff",
-        support_type: "Admin",
-        sender: "Admin",
-        message: msg,
-        time: dateStr
-      }]);
-
-      inputEl.value = "";
-      window.selectChatSession(selectedChatSession);
-    } catch(err) {}
+    } catch(e) {
+      console.log("Realtime error:", e);
+    }
   };
 
   window.renderActiveOrdersTable = function(ordersToRender) {
@@ -797,10 +630,6 @@
       return ordNo.includes(query) || custName.includes(query) || phoneNum.includes(query);
     });
     window.renderActiveOrdersTable(filtered);
-  };
-
-  window.passChat = function(roleName) {
-    alert("✅ Chat successfully passed to: " + roleName);
   };
 
   window.loadInventoryData = async function() {
@@ -1080,7 +909,7 @@
       </body>
       </html>
     `;
-     
+    
     let printWin = window.open('', '_blank', 'height=700,width=800');
     printWin.document.write(fullA4PrintHtml);
     printWin.document.close();
@@ -1227,7 +1056,7 @@
         </div>
       `}
     </div>`;
-     
+    
     if(document.getElementById("printableInvoiceArea")) {
         document.getElementById("printableInvoiceArea").innerHTML = invoiceHtml;
         document.getElementById("printModalBox").style.display = "flex";
@@ -1298,7 +1127,7 @@
     if(document.getElementById("dashTodaySales")) document.getElementById("dashTodaySales").innerText = "RM " + todaySales.toFixed(2);
     if(document.getElementById("dashMonthSales")) document.getElementById("dashMonthSales").innerText = "RM " + monthSales.toFixed(2);
     if(document.getElementById("dashAvgOrder")) document.getElementById("dashAvgOrder").innerText = "RM " + avgOrderValue.toFixed(2);
-     
+    
     window.drawMonthlySalesChart(orders);
     window.drawHourlySalesChart(orders);
   };
@@ -1384,68 +1213,31 @@
     document.getElementById("imageViewerModal").style.display = "none";
   };
 
- window.showAdminPanel = function() {
-    let loginScreen = document.getElementById("loginScreen");
-    let adminContent = document.getElementById("adminContent");
+  window.showAdminPanel = function() {
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("adminContent").style.display = "block";
+    window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
     
-    if (loginScreen) loginScreen.style.display = "none";
-    if (adminContent) adminContent.style.display = "block";
-
-    window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toUpperCase();
-     
     let roleBadge = document.getElementById("userRoleBadge");
-    if(roleBadge) roleBadge.innerText = window.myRole;
+    if(roleBadge) roleBadge.innerText = myRole.toUpperCase();
 
-    let roleLower = window.myRole.toLowerCase();
-
-    // सेक्सनहरू नियन्त्रण गर्ने व्यवस्था
     let dashBox = document.getElementById("salesDashboardBox");
-    let monthlyChart = document.getElementById("monthlySalesChartDiv");
-    let hourlyChart = document.getElementById("hourlySalesChartDiv");
-    let salesReportSec = document.getElementById("salesReportSection");
+    if(dashBox) dashBox.style.display = "flex";
     let menuBox = document.getElementById("menuManagementBox");
-    let invBox = document.getElementById("inventorySectionBox");
-    let staffBox = document.getElementById("staffManagementBox");
-    let expenseBox = document.getElementById("expenseTrackerBox");
-    let salaryBox = document.getElementById("salarySectionBox");
-    let chatBox = document.getElementById("chatSectionBox");
-    let ordersBox = document.getElementById("mainOrdersTableSection");
+    if(menuBox) menuBox.style.display = "block";
 
-    if (roleLower.includes("order_taker") || roleLower.includes("ordertaker") || roleLower.includes("delivery")) {
-      if(dashBox) dashBox.style.display = "none";
-      if(monthlyChart) monthlyChart.style.display = "none";
-      if(hourlyChart) hourlyChart.style.display = "none";
-      if(salesReportSec) salesReportSec.style.display = "none";
-      if(menuBox) menuBox.style.display = "none";
-      if(invBox) invBox.style.display = "none";
-      if(staffBox) staffBox.style.display = "none";
-      if(expenseBox) expenseBox.style.display = "none";
-      if(salaryBox) salaryBox.style.display = "none";
-      if(ordersBox) ordersBox.style.display = "block"; // केवल Active Orders देखाउने
-      if(chatBox) chatBox.style.display = "block";   // केवल Live Support Chat देखाउने
-    } else {
-      // Full Admin र Manager को लागि सबै देखाउने
-      if(dashBox) dashBox.style.display = "flex";
-      if(monthlyChart) monthlyChart.style.display = "block";
-      if(hourlyChart) hourlyChart.style.display = "block";
-      if(salesReportSec) salesReportSec.style.display = "block";
-      if(menuBox) menuBox.style.display = "block";
-      if(invBox) invBox.style.display = "block";
-      if(staffBox) staffBox.style.display = "block";
-      if(expenseBox) expenseBox.style.display = "block";
-      if(salaryBox) salaryBox.style.display = "block";
-      if(ordersBox) ordersBox.style.display = "block";
-      if(chatBox) chatBox.style.display = "block";
-      window.loadMenuList();
-      window.loadStaffList();
-      window.loadExpenseSummary();
-      window.loadInventoryData();
-      window.loadSalaryStaffDropdown();
-    }
-
+    window.loadMenuList();
     window.loadOrders();
     window.setupRealtimeOrders();
-    window.loadAdminChats();
+    window.loadStaffList();
+    window.loadExpenseSummary();
+    window.loadInventoryData();
+    window.loadSalaryStaffDropdown();
+
+    // Background auto-polling backup every 10 seconds
+    setInterval(() => {
+      window.loadOrders();
+    }, 10000);
   };
 
   window.logout = function() { sessionStorage.clear(); window.location.reload(); };
@@ -1552,44 +1344,44 @@
     printWindow.document.write(`
       <html>
       <head>
-        <title>Sales Report Statement</title>
-        <style>
-          body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
-          .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e91e63; padding-bottom: 10px; }
-          .header h2 { margin: 0; color: #e91e63; font-size: 24px; }
-          .header p { margin: 5px 0 0 0; color: #666; font-size: 14px; }
-          table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-          th { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; text-align: left; }
-          td { border: 1px solid #ddd; padding: 8px; }
-          .summary-box { margin-top: 20px; text-align: right; font-size: 16px; background: #f0f7ff; padding: 12px; border-radius: 6px; border: 1px solid #cce5ff; }
-        </style>
+          <title>Sales Report Statement</title>
+          <style>
+              body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
+              .header { text-align: center; margin-bottom: 20px; border-bottom: 2px solid #e91e63; padding-bottom: 10px; }
+              .header h2 { margin: 0; color: #e91e63; font-size: 24px; }
+              .header p { margin: 5px 0 0 0; color: #666; font-size: 14px; }
+              table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+              th { background: #f8f9fa; padding: 10px; border: 1px solid #ddd; text-align: left; }
+              td { border: 1px solid #ddd; padding: 8px; }
+              .summary-box { margin-top: 20px; text-align: right; font-size: 16px; background: #f0f7ff; padding: 12px; border-radius: 6px; border: 1px solid #cce5ff; }
+          </style>
       </head>
       <body>
-        <div class="header">
-          <h2>UGRATARA RESTAURANT</h2>
-          <p>📊 <b>Sales Report Statement</b> (${startDate || 'All Time'} to ${endDate || 'All Time'})</p>
-        </div>
-        <table>
-          <thead>
-            <tr>
-              <th style="width: 40px; text-align: center;">S.N.</th>
-              <th style="text-align: center;">Date & Time</th>
-              <th style="text-align: center;">Order No</th>
-              <th>Customer Name</th>
-              <th style="text-align: center;">Status</th>
-              <th style="text-align: right;">Total Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${tableRows}
-          </tbody>
-        </table>
-        <div class="summary-box">
-          <span style="color: #1976D2; font-weight: bold;">Total Revenue: RM ${totalRev.toFixed(2)}</span>
-        </div>
-        <script>
-          window.onload = function() { window.print(); window.close(); }
-        <\/script>
+          <div class="header">
+              <h2>UGRATARA RESTAURANT</h2>
+              <p>📊 <b>Sales Report Statement</b> (${startDate || 'All Time'} to ${endDate || 'All Time'})</p>
+          </div>
+          <table>
+              <thead>
+                  <tr>
+                      <th style="width: 40px; text-align: center;">S.N.</th>
+                      <th style="text-align: center;">Date & Time</th>
+                      <th style="text-align: center;">Order No</th>
+                      <th>Customer Name</th>
+                      <th style="text-align: center;">Status</th>
+                      <th style="text-align: right;">Total Amount</th>
+                  </tr>
+              </thead>
+              <tbody>
+                  ${tableRows}
+              </tbody>
+          </table>
+          <div class="summary-box">
+              <span style="color: #1976D2; font-weight: bold;">Total Revenue: RM ${totalRev.toFixed(2)}</span>
+          </div>
+          <script>
+              window.onload = function() { window.print(); window.close(); }
+          <\/script>
       </body>
       </html>
     `);
@@ -1601,16 +1393,6 @@
     if (!staffTable) return;
     let { data } = await supabaseClient.from('admins').select('*').order('id', { ascending: true });
     let staffData = (data && data.length > 0) ? data : staffListCache;
-    
-    // 🔍 म्यानेजर लगइन हुँदा एडमिन र म्यानेजरहरू लुकाउने र साधारण कर्मचारी मात्र देखाउने फिल्टर
-    let currentRole = String(sessionStorage.getItem("USER_ROLE") || "").toLowerCase();
-    if (currentRole === "manager") {
-      staffData = staffData.filter(staff => {
-        let r = String(staff.role || "").toLowerCase();
-        return r !== "admin" && r !== "manager";
-      });
-    }
-
     let html = "";
     staffData.forEach(staff => {
       let uName = staff.email || staff.username || '';
@@ -1641,7 +1423,7 @@
     if (row) {
       let statusCell = row.cells[3];
       if (statusCell) statusCell.innerText = newStatus;
-       
+      
       btnElement.innerText = newStatus === 'Active' ? '🟢 Active' : '🔴 Inactive';
       btnElement.className = newStatus === 'Active' ? 'inStockBtn' : 'outStockBtn';
       btnElement.setAttribute('onclick', `window.toggleStaffStatus(this, '${newStatus}')`);
@@ -1717,7 +1499,9 @@
         let netProfitEl = document.getElementById("summaryNetProfit");
         netProfitEl.innerText = "RM " + netProfit.toFixed(2);
         netProfitEl.style.color = netProfit >= 0 ? "#388E3C" : "#D32F2F";
-    } catch (err) {}
+    } catch (err) {
+        console.log("Catch error:", err);
+    }
   };
 
   window.exportExpenseExcel = async function() {
@@ -1794,11 +1578,11 @@
             <script>
                 window.onload = function() { window.print(); window.close(); }
             <\/script>
-      </body>
-      </html>
-  `);
-  printWindow.document.close();
-};
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+  };
 </script>
 </body>
 </html>
