@@ -483,13 +483,23 @@
   ];
   var selectedChatSession = null;
 
-  // 🖱️ ब्राउजरको Web Audio API मार्फत चर्को र प्रस्ट बज्ने माउस क्लिक साउन्ड
-  window.playClickSound = function() {
+  // 🔓 ब्राउजरको अटोप्ले पोलिसी बाइपास गर्न प्रयोगकर्ताको पहिलो क्लिकमा अडियो कन्टेक्स्ट अनलक गर्ने
+  document.addEventListener('click', function unlockAudioContext() {
     try {
       window.AudioContext = window.AudioContext || window.webkitAudioContext;
       if (!window.audioCtx) {
         window.audioCtx = new AudioContext();
       }
+      if (window.audioCtx.state === 'suspended') {
+        window.audioCtx.resume();
+      }
+    } catch(e) {}
+  }, { once: true });
+
+  // 🖱️ माउस क्लिक साउन्ड
+  window.playClickSound = function() {
+    try {
+      if (!window.audioCtx) return;
       if (window.audioCtx.state === 'suspended') {
         window.audioCtx.resume();
       }
@@ -500,7 +510,7 @@
       osc.type = 'triangle';
       osc.frequency.setValueAtTime(800, window.audioCtx.currentTime);
       
-      gain.gain.setValueAtTime(0.6, window.audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.4, window.audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.0001, window.audioCtx.currentTime + 0.08);
       
       osc.connect(gain);
@@ -518,6 +528,7 @@
     }
   });
 
+  // 🔔 चर्को र प्रस्ट तीन पटक बज्ने डिजिटल घण्टी (Supabase म्यासेज वा नयाँ अर्डर आउँदा बज्ने)
   window.playTringTringBell = function() {
     try {
       window.AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -528,23 +539,23 @@
         window.audioCtx.resume();
       }
       
-      // चर्को र प्रस्ट तीन पटक घण्टी बज्ने Web Audio API सिंथेटिक फलब्याक तथा मुख्य घण्टी
       const playBeep = (timeOffset, freq) => {
         let osc = window.audioCtx.createOscillator();
         let gain = window.audioCtx.createGain();
         osc.type = 'sine';
         osc.frequency.setValueAtTime(freq, window.audioCtx.currentTime + timeOffset);
         gain.gain.setValueAtTime(1.0, window.audioCtx.currentTime + timeOffset);
-        gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + timeOffset + 0.35);
+        gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + timeOffset + 0.4);
         osc.connect(gain);
         gain.connect(window.audioCtx.destination);
         osc.start(window.audioCtx.currentTime + timeOffset);
-        osc.stop(window.audioCtx.currentTime + timeOffset + 0.35);
+        osc.stop(window.audioCtx.currentTime + timeOffset + 0.4);
       };
 
-      playBeep(0, 1046.50); // High C
-      playBeep(0.25, 1318.51); // High E
-      playBeep(0.50, 1567.98); // High G
+      // तीन पटक चर्को स्वरमा घण्टी बज्ने (Tring Tring Tring)
+      playBeep(0.0, 1200);
+      playBeep(0.2, 1400);
+      playBeep(0.4, 1600);
 
       const audio = document.getElementById("notificationAudio");
       if (audio) {
