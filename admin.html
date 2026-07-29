@@ -659,13 +659,17 @@
   function setupRealtimeOrders() {
     try {
       supabaseClient
-        .channel('public:chats_admin')
+        .channel('public:chats_admin_v2')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, payload => {
-          if (payload.new && payload.new.sender === 'Customer') {
-            playTringTringBell();
+          if (payload.new && payload.new.sender) {
+            let senderName = String(payload.new.sender).trim().toLowerCase();
+            // यदि पठाउने मान्छे एडमिन वा स्टाफ होइन (अर्थात ग्राहक हो) भने घण्टी बजाउने
+            if (senderName !== 'admin' && senderName !== 'admin staff') {
+              playTringTringBell();
+            }
           }
           loadAdminChats();
-          if(selectedChatSession === payload.new.session_id) {
+          if(selectedChatSession && payload.new && selectedChatSession === payload.new.session_id) {
             selectChatSession(selectedChatSession);
           }
         })
