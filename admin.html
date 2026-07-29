@@ -579,10 +579,25 @@
     btn.innerText = "Verifying...";
     btn.disabled = true;
 
+    // 1. यदि मास्टर एडमिन हो भने Supabase चेक नगरिकनै तुरुन्त लगइन हुन दिने (Fast & Reliable Fallback)
+    if ((u === "admin@ugratara.com" || u === "admin") && p === "123456") {
+      sessionStorage.setItem("ADMIN_LOGIN", "true");
+      sessionStorage.setItem("USER_ROLE", "admin");
+      localStorage.setItem("adminRole", "admin");
+      sessionStorage.setItem("LOGGED_USER", u);
+      myRole = "admin";
+      currentLoggedInUser = u;
+      btn.innerText = "Login";
+      btn.disabled = false;
+      window.showAdminPanel();
+      return;
+    }
+
+    // 2. अन्य स्टाफहरूको लागि Supabase बाट प्रमाणीकरण गर्ने
     try {
       let { data, error } = await supabaseClient.from('admins').select('*').ilike('email', u);
       if(!error && data && data.length > 0) {
-        let matchedStaff = data.find(s => s.password === p);
+        let matchedStaff = data.find(s => String(s.password).trim() === p);
         if(matchedStaff) {
           let role = (matchedStaff.role || 'admin').toLowerCase();
           sessionStorage.setItem("ADMIN_LOGIN", "true");
@@ -599,18 +614,10 @@
       }
     } catch(err) {}
 
-    // Fallback default admin login check
-    setTimeout(() => {
-      sessionStorage.setItem("ADMIN_LOGIN", "true");
-      sessionStorage.setItem("USER_ROLE", "admin");
-      localStorage.setItem("adminRole", "admin");
-      sessionStorage.setItem("LOGGED_USER", u);
-      myRole = "admin";
-      currentLoggedInUser = u;
-      btn.innerText = "Login";
-      btn.disabled = false;
-      window.showAdminPanel();
-    }, 300);
+    // यदि डेटाबेसमा फेला परेन भने
+    btn.innerText = "Login";
+    btn.disabled = false;
+    alert("❌ Invalid Username or Password!");
   };
 
   window.loadOrders = async function() {
@@ -1501,7 +1508,7 @@
 
   if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
     myRole = (sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
-    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER"] || "";
+    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
     window.showAdminPanel();
   } else {
     document.getElementById("loginScreen").style.display = "flex";
