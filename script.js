@@ -395,22 +395,42 @@ window.deleteStaff = async function(id) {
     window.loadStaffList();
 };
 
-// 🔔 ग्राहकको च्याटमा एडमिनको रिप्लाई आउँदा घण्टी बज्ने फंक्सन
+// 🔔 ग्राहकको च्याटमा एडमिनको रिप्लाई आउँदा घण्टी बज्ने फंक्सन (Auto-Unlock Enabled)
 function playCustomerNotificationSound() {
   try {
-    let audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    let osc = audioCtx.createOscillator();
-    let gain = audioCtx.createGain();
+    let AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!window.customerAudioCtx) {
+      window.customerAudioCtx = new AudioContext();
+    }
+    if (window.customerAudioCtx.state === 'suspended') {
+      window.customerAudioCtx.resume();
+    }
+    
+    let osc = window.customerAudioCtx.createOscillator();
+    let gain = window.customerAudioCtx.createGain();
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
-    gain.gain.setValueAtTime(0.8, audioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+    osc.frequency.setValueAtTime(1200, window.customerAudioCtx.currentTime);
+    gain.gain.setValueAtTime(0.8, window.customerAudioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, window.customerAudioCtx.currentTime + 0.3);
     osc.connect(gain);
-    gain.connect(audioCtx.destination);
+    gain.connect(window.customerAudioCtx.destination);
     osc.start();
-    osc.stop(audioCtx.currentTime + 0.3);
+    osc.stop(window.customerAudioCtx.currentTime + 0.3);
   } catch(e) {}
 }
+
+// पेजमा पहिलो पटक क्लिक गर्दा ब्राउजरको अडियो अनुमति (Unlock) अनलक गर्ने
+document.addEventListener('click', function unlockCustomerAudio() {
+  try {
+    let AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!window.customerAudioCtx) {
+      window.customerAudioCtx = new AudioContext();
+    }
+    if (window.customerAudioCtx.state === 'suspended') {
+      window.customerAudioCtx.resume();
+    }
+  } catch(e) {}
+}, { once: true });
 
 // 🌐 Supabase Realtime लाइभ म्यासेज सुन्ने र एडमिनको म्यासेज आउँदा घण्टी बजाउने
 document.addEventListener("DOMContentLoaded", function () {
