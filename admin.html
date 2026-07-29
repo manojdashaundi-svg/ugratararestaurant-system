@@ -1398,7 +1398,7 @@
 
     let roleLower = window.myRole.toLowerCase();
 
-    // 🎯 भूमिका अनुसार सेक्सनहरू लुकाउने वा देखाउने व्यवस्थापन
+    // सेक्सनहरू नियन्त्रण गर्ने व्यवस्था
     let dashBox = document.getElementById("salesDashboardBox");
     let monthlyChart = document.getElementById("monthlySalesChartDiv");
     let hourlyChart = document.getElementById("hourlySalesChartDiv");
@@ -1421,10 +1421,10 @@
       if(staffBox) staffBox.style.display = "none";
       if(expenseBox) expenseBox.style.display = "none";
       if(salaryBox) salaryBox.style.display = "none";
-      if(ordersBox) ordersBox.style.display = "block"; // Active Orders देखाउने
-      if(chatBox) chatBox.style.display = "block";   // Live Support Chat देखाउने
+      if(ordersBox) ordersBox.style.display = "block"; // केवल Active Orders देखाउने
+      if(chatBox) chatBox.style.display = "block";   // केवल Live Support Chat देखाउने
     } else {
-      // Full Admin र Manager को लागि सबै सेक्सनहरू देखाउने
+      // Full Admin र Manager को लागि सबै देखाउने
       if(dashBox) dashBox.style.display = "flex";
       if(monthlyChart) monthlyChart.style.display = "block";
       if(hourlyChart) hourlyChart.style.display = "block";
