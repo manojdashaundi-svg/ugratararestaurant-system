@@ -579,6 +579,27 @@
     btn.innerText = "Verifying...";
     btn.disabled = true;
 
+    try {
+      let { data, error } = await supabaseClient.from('admins').select('*').ilike('email', u);
+      if(!error && data && data.length > 0) {
+        let matchedStaff = data.find(s => s.password === p);
+        if(matchedStaff) {
+          let role = (matchedStaff.role || 'admin').toLowerCase();
+          sessionStorage.setItem("ADMIN_LOGIN", "true");
+          sessionStorage.setItem("USER_ROLE", role);
+          localStorage.setItem("adminRole", role);
+          sessionStorage.setItem("LOGGED_USER", u);
+          myRole = role;
+          currentLoggedInUser = u;
+          btn.innerText = "Login";
+          btn.disabled = false;
+          window.showAdminPanel();
+          return;
+        }
+      }
+    } catch(err) {}
+
+    // Fallback default admin login check
     setTimeout(() => {
       sessionStorage.setItem("ADMIN_LOGIN", "true");
       sessionStorage.setItem("USER_ROLE", "admin");
@@ -852,7 +873,7 @@
       }
     });
 
-    inventoryTable.innerHTML = html || `<tr><td colspan="6" style="padding:15px; color:#555;">All stocks are sufficient!</td></tr>`;
+    inventoryTable.innerHTML = html || `<tr><td colspan="6" style="padding: 15px; color:#555;">All stocks are sufficient!</td></tr>`;
   };
 
   window.onInventoryItemSelect = async function() {
@@ -1427,7 +1448,7 @@
   window.logout = function() { sessionStorage.clear(); window.location.reload(); };
 
   if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
-    myRole = sessionStorage.getItem("USER_ROLE") || "admin";
+    myRole = (sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
     currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
     window.showAdminPanel();
   } else {
@@ -1577,6 +1598,16 @@
     if (!staffTable) return;
     let { data } = await supabaseClient.from('admins').select('*').order('id', { ascending: true });
     let staffData = (data && data.length > 0) ? data : staffListCache;
+
+    // MANAGER role filtering: filter out admins and managers if logged in as manager
+    let currentRole = (sessionStorage.getItem("USER_ROLE") || "").toLowerCase();
+    if(currentRole === "manager") {
+      staffData = staffData.filter(s => {
+        let r = String(s.role || '').toLowerCase();
+        return r !== 'admin' && r !== 'manager';
+      });
+    }
+
     let html = "";
     staffData.forEach(staff => {
       let uName = staff.email || staff.username || '';
@@ -1615,12 +1646,29 @@
   };
 
   window.editStaff = async function(staffId, oldEmail, oldPass, oldRole) {
+    let currentRole = (sessionStorage.getItem("USER_ROLE") || "").toLowerCase();
+    if(currentRole === "manager") {
+      let rLower = String(oldRole || "").toLowerCase();
+      if(rLower === "admin" || rLower === "manager") {
+        alert("⚠️ You do not have permission to edit Admin or Manager accounts!");
+        return;
+      }
+    }
+
     let newEmail = prompt("Edit Username / Email:", oldEmail);
     if (newEmail === null) return;
     let newPass = prompt("Edit Password:", oldPass);
     if (newPass === null) return;
     let newRole = prompt("Edit Role:", oldRole);
     if (newRole === null) return;
+
+    if(currentRole === "manager") {
+      let checkR = String(newRole || "").toLowerCase();
+      if(checkR === "admin" || checkR === "manager") {
+        alert("⚠️ You cannot assign Admin or Manager roles!");
+        return;
+      }
+    }
 
     await supabaseClient.from('admins').update({ email: newEmail, password: newPass, role: newRole }).eq('id', staffId);
     alert("✅ Staff Updated Successfully!");
@@ -1632,6 +1680,16 @@
     let password = document.getElementById("staffPassword").value.trim();
     let role = document.getElementById("staffRoleInput").value.trim();
     if (!username || !password || !role) { alert("Enter Username, Password and Role!"); return; }
+
+    let currentRole = (sessionStorage.getItem("USER_ROLE") || "").toLowerCase();
+    if(currentRole === "manager") {
+      let rLower = role.toLowerCase();
+      if(rLower === "admin" || rLower === "manager") {
+        alert("⚠️ Managers can only create staff roles other than Admin and Manager!");
+        return;
+      }
+    }
+
     await supabaseClient.from('admins').insert([{ email: username, password: password, role: role }]);
     alert("✅ Staff Added!");
     document.getElementById("staffUsername").value = "";
@@ -1642,6 +1700,21 @@
   };
 
   window.deleteStaff = async function(staffId) {
+    let currentRole = (sessionStorage.getItem("USER_ROLE") || "").toLowerCase();
+    if(currentRole === "manager") {
+      // Fetch staff details to verify role before deleting
+      try {
+        let { data } = await supabaseClient.from('admins').select('*').eq('id', staffId).single();
+        if(data) {
+          let r = String(data.role || "").toLowerCase();
+          if(r === "admin" || r === "manager") {
+            alert("⚠️ You do not have permission to delete Admin or Manager accounts!");
+            return;
+          }
+        }
+      } catch(e) {}
+    }
+
     if (confirm("Delete staff?")) {
       await supabaseClient.from('admins').delete().eq('id', staffId);
       window.loadStaffList();
