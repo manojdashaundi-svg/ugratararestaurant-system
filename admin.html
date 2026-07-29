@@ -55,7 +55,7 @@
 </head>
 <body>
 
-<!-- 🔔 घण्टी बजाउनको लागि अडियो एलिमेन्ट -->
+<!-- 🔔 भरपर्दो अडियो नोटिफिकेसन एलिमेन्ट -->
 <audio id="notificationAudio" preload="auto">
   <source src="https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3" type="audio/mpeg">
 </audio>
@@ -483,54 +483,19 @@
   ];
   var selectedChatSession = null;
 
-  // 🔓 ब्राउजरको अटोप्ले पोलिसी बाइपास गर्न प्रयोगकर्ताको पहिलो क्लिकमा अडियो कन्टेक्स्ट अनलक गर्ने
-  document.addEventListener('click', function unlockAudioContext() {
-    try {
-      window.AudioContext = window.AudioContext || window.webkitAudioContext;
-      if (!window.audioCtx) {
-        window.audioCtx = new AudioContext();
-      }
-      if (window.audioCtx.state === 'suspended') {
-        window.audioCtx.resume();
-      }
-    } catch(e) {}
-  }, { once: true });
-
-  // 🖱️ माउस क्लिक साउन्ड
-  window.playClickSound = function() {
-    try {
-      if (!window.audioCtx) return;
-      if (window.audioCtx.state === 'suspended') {
-        window.audioCtx.resume();
-      }
-      
-      let osc = window.audioCtx.createOscillator();
-      let gain = window.audioCtx.createGain();
-      
-      osc.type = 'triangle';
-      osc.frequency.setValueAtTime(800, window.audioCtx.currentTime);
-      
-      gain.gain.setValueAtTime(0.4, window.audioCtx.currentTime);
-      gain.gain.exponentialRampToValueAtTime(0.0001, window.audioCtx.currentTime + 0.08);
-      
-      osc.connect(gain);
-      gain.connect(window.audioCtx.destination);
-      
-      osc.start();
-      osc.stop(window.audioCtx.currentTime + 0.08);
-    } catch(e) {}
-  };
-
-  document.addEventListener("click", function(event) {
-    let target = event.target;
-    if (target.tagName === "BUTTON" || target.closest("button") || target.tagName === "A" || target.closest("a") || target.tagName === "SELECT" || target.tagName === "INPUT" || target.tagName === "LABEL") {
-      window.playClickSound();
-    }
-  });
-
-  // 🔔 चर्को र प्रस्ट तीन पटक बज्ने डिजिटल घण्टी (Supabase म्यासेज वा नयाँ अर्डर आउँदा बज्ने)
+  // 🔔 सुपर भरपर्दो अडियो फंक्सन (HTML5 Audio + Web Audio API दुवै प्रयोग गरिएको)
   window.playTringTringBell = function() {
     try {
+      // १. HTML5 Audio एलिमेन्ट प्ले गर्ने प्रयास
+      const audio = document.getElementById("notificationAudio");
+      if (audio) {
+        audio.currentTime = 0;
+        audio.play().catch(err => {
+          console.log("HTML5 audio autoplay blocked, using Web Audio API fallback");
+        });
+      }
+
+      // २. Web Audio API मार्फत सिन्थेसाइज्ड बिप साउन्ड बजाउने
       window.AudioContext = window.AudioContext || window.webkitAudioContext;
       if (!window.audioCtx) {
         window.audioCtx = new AudioContext();
@@ -552,23 +517,31 @@
         osc.stop(window.audioCtx.currentTime + timeOffset + 0.4);
       };
 
-      // तीन पटक चर्को स्वरमा घण्टी बज्ने (Tring Tring Tring)
       playBeep(0.0, 1200);
       playBeep(0.2, 1400);
       playBeep(0.4, 1600);
-
-      const audio = document.getElementById("notificationAudio");
-      if (audio) {
-        audio.currentTime = 0;
-        audio.play().catch(e => {});
-      }
-    } catch(e) {}
+    } catch(e) {
+      console.log("Audio play error: ", e);
+    }
   };
 
   window.testBellSound = function() {
     window.playTringTringBell();
     alert("🔔 डिजिटल घण्टी सुचारु भयो!");
   };
+
+  // 🖱️ माउस क्लिक वा इन्टरनएक्सन हुँदा अडियो कन्टेक्स्ट अनलक गर्ने
+  document.addEventListener('click', function() {
+    try {
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!window.audioCtx) {
+        window.audioCtx = new AudioContext();
+      }
+      if (window.audioCtx.state === 'suspended') {
+        window.audioCtx.resume();
+      }
+    } catch(e) {}
+  }, { once: true });
 
   window.handleLogin = async function() {
     var u = document.getElementById("username").value.trim().toLowerCase();
