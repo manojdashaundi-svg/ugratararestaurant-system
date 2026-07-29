@@ -762,15 +762,8 @@
     let currentRole = (sessionStorage.getItem("USER_ROLE") || "").toLowerCase();
     let filteredOrders = ordersToRender;
 
-    // ORDER_TAKER केवल Pending, Preparing, वा Order Received भएका अर्डरहरू मात्र हेर्न पाउनेछ
-    if(currentRole === "order_taker") {
-      filteredOrders = ordersToRender.filter(o => {
-        let st = String(o.status || "").trim().toLowerCase();
-        return st === "pending" || st === "preparing" || st === "order received" || st === "";
-      });
-    }
-    // DELIVERY केवल Ready वा Out for Delivery भएका अर्डरहरू मात्र हेर्न पाउनेछ
-    else if(currentRole === "delivery") {
+    // DELIVERY केवल Ready वा Out for Delivery भएका अर्डरहरू मात्र हेर्न पाउनेछ (ORDER_TAKER ले सबै अर्डरहरू देख्न पाउनेछ)
+    if(currentRole === "delivery") {
       filteredOrders = ordersToRender.filter(o => {
         let st = String(o.status || "").trim().toLowerCase();
         return st === "ready" || st === "out for delivery";
@@ -1130,7 +1123,7 @@
       </body>
       </html>
     `;
-     
+      
     let printWin = window.open('', '_blank', 'height=700,width=800');
     printWin.document.write(fullA4PrintHtml);
     printWin.document.close();
@@ -1277,7 +1270,7 @@
         </div>
       `}
     </div>`;
-     
+      
     if(document.getElementById("printableInvoiceArea")) {
         document.getElementById("printableInvoiceArea").innerHTML = invoiceHtml;
         document.getElementById("printModalBox").style.display = "flex";
@@ -1508,7 +1501,7 @@
 
   if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
     myRole = (sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
-    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
+    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER"] || "";
     window.showAdminPanel();
   } else {
     document.getElementById("loginScreen").style.display = "flex";
