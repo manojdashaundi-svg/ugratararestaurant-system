@@ -659,10 +659,15 @@
   function setupRealtimeOrders() {
     try {
       supabaseClient
-        .channel('public:orders_admin')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, payload => {
-          playTringTringBell();
-          loadOrders();
+        .channel('public:chats_admin')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, payload => {
+          if (payload.new && payload.new.sender === 'Customer') {
+            playTringTringBell();
+          }
+          loadAdminChats();
+          if(selectedChatSession === payload.new.session_id) {
+            selectChatSession(selectedChatSession);
+          }
         })
         .subscribe();
 
