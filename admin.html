@@ -115,7 +115,7 @@
   </div>
 
   <!-- 📊 Sales Report Generator & Export Section -->
-  <div style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <div id="salesReportBox" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
     <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">📊 Sales Report Generator & Export</h3>
     <div style="display: flex; gap: 15px; flex-wrap: wrap; align-items: flex-end;">
       <div>
@@ -194,7 +194,7 @@
   </div>
 
   <!-- 📦 Inventory Management Section -->
-  <div class="inventory-section">
+  <div id="inventoryManagementBox" class="inventory-section">
     <h3>📦 Inventory Management</h3>
     <div style="background:#f9f9f9; padding:15px; border-radius:8px; margin-bottom:20px; border:1px solid #ddd;">
       <div style="margin-bottom: 15px;">
@@ -268,7 +268,7 @@
     </div>
   </div>
 
-  <div style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
+  <div id="expenseTrackerBox" style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
       <h3 style="margin-bottom: 15px; color: #333;">💰 Expense & Profit Tracker</h3>
       
       <!-- खर्च थप्ने इनपुट बक्सहरू -->
@@ -308,7 +308,7 @@
   </div>
 
   <!-- 💰 Staff Salary Sheet & Voucher System -->
-  <div class="salary-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+  <div id="salarySectionBox" class="salary-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
       <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">💰 Staff Salary Sheet & Voucher System</h3>
       
       <!-- 1. Add New Staff & Designation -->
@@ -759,8 +759,26 @@
     var tableBody = document.getElementById("ordersTable");
     if(!tableBody) return;
     
+    let currentRole = (sessionStorage.getItem("USER_ROLE") || "").toLowerCase();
+    let filteredOrders = ordersToRender;
+
+    // ORDER_TAKER केवल Pending, Preparing, वा Order Received भएका अर्डरहरू मात्र हेर्न पाउनेछ
+    if(currentRole === "order_taker") {
+      filteredOrders = ordersToRender.filter(o => {
+        let st = String(o.status || "").trim().toLowerCase();
+        return st === "pending" || st === "preparing" || st === "order received" || st === "";
+      });
+    }
+    // DELIVERY केवल Ready वा Out for Delivery भएका अर्डरहरू मात्र हेर्न पाउनेछ
+    else if(currentRole === "delivery") {
+      filteredOrders = ordersToRender.filter(o => {
+        let st = String(o.status || "").trim().toLowerCase();
+        return st === "ready" || st === "out for delivery";
+      });
+    }
+
     let html = "";
-    let limitedOrders = ordersToRender.slice(0, 10);
+    let limitedOrders = filteredOrders.slice(0, 10);
     let totalOrdersCount = limitedOrders.length;
 
     if(totalOrdersCount === 0) {
@@ -1425,18 +1443,59 @@
     if(roleBadge) roleBadge.innerText = myRole.toUpperCase();
 
     let dashBox = document.getElementById("salesDashboardBox");
-    if(dashBox) dashBox.style.display = "flex";
+    let monthlyDiv = document.getElementById("monthlySalesChartDiv");
+    let hourlyDiv = document.getElementById("hourlySalesChartDiv");
+    let reportBox = document.getElementById("salesReportBox");
     let menuBox = document.getElementById("menuManagementBox");
-    if(menuBox) menuBox.style.display = "block";
+    let inventoryBox = document.getElementById("inventoryManagementBox");
+    let staffBox = document.getElementById("staffManagementBox");
+    let expenseBox = document.getElementById("expenseTrackerBox");
+    let salaryBox = document.getElementById("salarySectionBox");
 
-    window.loadMenuList();
+    // ROLE-BASED ACCESS CONTROL (RBAC) UI HIDING FOR ORDER_TAKER & DELIVERY
+    if (window.myRole === "order_taker") {
+      if(dashBox) dashBox.style.display = "none";
+      if(monthlyDiv) monthlyDiv.style.display = "none";
+      if(hourlyDiv) hourlyDiv.style.display = "none";
+      if(reportBox) reportBox.style.display = "none";
+      if(menuBox) menuBox.style.display = "none";
+      if(inventoryBox) inventoryBox.style.display = "none";
+      if(staffBox) staffBox.style.display = "none";
+      if(expenseBox) expenseBox.style.display = "none";
+      if(salaryBox) salaryBox.style.display = "none";
+    } else if (window.myRole === "delivery") {
+      if(dashBox) dashBox.style.display = "none";
+      if(monthlyDiv) monthlyDiv.style.display = "none";
+      if(hourlyDiv) hourlyDiv.style.display = "none";
+      if(reportBox) reportBox.style.display = "none";
+      if(menuBox) menuBox.style.display = "none";
+      if(inventoryBox) inventoryBox.style.display = "none";
+      if(staffBox) staffBox.style.display = "none";
+      if(expenseBox) expenseBox.style.display = "none";
+      if(salaryBox) salaryBox.style.display = "none";
+    } else {
+      if(dashBox) dashBox.style.display = "flex";
+      if(monthlyDiv) monthlyDiv.style.display = "block";
+      if(hourlyDiv) hourlyDiv.style.display = "block";
+      if(reportBox) reportBox.style.display = "block";
+      if(menuBox) menuBox.style.display = "block";
+      if(inventoryBox) inventoryBox.style.display = "block";
+      if(staffBox) staffBox.style.display = "block";
+      if(expenseBox) expenseBox.style.display = "block";
+      if(salaryBox) salaryBox.style.display = "block";
+    }
+
+    if(window.myRole !== "order_taker" && window.myRole !== "delivery") {
+      window.loadMenuList();
+      window.loadStaffList();
+      window.loadExpenseSummary();
+      window.loadInventoryData();
+      window.loadSalaryStaffDropdown();
+    }
+
     window.loadOrders();
     window.setupRealtimeOrders();
     window.loadAdminChats();
-    window.loadStaffList();
-    window.loadExpenseSummary();
-    window.loadInventoryData();
-    window.loadSalaryStaffDropdown();
 
     // 🔄 Auto-polling interval every 2 seconds for instant lightning-fast chat updates
     setInterval(() => {
