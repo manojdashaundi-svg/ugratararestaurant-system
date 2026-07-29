@@ -63,8 +63,8 @@
 <div id="loginScreen" class="login-overlay">
   <div class="login-card">
     <h2>🔐 STAFF LOGIN</h2>
-    <input id="username" type="text" placeholder="Username" autocomplete="off" value="admin@ugratara.com">
-    <input id="password" type="password" placeholder="Password" autocomplete="off" value="123456">
+    <input id="username" type="text" placeholder="Username / Email" autocomplete="off" value="">
+    <input id="password" type="password" placeholder="Password" autocomplete="off" value="">
     <button id="loginBtn" type="button" onclick="handleLogin()">Login</button>
   </div>
 </div>
@@ -244,7 +244,7 @@
       <div style="display: flex; gap: 10px; flex-wrap: wrap;">
         <input id="staffUsername" type="text" placeholder="Username / Email" style="flex: 1; min-width: 180px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
         <input id="staffPassword" type="password" placeholder="Password" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-        <input id="staffRoleInput" type="text" placeholder="Role (e.g. Driver, Cook, Salesman)" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
+        <input id="staffRoleInput" type="text" placeholder="Role (e.g. order_taker, delivery, manager)" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
         <button class="addBtn" onclick="createNewStaff()" style="background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add Staff</button>
       </div>
     </div>
@@ -316,7 +316,7 @@
           <h4 style="margin-bottom: 10px; color: #333;">+ Add New Staff & Designation</h4>
           <div style="display: flex; gap: 10px; flex-wrap: wrap;">
               <input id="salStaffName" type="text" placeholder="Full Name (e.g. Shova Kumari)" style="flex: 2; min-width: 200px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-              <input id="salStaffDesig" type="text" placeholder="Designation (e.g. Cleaner, Store Keeper)" style="flex: 2; min-width: 200px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+              <input id="salStaffDesig" type="text" placeholder="Designation (e.g. order_taker, delivery)" style="flex: 2; min-width: 200px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
               <button class="addBtn" onclick="addNewSalaryStaff()" style="background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add Staff</button>
           </div>
       </div>
@@ -584,6 +584,7 @@
     btn.innerText = "Verifying...";
     btn.disabled = true;
 
+    // 1. केवल मास्टर एडमिन (admin@ugratara.com) को लागि मात्र 'admin' रोल फिक्स गर्ने
     if ((u === "admin@ugratara.com" || u === "admin") && p === "123456") {
       sessionStorage.setItem("ADMIN_LOGIN", "true");
       sessionStorage.setItem("USER_ROLE", "admin");
@@ -597,12 +598,15 @@
       return;
     }
 
+    // 2. अन्य स्टाफहरूको लागि Supabase डेटाबेसबाट ठ्याक्कै उनीहरूको व्यक्तिगत रोल चेक गर्ने
     try {
       let { data, error } = await supabaseClient.from('admins').select('*').ilike('email', u);
       if(!error && data && data.length > 0) {
         let matchedStaff = data.find(s => String(s.password).trim() === p);
         if(matchedStaff) {
-          let role = (matchedStaff.role || 'admin').toLowerCase();
+          // डेटाबेसमा राखिएको वास्तविक रोल (जस्तै order_taker, delivery, manager, आदि) लिने
+          let role = String(matchedStaff.role || 'order_taker').trim().toLowerCase();
+          
           sessionStorage.setItem("ADMIN_LOGIN", "true");
           sessionStorage.setItem("USER_ROLE", role);
           localStorage.setItem("adminRole", role);
@@ -1463,6 +1467,7 @@
     let expenseBox = document.getElementById("expenseTrackerBox");
     let salaryBox = document.getElementById("salarySectionBox");
 
+    // ROLE-BASED ACCESS CONTROL (RBAC) UI HIDING FOR ORDER_TAKER & DELIVERY
     if (myRole === "order_taker") {
       if(dashBox) dashBox.style.display = "none";
       if(monthlyDiv) monthlyDiv.style.display = "none";
@@ -1517,7 +1522,7 @@
 
   if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
     myRole = (sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
-    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
+    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER"] || "";
     showAdminPanel();
   } else {
     document.getElementById("loginScreen").style.display = "flex";
