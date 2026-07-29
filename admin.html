@@ -782,11 +782,11 @@
         return st === "ready" || st === "out for delivery";
       });
     }
-    // 2. ORDER_TAKER ले केवल 'Pending' (वा नयाँ) अर्डरहरू मात्र हेर्न पाउनेछ ('Preparing' र 'Ready' पूर्ण रूपमा लुकाइनेछन्)
+    // 2. ORDER_TAKER ले Pending, Ready र Out for Delivery भएका अर्डरहरू मात्र हेर्न पाउनेछ (बीचको Preparing मात्र पूर्ण रूपमा हटाइएको छ)
     else if(currentRole === "order_taker") {
       filteredOrders = ordersToRender.filter(o => {
         let st = String(o.status || "").trim().toLowerCase();
-        return st === "pending" || st === "order received" || st === "";
+        return st === "pending" || st === "order received" || st === "" || st === "ready" || st === "out for delivery";
       });
     }
 
@@ -1519,7 +1519,7 @@
 
   if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
     myRole = (sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
-    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER"] || "";
+    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
     showAdminPanel();
   } else {
     document.getElementById("loginScreen").style.display = "flex";
