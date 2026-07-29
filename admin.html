@@ -1396,32 +1396,67 @@
   };
 
   window.showAdminPanel = function() {
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("adminContent").style.display = "block";
-    window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
+    let loginScreen = document.getElementById("loginScreen");
+    let adminContent = document.getElementById("adminContent");
+    
+    if (loginScreen) loginScreen.style.display = "none";
+    if (adminContent) adminContent.style.display = "block";
+
+    window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toUpperCase();
      
     let roleBadge = document.getElementById("userRoleBadge");
-    if(roleBadge) roleBadge.innerText = myRole.toUpperCase();
+    if(roleBadge) roleBadge.innerText = window.myRole;
 
+    let roleLower = window.myRole.toLowerCase();
+
+    // सेक्सनहरू नियन्त्रण गर्ने व्यवस्था
     let dashBox = document.getElementById("salesDashboardBox");
-    if(dashBox) dashBox.style.display = "flex";
+    let monthlyChart = document.getElementById("monthlySalesChartDiv");
+    let hourlyChart = document.getElementById("hourlySalesChartDiv");
+    let salesReportSec = document.getElementById("salesReportSection");
     let menuBox = document.getElementById("menuManagementBox");
-    if(menuBox) menuBox.style.display = "block";
+    let invBox = document.querySelector(".inventory-section");
+    let staffBox = document.getElementById("staffManagementBox");
+    let expenseBox = document.getElementById("expenseTrackerBox");
+    let salaryBox = document.querySelector(".salary-section");
+    let chatBox = document.querySelector(".chat-section");
+    let ordersBox = document.getElementById("mainOrdersTableSection");
 
-    window.loadMenuList();
+    if (roleLower.includes("order_taker") || roleLower.includes("ordertaker") || roleLower.includes("delivery")) {
+      if(dashBox) dashBox.style.display = "none";
+      if(monthlyChart) monthlyChart.style.display = "none";
+      if(hourlyChart) hourlyChart.style.display = "none";
+      if(salesReportSec) salesReportSec.style.display = "none";
+      if(menuBox) menuBox.style.display = "none";
+      if(invBox) invBox.style.display = "none";
+      if(staffBox) staffBox.style.display = "none";
+      if(expenseBox) expenseBox.style.display = "none";
+      if(salaryBox) salaryBox.style.display = "none";
+      if(ordersBox) ordersBox.style.display = "block"; // केवल Active Orders देखाउने
+      if(chatBox) chatBox.style.display = "block";   // केवल Live Support Chat देखाउने
+    } else {
+      // Full Admin र Manager को लागि सबै देखाउने
+      if(dashBox) dashBox.style.display = "flex";
+      if(monthlyChart) monthlyChart.style.display = "block";
+      if(hourlyChart) hourlyChart.style.display = "block";
+      if(salesReportSec) salesReportSec.style.display = "block";
+      if(menuBox) menuBox.style.display = "block";
+      if(invBox) invBox.style.display = "block";
+      if(staffBox) staffBox.style.display = "block";
+      if(expenseBox) expenseBox.style.display = "block";
+      if(salaryBox) salaryBox.style.display = "block";
+      if(ordersBox) ordersBox.style.display = "block";
+      if(chatBox) chatBox.style.display = "block";
+      window.loadMenuList();
+      window.loadStaffList();
+      window.loadExpenseSummary();
+      window.loadInventoryData();
+      window.loadSalaryStaffDropdown();
+    }
+
     window.loadOrders();
     window.setupRealtimeOrders();
     window.loadAdminChats();
-    window.loadStaffList();
-    window.loadExpenseSummary();
-    window.loadInventoryData();
-    window.loadSalaryStaffDropdown();
-
-    // 🔄 Auto-polling interval every 2 seconds for instant lightning-fast chat updates
-    setInterval(() => {
-      window.loadOrders();
-      window.loadAdminChats();
-    }, 2000);
   };
 
   window.logout = function() { sessionStorage.clear(); window.location.reload(); };
