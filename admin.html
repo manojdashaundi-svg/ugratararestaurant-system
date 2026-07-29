@@ -775,15 +775,12 @@
     let currentRole = (sessionStorage.getItem("USER_ROLE") || "").toLowerCase();
     let filteredOrders = ordersToRender;
 
-    // 1. DELIVERY ले केवल Ready वा Out for Delivery भएका अर्डरहरू मात्र हेर्न पाउनेछ
     if(currentRole === "delivery") {
       filteredOrders = ordersToRender.filter(o => {
         let st = String(o.status || "").trim().toLowerCase();
         return st === "ready" || st === "out for delivery";
       });
-    }
-    // 2. ORDER_TAKER ले Pending, Ready र Out for Delivery भएका अर्डरहरू मात्र हेर्न पाउनेछ (बीचको Preparing मात्र पूर्ण रूपमा हटाइएको छ)
-    else if(currentRole === "order_taker") {
+    } else if(currentRole === "order_taker") {
       filteredOrders = ordersToRender.filter(o => {
         let st = String(o.status || "").trim().toLowerCase();
         return st === "pending" || st === "order received" || st === "" || st === "ready" || st === "out for delivery";
@@ -1509,10 +1506,11 @@
     setupRealtimeOrders();
     loadAdminChats();
 
+    // ⚡ Performance Fix: समय अन्तराल २ सेकेन्डबाट बढाएर १५ सेकेन्ड बनाइएको छ ताकि सर्भर र ब्राउजरलाई लोड नपरोस्
     setInterval(() => {
       loadOrders();
       loadAdminChats();
-    }, 2000);
+    }, 15000);
   };
 
   function logout() { sessionStorage.clear(); window.location.reload(); };
