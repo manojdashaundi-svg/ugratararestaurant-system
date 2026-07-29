@@ -584,7 +584,6 @@
     btn.innerText = "Verifying...";
     btn.disabled = true;
 
-    // 1. मास्टर एडमिन (admin@ugratara.com) चेक
     if ((u === "admin@ugratara.com" || u === "admin") && p === "123456") {
       sessionStorage.setItem("ADMIN_LOGIN", "true");
       sessionStorage.setItem("USER_ROLE", "admin");
@@ -598,7 +597,6 @@
       return;
     }
 
-    // 2. Supabase डेटाबेसबाट अन्य सबै स्टाफहरू प्रमाणित गर्ने (Robust Fallback & Matcher)
     try {
       let { data, error } = await supabaseClient.from('admins').select('*');
       if(!error && data && data.length > 0) {
@@ -784,11 +782,11 @@
         return st === "ready" || st === "out for delivery";
       });
     }
-    // 2. ORDER_TAKER ले केवल Pending वा Preparing अर्डरहरू मात्र हेर्न पाउनेछ (Ready वा त्यसभन्दा माथिका अर्डरहरू पूर्ण रूपमा लुक्नेछन्)
+    // 2. ORDER_TAKER ले Pending, Preparing, Ready र Out for Delivery भएका सबै अर्डरहरू हेर्न पाउनेछ
     else if(currentRole === "order_taker") {
       filteredOrders = ordersToRender.filter(o => {
         let st = String(o.status || "").trim().toLowerCase();
-        return st === "pending" || st === "order received" || st === "" || st === "preparing";
+        return st === "pending" || st === "order received" || st === "" || st === "preparing" || st === "ready" || st === "out for delivery";
       });
     }
 
@@ -822,11 +820,7 @@
         if (status === "pending" || status === "order received" || status === "") {
             actionButtons = `<button class="rcvBtn" onclick="triggerInstantAction('${o.order_no || o.id}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
         } else if (status === "preparing") {
-            if (currentRole === "order_taker") {
-                actionButtons = `<span style="color:#666; font-style:italic;">Preparing by Kitchen</span>`;
-            } else {
-                actionButtons = `<button class="rdyBtn" onclick="triggerInstantAction('${o.order_no || o.id}', 'Ready', 'bill')">🍳 Ready & Bill</button>`;
-            }
+            actionButtons = `<button class="rdyBtn" onclick="triggerInstantAction('${o.order_no || o.id}', 'Ready', 'bill')">🍳 Ready & Bill</button>`;
         } else if (status === "ready") {
             actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="updateOrderStatus('${o.order_no || o.id}', 'Out for Delivery')">🚚 Dispatch</button>`;
         } else if (status === "out for delivery") {
@@ -1471,7 +1465,6 @@
     let expenseBox = document.getElementById("expenseTrackerBox");
     let salaryBox = document.getElementById("salarySectionBox");
 
-    // ROLE-BASED ACCESS CONTROL (RBAC) UI HIDING FOR ORDER_TAKER & DELIVERY
     if (myRole === "order_taker") {
       if(dashBox) dashBox.style.display = "none";
       if(monthlyDiv) monthlyDiv.style.display = "none";
