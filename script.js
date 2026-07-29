@@ -395,7 +395,7 @@ window.deleteStaff = async function(id) {
     window.loadStaffList();
 };
 
-// 🔔 ग्राहकको च्याटमा एडमिनको रिप्लाई आउँदा घण्टी बज्ने फंक्सन (Auto-Unlock Enabled)
+// 🔔 ग्राहकको च्याटमा एडमिनको रिप्लाई आउँदा घण्टी बज्ने फंक्सन (Universal & Force Play)
 function playCustomerNotificationSound() {
   try {
     let AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -406,16 +406,26 @@ function playCustomerNotificationSound() {
       window.customerAudioCtx.resume();
     }
     
-    let osc = window.customerAudioCtx.createOscillator();
-    let gain = window.customerAudioCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.setValueAtTime(1200, window.customerAudioCtx.currentTime);
-    gain.gain.setValueAtTime(0.8, window.customerAudioCtx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, window.customerAudioCtx.currentTime + 0.3);
-    osc.connect(gain);
-    gain.connect(window.customerAudioCtx.destination);
-    osc.start();
-    osc.stop(window.customerAudioCtx.currentTime + 0.3);
+    // डबल टिंग साउन्ड (दुईवटा बिप) ताकि छिटो सुन्नियोस्
+    const playTone = (freq, delay) => {
+      setTimeout(() => {
+        try {
+          let osc = window.customerAudioCtx.createOscillator();
+          let gain = window.customerAudioCtx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, window.customerAudioCtx.currentTime);
+          gain.gain.setValueAtTime(1.0, window.customerAudioCtx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.001, window.customerAudioCtx.currentTime + 0.3);
+          osc.connect(gain);
+          gain.connect(window.customerAudioCtx.destination);
+          osc.start();
+          osc.stop(window.customerAudioCtx.currentTime + 0.3);
+        } catch(e){}
+      }, delay);
+    };
+
+    playTone(1200, 0);
+    playTone(1500, 150);
   } catch(e) {}
 }
 
@@ -432,16 +442,20 @@ document.addEventListener('click', function unlockCustomerAudio() {
   } catch(e) {}
 }, { once: true });
 
-// 🌐 Supabase Realtime लाइभ म्यासेज सुन्ने र एडमिनको म्यासेज आउँदा घण्टी बजाउने
+// 🌐 Supabase Realtime लाइभ म्यासेज सुन्ने र एडमिन वा अरू कसैको म्यासेज आउँदा घण्टी बजाउने (Case-insensitive check)
 document.addEventListener("DOMContentLoaded", function () {
     let client = getSupabaseClient();
     if (client && typeof client.channel === 'function') {
         try {
             client
-              .channel('public:customer_chat_notification')
+              .channel('public:customer_chat_notification_v2')
               .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, payload => {
-                if (payload.new && payload.new.sender === 'Admin') {
-                  playCustomerNotificationSound();
+                if (payload.new && payload.new.sender) {
+                  let senderName = String(payload.new.sender).trim().toLowerCase();
+                  // यदि सेन्डर 'customer' छैन भने (अर्थात Admin, Manager वा Staff हो भने) घण्टी बजाउने
+                  if (senderName !== 'customer') {
+                    playCustomerNotificationSound();
+                  }
                 }
               })
               .subscribe();
