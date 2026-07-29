@@ -734,30 +734,12 @@
     } catch(err) {}
   };
 
- window.renderActiveOrdersTable = function(ordersToRender) {
+  window.renderActiveOrdersTable = function(ordersToRender) {
     var tableBody = document.getElementById("ordersTable");
     if(!tableBody) return;
     
-    let currentRoleLower = String(sessionStorage.getItem("USER_ROLE") || "").toLowerCase();
-    let processedOrders = ordersToRender;
-
-    // ORDER_TAKER को लागि फिल्टर: Pending / Order Received मात्र देखाउने
-    if (currentRoleLower.includes("order_taker") || currentRoleLower.includes("ordertaker")) {
-      processedOrders = ordersToRender.filter(o => {
-        let st = String(o.status || "").trim().toLowerCase();
-        return st === "pending" || st === "order received" || st === "";
-      });
-    } 
-    // DELIVERY को लागि फिल्टर: Ready वा Out for Delivery मात्र देखाउने
-    else if (currentRoleLower.includes("delivery")) {
-      processedOrders = ordersToRender.filter(o => {
-        let st = String(o.status || "").trim().toLowerCase();
-        return st === "ready" || st === "out for delivery";
-      });
-    }
-
     let html = "";
-    let limitedOrders = processedOrders.slice(0, 10);
+    let limitedOrders = ordersToRender.slice(0, 10);
     let totalOrdersCount = limitedOrders.length;
 
     if(totalOrdersCount === 0) {
@@ -773,47 +755,26 @@
         let delivHtml = (o.proof_img && o.proof_img !== "None" && o.proof_img !== "") ?  
           `<img src="${o.proof_img}" class="proof-thumb" onclick="window.openImageViewer('${o.proof_img}')">` : `None`;
         
-        let statusSelect = "";
-        if (currentRoleLower.includes("order_taker") || currentRoleLower.includes("ordertaker") || currentRoleLower.includes("delivery")) {
-          statusSelect = `<span style="font-weight:bold; color:#e91e63;">${rawStatus}</span>`;
-        } else {
-          statusSelect = `<select id="status_${o.order_no || o.id}">
-            <option value="Pending" ${status==="pending"?"selected":""}>Pending</option>
-            <option value="Preparing" ${status==="preparing"?"selected":""}>Preparing</option>
-            <option value="Ready" ${status==="ready"?"selected":""}>Ready</option>
-            <option value="Out for Delivery" ${status==="out for delivery"?"selected":""}>Out for Delivery</option>
-            <option value="Delivered" ${status==="delivered"?"selected":""}>Delivered</option>
-          </select> 
-          <button class="updateBtn" onclick="window.manualUpdate('${o.order_no || o.id}')">Go</button>`;
-        }
+        let statusSelect = `<select id="status_${o.order_no || o.id}">
+          <option value="Pending" ${status==="pending"?"selected":""}>Pending</option>
+          <option value="Preparing" ${status==="preparing"?"selected":""}>Preparing</option>
+          <option value="Ready" ${status==="ready"?"selected":""}>Ready</option>
+          <option value="Out for Delivery" ${status==="out for delivery"?"selected":""}>Out for Delivery</option>
+          <option value="Delivered" ${status==="delivered"?"selected":""}>Delivered</option>
+        </select> 
+        <button class="updateBtn" onclick="window.manualUpdate('${o.order_no || o.id}')">Go</button>`;
 
         let actionButtons = "";
-        if (currentRoleLower.includes("order_taker") || currentRoleLower.includes("ordertaker")) {
-            if (status === "pending" || status === "order received" || status === "") {
-                actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
-            } else {
-                actionButtons = `<span style="color:#666;">In Progress</span>`;
-            }
-        } else if (currentRoleLower.includes("delivery")) {
-            if (status === "ready") {
-                actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no || o.id}', 'Out for Delivery')">🚚 Dispatch</button>`;
-            } else if (status === "out for delivery") {
-                actionButtons = `Upload Proof:<br><input type="file" accept="image/*" capture="environment" onchange="window.uploadDeliveryProof('${o.order_no || o.id}', this)" style="width:110px;">`;
-            } else {
-                actionButtons = `<span style="color:#666;">Waiting for Ready</span>`;
-            }
-        } else {
-            if (status === "pending" || status === "order received" || status === "") {
-                actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
-            } else if (status === "preparing") {
-                actionButtons = `<button class="rdyBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Ready', 'bill')">🍳 Ready & Bill</button>`;
-            } else if (status === "ready") {
-                actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no || o.id}', 'Out for Delivery')">🚚 Dispatch</button>`;
-            } else if (status === "out for delivery") {
-                actionButtons = `Upload Proof:<br><input type="file" accept="image/*" capture="environment" onchange="window.uploadDeliveryProof('${o.order_no || o.id}', this)" style="width:110px;">`;
-            } else if (status === "delivered") {
-                actionButtons = `<span style="color:green; font-weight:bold;">✅ Delivered</span>`;
-            }
+        if (status === "pending" || status === "order received" || status === "") {
+            actionButtons = `<button class="rcvBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Preparing', 'kot')">🎫 Receive & KOT</button>`;
+        } else if (status === "preparing") {
+            actionButtons = `<button class="rdyBtn" onclick="window.triggerInstantAction('${o.order_no || o.id}', 'Ready', 'bill')">🍳 Ready & Bill</button>`;
+        } else if (status === "ready") {
+            actionButtons = `<button class="updateBtn" style="background:#FF9800;" onclick="window.updateOrderStatus('${o.order_no || o.id}', 'Out for Delivery')">🚚 Dispatch</button>`;
+        } else if (status === "out for delivery") {
+            actionButtons = `Upload Proof:<br><input type="file" accept="image/*" capture="environment" onchange="window.uploadDeliveryProof('${o.order_no || o.id}', this)" style="width:110px;">`;
+        } else if (status === "delivered") {
+            actionButtons = `<span style="color:green; font-weight:bold;">✅ Delivered</span>`;
         }
 
         let displayOrderNo = o.order_no && String(o.order_no).startsWith("ORD") ? o.order_no : ("ORD" + (1001 + index));
@@ -1435,67 +1396,32 @@
   };
 
   window.showAdminPanel = function() {
-    let loginScreen = document.getElementById("loginScreen");
-    let adminContent = document.getElementById("adminContent");
-    
-    if (loginScreen) loginScreen.style.display = "none";
-    if (adminContent) adminContent.style.display = "block";
-
-    window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toUpperCase();
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("adminContent").style.display = "block";
+    window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
      
     let roleBadge = document.getElementById("userRoleBadge");
-    if(roleBadge) roleBadge.innerText = window.myRole;
+    if(roleBadge) roleBadge.innerText = myRole.toUpperCase();
 
-    let roleLower = window.myRole.toLowerCase();
-
-    // सेक्सनहरू नियन्त्रण गर्ने व्यवस्था
     let dashBox = document.getElementById("salesDashboardBox");
-    let monthlyChart = document.getElementById("monthlySalesChartDiv");
-    let hourlyChart = document.getElementById("hourlySalesChartDiv");
-    let salesReportSec = document.getElementById("salesReportSection");
+    if(dashBox) dashBox.style.display = "flex";
     let menuBox = document.getElementById("menuManagementBox");
-    let invBox = document.querySelector(".inventory-section");
-    let staffBox = document.getElementById("staffManagementBox");
-    let expenseBox = document.getElementById("expenseTrackerBox");
-    let salaryBox = document.querySelector(".salary-section");
-    let chatBox = document.querySelector(".chat-section");
-    let ordersBox = document.getElementById("mainOrdersTableSection");
+    if(menuBox) menuBox.style.display = "block";
 
-    if (roleLower.includes("order_taker") || roleLower.includes("ordertaker") || roleLower.includes("delivery")) {
-      if(dashBox) dashBox.style.display = "none";
-      if(monthlyChart) monthlyChart.style.display = "none";
-      if(hourlyChart) hourlyChart.style.display = "none";
-      if(salesReportSec) salesReportSec.style.display = "none";
-      if(menuBox) menuBox.style.display = "none";
-      if(invBox) invBox.style.display = "none";
-      if(staffBox) staffBox.style.display = "none";
-      if(expenseBox) expenseBox.style.display = "none";
-      if(salaryBox) salaryBox.style.display = "none";
-      if(ordersBox) ordersBox.style.display = "block"; // केवल Active Orders देखाउने
-      if(chatBox) chatBox.style.display = "block";   // केवल Live Support Chat देखाउने
-    } else {
-      // Full Admin र Manager को लागि सबै देखाउने
-      if(dashBox) dashBox.style.display = "flex";
-      if(monthlyChart) monthlyChart.style.display = "block";
-      if(hourlyChart) hourlyChart.style.display = "block";
-      if(salesReportSec) salesReportSec.style.display = "block";
-      if(menuBox) menuBox.style.display = "block";
-      if(invBox) invBox.style.display = "block";
-      if(staffBox) staffBox.style.display = "block";
-      if(expenseBox) expenseBox.style.display = "block";
-      if(salaryBox) salaryBox.style.display = "block";
-      if(ordersBox) ordersBox.style.display = "block";
-      if(chatBox) chatBox.style.display = "block";
-      window.loadMenuList();
-      window.loadStaffList();
-      window.loadExpenseSummary();
-      window.loadInventoryData();
-      window.loadSalaryStaffDropdown();
-    }
-
+    window.loadMenuList();
     window.loadOrders();
     window.setupRealtimeOrders();
     window.loadAdminChats();
+    window.loadStaffList();
+    window.loadExpenseSummary();
+    window.loadInventoryData();
+    window.loadSalaryStaffDropdown();
+
+    // 🔄 Auto-polling interval every 2 seconds for instant lightning-fast chat updates
+    setInterval(() => {
+      window.loadOrders();
+      window.loadAdminChats();
+    }, 2000);
   };
 
   window.logout = function() { sessionStorage.clear(); window.location.reload(); };
