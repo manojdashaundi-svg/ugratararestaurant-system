@@ -29,7 +29,7 @@
     .addBtn { background:#e91e63; color:white; border:none; padding:8px 15px; border-radius:6px; cursor:pointer; }
     .editBtn { background:#2196F3; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
     .removeBtn { background:#f44336; color:white; border:none; padding:5px 10px; border-radius:4px; font-weight:bold; cursor:pointer; margin:2px; }
-    .staff-section, .menu-section, .inventory-section, .salary-section { background:#fff; padding:20px; border-radius:10px; margin-top:40px; border:1px solid #ddd; display:block; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
+    .staff-section, .menu-section, .inventory-section, .salary-section, .chat-section { background:#fff; padding:20px; border-radius:10px; margin-top:40px; border:1px solid #ddd; display:block; box-shadow:0 2px 8px rgba(0,0,0,0.05); }
     .excelBtn { background:#1F7246; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
     .pdfBtn { background:#E01A22; color:white; border:none; padding:10px 15px; border-radius:6px; font-weight:bold; cursor:pointer; }
     .login-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:#f5f5f5; display:flex; justify-content:center; align-items:center; z-index:99999; }
@@ -234,201 +234,241 @@
       </table>
     </div>
   </div>
-</div>
 
-<!-- 🎯 इमेज भ्यूअर मोडल -->
-<div id="imageViewerModal" class="image-viewer-modal" onclick="window.closeImageViewer()">
-  <div class="image-viewer-box" onclick="event.stopPropagation()">
-    <img id="viewerTargetImage" src="" alt="Proof View">
-    <button class="close-viewer-btn" onclick="window.closeImageViewer()">Close Window ✕</button>
-  </div>
-</div>
-
-<!-- 👥 Staff & Access Management Section -->
-<div id="staffManagementBox" class="staff-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-  <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">👥 Staff & Access Management</h3>
-  
-  <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd;">
-    <h4 style="margin-bottom: 10px; color: #333;">+ Add New Staff</h4>
-    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-      <input id="staffUsername" type="text" placeholder="Username / Email" style="flex: 1; min-width: 180px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-      <input id="staffPassword" type="password" placeholder="Password" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-      <input id="staffRoleInput" type="text" placeholder="Role (e.g. Driver, Cook, Salesman)" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
-      <button class="addBtn" onclick="window.createNewStaff()" style="background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add Staff</button>
-    </div>
-  </div>
-
-  <h4 style="margin-bottom: 10px; color: #333;">Current Staff Members</h4>
-  <div style="overflow-x: auto; width: 100%;">
-    <table>
-     <thead>
-    <tr>
-      <th>Username</th>
-      <th>Password</th>
-      <th>Role</th>
-      <th>Status</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-      <tbody id="staffTableList">
-        <tr><td colspan="5" style="padding: 15px;">Loading staff members...</td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<div style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
-    <h3 style="margin-bottom: 15px; color: #333;">💰 Expense & Profit Tracker</h3>
+  <!-- 👥 Staff & Access Management Section -->
+  <div id="staffManagementBox" class="staff-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+    <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">👥 Staff & Access Management</h3>
     
-    <!-- खर्च थप्ने इनपुट बक्सहरू -->
-    <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center;">
-        <input type="date" id="expenseDateInput" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-        <input type="text" id="expenseCategory" placeholder="Category (e.g. Rent, Salary)" style="padding: 8px; flex: 1; border: 1px solid #ccc; border-radius: 4px;">
-        <input type="number" id="expenseAmount" placeholder="Amount (RM)" style="padding: 8px; width: 130px; border: 1px solid #ccc; border-radius: 4px;">
-        <input type="text" id="expenseDescription" placeholder="Description" style="padding: 8px; flex: 2; border: 1px solid #ccc; border-radius: 4px;">
-        <button onclick="window.addExpense()" style="background: #e91e63; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer;">+ Add Expense</button>
+    <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 15px; border: 1px solid #ddd;">
+      <h4 style="margin-bottom: 10px; color: #333;">+ Add New Staff</h4>
+      <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <input id="staffUsername" type="text" placeholder="Username / Email" style="flex: 1; min-width: 180px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+        <input id="staffPassword" type="password" placeholder="Password" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+        <input id="staffRoleInput" type="text" placeholder="Role (e.g. Driver, Cook, Salesman)" style="flex: 1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
+        <button class="addBtn" onclick="window.createNewStaff()" style="background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add Staff</button>
+      </div>
     </div>
 
-    <!-- 📊 Expense Report Generator & Export सेक्सन -->
-    <div style="margin-bottom: 20px;">
-        <h4 style="color: #333; margin-bottom: 10px;">📊 Expense Report Generator & Export</h4>
-        <div style="display: flex; gap: 15px; align-items: center; background: #f9f9f9; padding: 15px; border-radius: 6px; flex-wrap: wrap;">
-            <div>
-                <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">Start Date:</label>
-                <input type="date" id="expenseStartDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-            </div>
-            <div>
-                <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">End Date:</label>
-                <input type="date" id="expenseEndDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-            </div>
-            <div style="display: flex; gap: 10px; align-items: flex-end; margin-top: 20px;">
-                <button onclick="window.exportExpenseExcel()" style="background: #2e7d32; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📥 Export Excel (.CSV)</button>
-               <button onclick="window.printExpensePDF()" style="background: #d32f2f; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">🖨️ Print / Download PDF</button>
-            </div>
-        </div>
+    <h4 style="margin-bottom: 10px; color: #333;">Current Staff Members</h4>
+    <div style="overflow-x: auto; width: 100%;">
+      <table>
+       <thead>
+      <tr>
+        <th>Username</th>
+        <th>Password</th>
+        <th>Role</th>
+        <th>Status</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+        <tbody id="staffTableList">
+          <tr><td colspan="5" style="padding: 15px;">Loading staff members...</td></tr>
+        </tbody>
+      </table>
     </div>
+  </div>
 
-    <!-- Total Summary देखाउने सेक्सन -->
-    <div style="border-top: 2px solid #eee; padding-top: 15px; font-size: 16px; display: flex; flex-direction: column; gap: 8px;">
-        <div style="color: #1976D2; font-weight: bold;">जम्मा Total Revenue: <span id="summaryRevenue">RM 147.00</span></div>
-        <div style="color: #D32F2F; font-weight: bold;">जम्मा Total Expense: <span id="summaryExpense">RM 0.00</span></div>
-        <div style="color: #388E3C; font-weight: bold; font-size: 18px;">जम्मा Net Profit: <span id="summaryNetProfit">RM 0.00</span></div>
+  <div style="background: #ffffff; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-top: 20px;">
+      <h3 style="margin-bottom: 15px; color: #333;">💰 Expense & Profit Tracker</h3>
+      
+      <!-- खर्च थप्ने इनपुट बक्सहरू -->
+      <div style="display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 20px; align-items: center;">
+          <input type="date" id="expenseDateInput" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+          <input type="text" id="expenseCategory" placeholder="Category (e.g. Rent, Salary)" style="padding: 8px; flex: 1; border: 1px solid #ccc; border-radius: 4px;">
+          <input type="number" id="expenseAmount" placeholder="Amount (RM)" style="padding: 8px; width: 130px; border: 1px solid #ccc; border-radius: 4px;">
+          <input type="text" id="expenseDescription" placeholder="Description" style="padding: 8px; flex: 2; border: 1px solid #ccc; border-radius: 4px;">
+          <button onclick="window.addExpense()" style="background: #e91e63; color: white; border: none; padding: 8px 15px; border-radius: 4px; font-weight: bold; cursor: pointer;">+ Add Expense</button>
+      </div>
+
+      <!-- 📊 Expense Report Generator & Export सेक्सन -->
+      <div style="margin-bottom: 20px;">
+          <h4 style="color: #333; margin-bottom: 10px;">📊 Expense Report Generator & Export</h4>
+          <div style="display: flex; gap: 15px; align-items: center; background: #f9f9f9; padding: 15px; border-radius: 6px; flex-wrap: wrap;">
+              <div>
+                  <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">Start Date:</label>
+                  <input type="date" id="expenseStartDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+              </div>
+              <div>
+                  <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">End Date:</label>
+                  <input type="date" id="expenseEndDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+              </div>
+              <div style="display: flex; gap: 10px; align-items: flex-end; margin-top: 20px;">
+                  <button onclick="window.exportExpenseExcel()" style="background: #2e7d32; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📥 Export Excel (.CSV)</button>
+                 <button onclick="window.printExpensePDF()" style="background: #d32f2f; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">🖨️ Print / Download PDF</button>
+              </div>
+          </div>
+      </div>
+
+      <!-- Total Summary देखाउने सेक्सन -->
+      <div style="border-top: 2px solid #eee; padding-top: 15px; font-size: 16px; display: flex; flex-direction: column; gap: 8px;">
+          <div style="color: #1976D2; font-weight: bold;">जम्मा Total Revenue: <span id="summaryRevenue">RM 147.00</span></div>
+          <div style="color: #D32F2F; font-weight: bold;">जम्मा Total Expense: <span id="summaryExpense">RM 0.00</span></div>
+          <div style="color: #388E3C; font-weight: bold; font-size: 18px;">जम्मा Net Profit: <span id="summaryNetProfit">RM 0.00</span></div>
+      </div>
+  </div>
+
+  <!-- 💰 Staff Salary Sheet & Voucher System -->
+  <div class="salary-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+      <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">💰 Staff Salary Sheet & Voucher System</h3>
+      
+      <!-- 1. Add New Staff & Designation -->
+      <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd;">
+          <h4 style="margin-bottom: 10px; color: #333;">+ Add New Staff & Designation</h4>
+          <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+              <input id="salStaffName" type="text" placeholder="Full Name (e.g. Shova Kumari)" style="flex: 2; min-width: 200px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+              <input id="salStaffDesig" type="text" placeholder="Designation (e.g. Cleaner, Store Keeper)" style="flex: 2; min-width: 200px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+              <button class="addBtn" onclick="window.addNewSalaryStaff()" style="background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add Staff</button>
+          </div>
+      </div>
+
+      <!-- 2. Create Salary Voucher -->
+      <div style="background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e91e63;">
+          <h4 style="margin-bottom: 15px; color: #e91e63;">🧾 Create Salary Voucher</h4>
+          
+          <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+              <div style="flex: 2; min-width: 250px;">
+                  <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Employee Name:</label>
+                  <select id="voucherEmpSelect" onchange="window.onVoucherEmpChange()" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
+                      <option value="">-- कामदार रोज्नुहोस् --</option>
+                  </select>
+              </div>
+              <div style="flex: 2; min-width: 250px;">
+                  <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Designation:</label>
+                  <input id="voucherDesignation" type="text" placeholder="Designation" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
+              </div>
+          </div>
+
+          <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
+              <div style="flex: 1; min-width: 100px;">
+                  <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Day:</label>
+                  <input id="voucherDay" type="number" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+              </div>
+              <div style="flex: 1; min-width: 100px;">
+                  <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Month:</label>
+                  <input id="voucherMonth" type="number" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+              </div>
+              <div style="flex: 1; min-width: 100px;">
+                  <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Year:</label>
+                  <input id="voucherYear" type="number" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
+              </div>
+          </div>
+
+          <!-- Earnings & Allowances -->
+          <div style="margin-bottom: 15px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <label style="font-weight: bold; color: #333;">Earnings & Allowances:</label>
+                  <button onclick="window.addEarningRow()" style="background: #e91e63; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">+ Add Earnings</button>
+              </div>
+              <div id="earningsContainer" style="display: flex; flex-direction: column; gap: 8px;">
+                  <div style="display: flex; gap: 10px; align-items: center;" class="earning-row">
+                      <input type="text" value="MONTHLY BASIC SALARY PAYED" style="flex: 3; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+                      <input type="number" value="0" oninput="window.calculateNetSalary()" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="earning-amount">
+                      <button onclick="window.removeRow(this)" style="background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">✕</button>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Deductions -->
+          <div style="margin-bottom: 15px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                  <label style="font-weight: bold; color: #333;">Deductions:</label>
+                  <button onclick="window.addDeductionRow()" style="background: #e91e63; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">+ Add Deduction</button>
+              </div>
+              <div id="deductionsContainer" style="display: flex; flex-direction: column; gap: 8px;">
+                  <div style="display: flex; gap: 10px; align-items: center;" class="deduction-row">
+                      <input type="text" placeholder="Deduction Description" style="flex: 3; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="deduction-desc">
+                      <input type="number" value="0" oninput="window.calculateNetSalary()" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="deduction-amount">
+                      <button onclick="window.removeRow(this)" style="background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">✕</button>
+                  </div>
+              </div>
+          </div>
+
+          <!-- Payment Mode -->
+          <div style="margin-bottom: 20px;">
+              <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Payment Mode:</label>
+              <select id="voucherPaymentMode" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
+                  <option value="💵 CASH PAYMENT">💵 CASH PAYMENT</option>
+                  <option value="🏦 BANK CASH / CHECK DEPOSITE">🏦 BANK CASH / CHECK DEPOSITE</option>
+                  <option value="📱 MOBILE BANKING TRANSFER">📱 MOBILE BANKING TRANSFER</option>
+              </select>
+          </div>
+
+          <!-- NET Salary Display -->
+          <div style="background: #fff5f5; border: 1px dashed #e91e63; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 18px; font-weight: bold; color: #e91e63;">
+              NET Salary: RM <span id="displayNetSalary">0.00</span>
+          </div>
+
+          <!-- Save & Print Button -->
+          <button onclick="window.saveAndPrintSalaryVoucher()" style="background: #4CAF50; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px;">💾 Save & Print Salary Voucher</button>
+      </div>
+
+      <!-- 3. Salary Statements Export & Report -->
+      <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
+          <h4 style="color: #333; margin-bottom: 10px;">📊 Salary Statements Export & Report</h4>
+          <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
+              <div>
+                  <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">Start Date:</label>
+                  <input type="date" id="salaryStartDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+              </div>
+              <div>
+                  <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">End Date:</label>
+                  <input type="date" id="salaryEndDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
+              </div>
+              <div style="display: flex; gap: 10px; align-items: flex-end; margin-top: 20px;">
+                  <button onclick="window.exportSalaryExcel()" class="excelBtn" style="background: #2e7d32; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📥 Download Excel (.CSV)</button>
+                  <button onclick="window.printSalaryPDF()" class="pdfBtn" style="background: #d32f2f; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📄 Print / PDF Report</button>
+              </div>
+          </div>
+      </div>
+  </div>
+
+  <!-- 💬 Live Support Chat Center Section (Moved to Bottom) -->
+  <div class="chat-section">
+    <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">💬 Live Support Chat Center</h3>
+    <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+      <div style="flex: 1; min-width: 280px; border-right: 1px solid #ddd; padding-right: 10px;">
+        <h4>Active Chats</h4>
+        <div id="chatListContainer" style="display: flex; flex-direction: column; gap: 10px; max-height: 400px; overflow-y: auto;">
+          <div style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #fafafa; cursor: pointer;">
+            <b>ORD0076 (Sh...)</b><br><small>2026-07-11, 01:44 PM</small><br>
+            <span style="background: #9C27B0; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px;">MANAGER</span>
+          </div>
+          <div style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; background: #fafafa; cursor: pointer;">
+            <b>ORD0087 (mio okl k)</b><br><small>2026-07-11, 01:44 PM</small><br>
+            <span style="background: #2196F3; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px;">DELIVERY</span>
+          </div>
+        </div>
+      </div>
+      <div style="flex: 2; min-width: 320px; display: flex; flex-direction: column; justify-content: space-between;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #ddd; padding-bottom: 8px; margin-bottom: 10px;">
+          <h4 style="margin: 0;" id="activeChatTitle">Order: ORD0076 [Complain and Product Information]</h4>
+          <div>
+            <span style="font-size: 13px; font-weight: bold; color: #555;">Pass to:</span>
+            <button onclick="window.passChat('Manager')" style="background: #9C27B0; color: #white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; color:#fff; font-size:12px;">Manager</button>
+            <button onclick="window.passChat('O. Taker')" style="background: #FF9800; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size:12px;">O. Taker</button>
+            <button onclick="window.passChat('Delivery')" style="background: #2196F3; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size:12px;">Delivery</button>
+          </div>
+        </div>
+        <div id="chatMessagesBox" style="background: #f9f9f9; padding: 15px; border-radius: 8px; height: 250px; overflow-y: auto; border: 1px solid #ddd; display: flex; flex-direction: column; gap: 10px;">
+          <div style="background: #fff; padding: 8px 12px; border-radius: 6px; border: 1px solid #eee; width: fit-content; max-width: 80%;">
+            <small style="color: #777; display: block; font-weight: bold;">Customer</small>
+            <span>hi</span>
+            <small style="color: #999; display: block; font-size: 10px; margin-top: 2px;">2026-07-11, 01:44 PM</small>
+          </div>
+          <div style="background: #fff; padding: 8px 12px; border-radius: 6px; border: 1px solid #eee; width: fit-content; max-width: 80%;">
+            <small style="color: #777; display: block; font-weight: bold;">Customer</small>
+            <span>Namaste</span>
+            <small style="color: #999; display: block; font-size: 10px; margin-top: 2px;">2026-07-11, 01:45 PM</small>
+          </div>
+        </div>
+        <div style="display: flex; gap: 10px; margin-top: 10px;">
+          <input type="text" id="adminChatInput" placeholder="Type a reply..." style="flex: 1; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
+          <button onclick="window.sendAdminChat()" style="background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">Send</button>
+        </div>
+      </div>
     </div>
-</div>
+  </div>
 
-<!-- 💰 Staff Salary Sheet & Voucher System -->
-<div class="salary-section" style="background: #fff; padding: 20px; border-radius: 12px; margin: 20px 0; border: 1px solid #ddd; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-    <h3 style="color: #e91e63; margin-bottom: 15px; font-size: 18px;">💰 Staff Salary Sheet & Voucher System</h3>
-    
-    <!-- 1. Add New Staff & Designation -->
-    <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #ddd;">
-        <h4 style="margin-bottom: 10px; color: #333;">+ Add New Staff & Designation</h4>
-        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-            <input id="salStaffName" type="text" placeholder="Full Name (e.g. Shova Kumari)" style="flex: 2; min-width: 200px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-            <input id="salStaffDesig" type="text" placeholder="Designation (e.g. Cleaner, Store Keeper)" style="flex: 2; min-width: 200px; padding: 10px; border-radius: 6px; border: 1px solid #ccc;">
-            <button class="addBtn" onclick="window.addNewSalaryStaff()" style="background: #e91e63; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">+ Add Staff</button>
-        </div>
-    </div>
-
-    <!-- 2. Create Salary Voucher -->
-    <div style="background: #fff; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid #e91e63;">
-        <h4 style="margin-bottom: 15px; color: #e91e63;">🧾 Create Salary Voucher</h4>
-        
-        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
-            <div style="flex: 2; min-width: 250px;">
-                <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Employee Name:</label>
-                <select id="voucherEmpSelect" onchange="window.onVoucherEmpChange()" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
-                    <option value="">-- कामदार रोज्नुहोस् --</option>
-                </select>
-            </div>
-            <div style="flex: 2; min-width: 250px;">
-                <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Designation:</label>
-                <input id="voucherDesignation" type="text" placeholder="Designation" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
-            </div>
-        </div>
-
-        <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 15px;">
-            <div style="flex: 1; min-width: 100px;">
-                <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Day:</label>
-                <input id="voucherDay" type="number" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
-            </div>
-            <div style="flex: 1; min-width: 100px;">
-                <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Month:</label>
-                <input id="voucherMonth" type="number" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
-            </div>
-            <div style="flex: 1; min-width: 100px;">
-                <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Year:</label>
-                <input id="voucherYear" type="number" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #ccc;">
-            </div>
-        </div>
-
-        <!-- Earnings & Allowances -->
-        <div style="margin-bottom: 15px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <label style="font-weight: bold; color: #333;">Earnings & Allowances:</label>
-                <button onclick="window.addEarningRow()" style="background: #e91e63; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">+ Add Earnings</button>
-            </div>
-            <div id="earningsContainer" style="display: flex; flex-direction: column; gap: 8px;">
-                <div style="display: flex; gap: 10px; align-items: center;" class="earning-row">
-                    <input type="text" value="MONTHLY BASIC SALARY PAYED" style="flex: 3; padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-                    <input type="number" value="0" oninput="window.calculateNetSalary()" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="earning-amount">
-                    <button onclick="window.removeRow(this)" style="background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">✕</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Deductions -->
-        <div style="margin-bottom: 15px;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                <label style="font-weight: bold; color: #333;">Deductions:</label>
-                <button onclick="window.addDeductionRow()" style="background: #e91e63; color: white; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; cursor: pointer; font-size: 12px;">+ Add Deduction</button>
-            </div>
-            <div id="deductionsContainer" style="display: flex; flex-direction: column; gap: 8px;">
-                <div style="display: flex; gap: 10px; align-items: center;" class="deduction-row">
-                    <input type="text" placeholder="Deduction Description" style="flex: 3; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="deduction-desc">
-                    <input type="number" value="0" oninput="window.calculateNetSalary()" style="flex: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" class="deduction-amount">
-                    <button onclick="window.removeRow(this)" style="background: #f44336; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-weight: bold;">✕</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Payment Mode -->
-        <div style="margin-bottom: 20px;">
-            <label style="display: block; font-size: 13px; font-weight: bold; color: #555; margin-bottom: 5px;">Payment Mode:</label>
-            <select id="voucherPaymentMode" style="width: 100%; padding: 10px; border-radius: 6px; border: 1px solid #ccc; font-weight: bold;">
-                <option value="💵 CASH PAYMENT">💵 CASH PAYMENT</option>
-                <option value="🏦 BANK CASH / CHECK DEPOSITE">🏦 BANK CASH / CHECK DEPOSITE</option>
-                <option value="📱 MOBILE BANKING TRANSFER">📱 MOBILE BANKING TRANSFER</option>
-            </select>
-        </div>
-
-        <!-- NET Salary Display -->
-        <div style="background: #fff5f5; border: 1px dashed #e91e63; padding: 15px; border-radius: 8px; margin-bottom: 20px; font-size: 18px; font-weight: bold; color: #e91e63;">
-            NET Salary: RM <span id="displayNetSalary">0.00</span>
-        </div>
-
-        <!-- Save & Print Button -->
-        <button onclick="window.saveAndPrintSalaryVoucher()" style="background: #4CAF50; color: white; border: none; padding: 12px 25px; border-radius: 8px; font-weight: bold; cursor: pointer; width: 100%; font-size: 16px;">💾 Save & Print Salary Voucher</button>
-    </div>
-
-    <!-- 3. Salary Statements Export & Report -->
-    <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; border: 1px solid #ddd;">
-        <h4 style="color: #333; margin-bottom: 10px;">📊 Salary Statements Export & Report</h4>
-        <div style="display: flex; gap: 15px; align-items: center; flex-wrap: wrap;">
-            <div>
-                <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">Start Date:</label>
-                <input type="date" id="salaryStartDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-            </div>
-            <div>
-                <label style="font-size: 13px; color: #333; font-weight: bold; display: block; margin-bottom: 5px;">End Date:</label>
-                <input type="date" id="salaryEndDate" style="padding: 8px; border: 1px solid #ccc; border-radius: 4px;">
-            </div>
-            <div style="display: flex; gap: 10px; align-items: flex-end; margin-top: 20px;">
-                <button onclick="window.exportSalaryExcel()" class="excelBtn" style="background: #2e7d32; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📥 Download Excel (.CSV)</button>
-                <button onclick="window.printSalaryPDF()" class="pdfBtn" style="background: #d32f2f; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📄 Print / PDF Report</button>
-            </div>
-        </div>
-    </div>
 </div>
 
 <!-- 🎯 KOT र Bill प्रिन्ट मोडल बक्स -->
@@ -457,6 +497,44 @@
   var staffListCache = [
     { email: "admin@ugratara.com", password: "123456", role: "admin", status: "Active" }
   ];
+
+  // 🖱️ ब्राउजरको Web Audio API मार्फत चर्को र प्रस्ट बज्ने माउस क्लिक साउन्ड
+  window.playClickSound = function() {
+    try {
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!window.audioCtx) {
+        window.audioCtx = new AudioContext();
+      }
+      if (window.audioCtx.state === 'suspended') {
+        window.audioCtx.resume();
+      }
+      
+      let osc = window.audioCtx.createOscillator();
+      let gain = window.audioCtx.createGain();
+      
+      osc.type = 'triangle'; // चर्को र स्पस्ट साउन्डको लागि
+      osc.frequency.setValueAtTime(800, window.audioCtx.currentTime);
+      
+      gain.gain.setValueAtTime(0.6, window.audioCtx.currentTime); // भोल्युम बढाइएको (Gain 0.6)
+      gain.gain.exponentialRampToValueAtTime(0.0001, window.audioCtx.currentTime + 0.08);
+      
+      osc.connect(gain);
+      gain.connect(window.audioCtx.destination);
+      
+      osc.start();
+      osc.stop(window.audioCtx.currentTime + 0.08);
+    } catch(e) {
+      console.log("Web Audio API error:", e);
+    }
+  };
+
+  // 🖱️ एडमिन प्यानल भित्र जुनसुकै बटन, अप्सन वा इलिमेन्टमा क्लिक गर्दा स्वतः साउन्ड बज्ने
+  document.addEventListener("click", function(event) {
+    let target = event.target;
+    if (target.tagName === "BUTTON" || target.closest("button") || target.tagName === "A" || target.closest("a") || target.tagName === "SELECT" || target.tagName === "INPUT" || target.tagName === "LABEL") {
+      window.playClickSound();
+    }
+  });
 
   // 🔔 ३ पटक लगातार "ट्रिङ-ट्रिङ-ट्रिङ" बजाउने फंक्शन
   window.playTringTringBell = function() {
@@ -630,6 +708,27 @@
       return ordNo.includes(query) || custName.includes(query) || phoneNum.includes(query);
     });
     window.renderActiveOrdersTable(filtered);
+  };
+
+  window.passChat = function(roleName) {
+    alert("✅ Chat successfully passed to: " + roleName);
+  };
+
+  window.sendAdminChat = function() {
+    let inputEl = document.getElementById("adminChatInput");
+    let msg = inputEl.value.trim();
+    if(!msg) return;
+    let box = document.getElementById("chatMessagesBox");
+    let nowStr = new Date().toLocaleString();
+    box.innerHTML += `
+      <div style="background: #e3f2fd; padding: 8px 12px; border-radius: 6px; border: 1px solid #bbdefb; width: fit-content; max-width: 80%; margin-left: auto;">
+        <small style="color: #1976D2; display: block; font-weight: bold;">Admin (You)</small>
+        <span>${msg}</span>
+        <small style="color: #999; display: block; font-size: 10px; margin-top: 2px;">${nowStr}</small>
+      </div>
+    `;
+    inputEl.value = "";
+    box.scrollTop = box.scrollHeight;
   };
 
   window.loadInventoryData = async function() {
