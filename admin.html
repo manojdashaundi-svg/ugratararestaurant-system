@@ -769,13 +769,14 @@
     let currentRole = (sessionStorage.getItem("USER_ROLE") || "").toLowerCase();
     let filteredOrders = ordersToRender;
 
-    // DELIVERY केवल Ready वा Out for Delivery भएका अर्डरहरू मात्र हेर्न पाउनेछ (ORDER_TAKER ले सबै अर्डरहरू देख्न पाउनेछ)
+    // DELIVERY ले केवल Ready वा Out for Delivery भएका अर्डरहरू मात्र हेर्न पाउनेछ
     if(currentRole === "delivery") {
       filteredOrders = ordersToRender.filter(o => {
         let st = String(o.status || "").trim().toLowerCase();
         return st === "ready" || st === "out for delivery";
       });
     }
+    // ORDER_TAKER ले सबै अर्डरहरू (Pending, Preparing, Ready, आदि) देख्न र Ready & Bill बटन प्रयोग गर्न पाउनेछ
 
     let html = "";
     let limitedOrders = filteredOrders.slice(0, 10);
