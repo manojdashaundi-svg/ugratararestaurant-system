@@ -294,7 +294,7 @@
               </div>
               <div style="display: flex; gap: 10px; align-items: flex-end; margin-top: 20px;">
                   <button onclick="window.exportExpenseExcel()" style="background: #2e7d32; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">📥 Export Excel (.CSV)</button>
-                 <button onclick="window.printExpensePDF()" style="background: #d32f2f; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">🖨️ Print / Download PDF</button>
+                  <button onclick="window.printExpensePDF()" style="background: #d32f2f; color: white; border: none; padding: 9px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 13px;">🖨️ Print / Download PDF</button>
               </div>
           </div>
       </div>
@@ -520,21 +520,37 @@
 
   window.playTringTringBell = function() {
     try {
-      const audio = document.getElementById("notificationAudio");
-      if (!audio) return;
+      window.AudioContext = window.AudioContext || window.webkitAudioContext;
+      if (!window.audioCtx) {
+        window.audioCtx = new AudioContext();
+      }
+      if (window.audioCtx.state === 'suspended') {
+        window.audioCtx.resume();
+      }
       
-      audio.currentTime = 0;
-      audio.play().then(() => {
-        setTimeout(() => {
-          audio.currentTime = 0;
-          audio.play().catch(e => {});
-        }, 200);
+      // चर्को र प्रस्ट तीन पटक घण्टी बज्ने Web Audio API सिंथेटिक फलब्याक तथा मुख्य घण्टी
+      const playBeep = (timeOffset, freq) => {
+        let osc = window.audioCtx.createOscillator();
+        let gain = window.audioCtx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(freq, window.audioCtx.currentTime + timeOffset);
+        gain.gain.setValueAtTime(1.0, window.audioCtx.currentTime + timeOffset);
+        gain.gain.exponentialRampToValueAtTime(0.001, window.audioCtx.currentTime + timeOffset + 0.35);
+        osc.connect(gain);
+        gain.connect(window.audioCtx.destination);
+        osc.start(window.audioCtx.currentTime + timeOffset);
+        osc.stop(window.audioCtx.currentTime + timeOffset + 0.35);
+      };
 
-        setTimeout(() => {
-          audio.currentTime = 0;
-          audio.play().catch(e => {});
-        }, 400);
-      }).catch(err => {});
+      playBeep(0, 1046.50); // High C
+      playBeep(0.25, 1318.51); // High E
+      playBeep(0.50, 1567.98); // High G
+
+      const audio = document.getElementById("notificationAudio");
+      if (audio) {
+        audio.currentTime = 0;
+        audio.play().catch(e => {});
+      }
     } catch(e) {}
   };
 
@@ -592,11 +608,11 @@
     } catch (err) {}
   };
 
-  // 🔄 Supabase Realtime Subscription for Orders & Chats
+  // 🔄 Supabase Realtime Subscription for Orders & Chats with Instant Fast Notification Sound
   window.setupRealtimeOrders = function() {
     try {
       supabaseClient
-        .channel('public:orders')
+        .channel('public:orders_admin')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'orders' }, payload => {
           window.playTringTringBell();
           window.loadOrders();
@@ -604,9 +620,12 @@
         .subscribe();
 
       supabaseClient
-        .channel('public:chats')
+        .channel('public:chats_admin')
         .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'chats' }, payload => {
-          window.playTringTringBell();
+          // यदि म्यासेज ग्राहक (Customer) बाट आएको हो भने मात्र चर्को घण्टी बजाउने
+          if (payload.new && payload.new.sender === 'Customer') {
+            window.playTringTringBell();
+          }
           window.loadAdminChats();
           if(selectedChatSession === payload.new.session_id) {
             window.selectChatSession(selectedChatSession);
@@ -1061,7 +1080,7 @@
       </body>
       </html>
     `;
-    
+     
     let printWin = window.open('', '_blank', 'height=700,width=800');
     printWin.document.write(fullA4PrintHtml);
     printWin.document.close();
@@ -1208,7 +1227,7 @@
         </div>
       `}
     </div>`;
-    
+     
     if(document.getElementById("printableInvoiceArea")) {
         document.getElementById("printableInvoiceArea").innerHTML = invoiceHtml;
         document.getElementById("printModalBox").style.display = "flex";
@@ -1279,7 +1298,7 @@
     if(document.getElementById("dashTodaySales")) document.getElementById("dashTodaySales").innerText = "RM " + todaySales.toFixed(2);
     if(document.getElementById("dashMonthSales")) document.getElementById("dashMonthSales").innerText = "RM " + monthSales.toFixed(2);
     if(document.getElementById("dashAvgOrder")) document.getElementById("dashAvgOrder").innerText = "RM " + avgOrderValue.toFixed(2);
-    
+     
     window.drawMonthlySalesChart(orders);
     window.drawHourlySalesChart(orders);
   };
@@ -1369,7 +1388,7 @@
     document.getElementById("loginScreen").style.display = "none";
     document.getElementById("adminContent").style.display = "block";
     window.myRole = String(sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
-    
+     
     let roleBadge = document.getElementById("userRoleBadge");
     if(roleBadge) roleBadge.innerText = myRole.toUpperCase();
 
@@ -1387,11 +1406,11 @@
     window.loadInventoryData();
     window.loadSalaryStaffDropdown();
 
-    // Background auto-polling backup every 10 seconds
+    // 🔄 Auto-polling interval every 2 seconds for instant lightning-fast chat updates
     setInterval(() => {
       window.loadOrders();
       window.loadAdminChats();
-    }, 10000);
+    }, 2000);
   };
 
   window.logout = function() { sessionStorage.clear(); window.location.reload(); };
@@ -1403,95 +1422,6 @@
   } else {
     document.getElementById("loginScreen").style.display = "flex";
   }
-
-  // 💬 Load Admin Live Chats from Supabase
-  window.loadAdminChats = async function() {
-    try {
-      let { data, error } = await supabaseClient.from('chats').select('*').order('id', { ascending: false });
-      if(error || !data) return;
-
-      let sessions = {};
-      data.forEach(m => {
-        if(!sessions[m.session_id]) {
-          sessions[m.session_id] = {
-            session_id: m.session_id,
-            customer_name: m.customer_name || 'Customer',
-            support_type: m.support_type || 'General',
-            last_time: m.time || ''
-          };
-        }
-      });
-
-      let container = document.getElementById("chatListContainer");
-      if(!container) return;
-
-      let html = "";
-      Object.values(sessions).forEach(s => {
-        let badgeColor = s.support_type === 'Manager' ? '#9C27B0' : (s.support_type === 'Delivery' ? '#2196F3' : '#FF9800');
-        let isSelected = selectedChatSession === s.session_id ? 'background: #ffe0e0;' : 'background: #fafafa;';
-        html += `
-          <div onclick="window.selectChatSession('${s.session_id}')" style="padding: 10px; border: 1px solid #ddd; border-radius: 6px; ${isSelected} cursor: pointer;">
-            <b>${s.session_id} (${s.customer_name})</b><br><small style="color:#666;">${s.last_time}</small><br>
-            <span style="background: ${badgeColor}; color: #fff; padding: 2px 6px; border-radius: 4px; font-size: 11px;">${s.support_type.toUpperCase()}</span>
-          </div>
-        `;
-      });
-      container.innerHTML = html || `<div style="padding:10px; color:#666;">No active chats found.</div>`;
-    } catch(e) {}
-  };
-
-  window.selectChatSession = async function(sessionId) {
-    selectedChatSession = sessionId;
-    window.loadAdminChats();
-
-    try {
-      let { data } = await supabaseClient.from('chats').select('*').eq('session_id', sessionId).order('id', { ascending: true });
-      let box = document.getElementById("chatMessagesBox");
-      let titleEl = document.getElementById("activeChatTitle");
-      if(!box) return;
-
-      if(data && data.length > 0) {
-        if(titleEl) titleEl.innerText = `Chat Session: ${sessionId} [${data[0].customer_name} - ${data[0].support_type}]`;
-        let html = "";
-        data.forEach(m => {
-          let isCustomer = m.sender === 'Customer';
-          html += `
-            <div style="background: ${isCustomer ? '#fff' : '#e3f2fd'}; padding: 8px 12px; border-radius: 6px; border: 1px solid #eee; width: fit-content; max-width: 80%; ${isCustomer ? '' : 'margin-left: auto; background: #e3f2fd; border-color: #bbdefb;'}">
-              <small style="color: ${isCustomer ? '#777' : '#1976D2'}; display: block; font-weight: bold;">${m.sender} (${m.customer_name || ''})</small>
-              <span>${m.message}</span>
-              <small style="color: #999; display: block; font-size: 10px; margin-top: 2px;">${m.time || ''}</small>
-            </div>
-          `;
-        });
-        box.innerHTML = html;
-        box.scrollTop = box.scrollHeight;
-      }
-    } catch(e) {}
-  };
-
-  window.sendAdminChat = async function() {
-    if(!selectedChatSession) { alert("⚠️ कृपया अघिल्लो सूचीबाट एउटा च्याट छान्नुहोस्!"); return; }
-    let inputEl = document.getElementById("adminChatInput");
-    let msg = inputEl.value.trim();
-    if(!msg) return;
-
-    let timeStr = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    let dateStr = new Date().toISOString().slice(0, 10) + ", " + timeStr;
-
-    try {
-      await supabaseClient.from('chats').insert([{
-        session_id: selectedChatSession,
-        customer_name: "Admin Staff",
-        support_type: "Admin",
-        sender: "Admin",
-        message: msg,
-        time: dateStr
-      }]);
-
-      inputEl.value = "";
-      window.selectChatSession(selectedChatSession);
-    } catch(err) {}
-  };
 
   window.drawMonthlySalesChart = function(orders) {
     if (typeof google === 'undefined' || !google.visualization) return;
@@ -1666,7 +1596,7 @@
     if (row) {
       let statusCell = row.cells[3];
       if (statusCell) statusCell.innerText = newStatus;
-      
+       
       btnElement.innerText = newStatus === 'Active' ? '🟢 Active' : '🔴 Inactive';
       btnElement.className = newStatus === 'Active' ? 'inStockBtn' : 'outStockBtn';
       btnElement.setAttribute('onclick', `window.toggleStaffStatus(this, '${newStatus}')`);
