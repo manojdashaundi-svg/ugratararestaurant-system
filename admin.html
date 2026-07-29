@@ -584,7 +584,7 @@
     btn.innerText = "Verifying...";
     btn.disabled = true;
 
-    // 1. केवल मास्टर एडमिन (admin@ugratara.com) को लागि मात्र 'admin' रोल फिक्स गर्ने
+    // 1. मास्टर एडमिन (admin@ugratara.com) चेक
     if ((u === "admin@ugratara.com" || u === "admin") && p === "123456") {
       sessionStorage.setItem("ADMIN_LOGIN", "true");
       sessionStorage.setItem("USER_ROLE", "admin");
@@ -598,13 +598,17 @@
       return;
     }
 
-    // 2. अन्य स्टाफहरूको लागि Supabase डेटाबेसबाट ठ्याक्कै उनीहरूको व्यक्तिगत रोल चेक गर्ने
+    // 2. Supabase डेटाबेसबाट अन्य सबै स्टाफहरू प्रमाणित गर्ने (Robust Fallback & Matcher)
     try {
-      let { data, error } = await supabaseClient.from('admins').select('*').ilike('email', u);
+      let { data, error } = await supabaseClient.from('admins').select('*');
       if(!error && data && data.length > 0) {
-        let matchedStaff = data.find(s => String(s.password).trim() === p);
+        let matchedStaff = data.find(s => {
+          let dbEmail = String(s.email || s.username || "").trim().toLowerCase();
+          let dbPass = String(s.password || "").trim();
+          return dbEmail === u && dbPass === p;
+        });
+
         if(matchedStaff) {
-          // डेटाबेसमा राखिएको वास्तविक रोल (जस्तै order_taker, delivery, manager, आदि) लिने
           let role = String(matchedStaff.role || 'order_taker').trim().toLowerCase();
           
           sessionStorage.setItem("ADMIN_LOGIN", "true");
@@ -1522,7 +1526,7 @@
 
   if (sessionStorage.getItem("ADMIN_LOGIN") === "true") {
     myRole = (sessionStorage.getItem("USER_ROLE") || "admin").toLowerCase();
-    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER"] || "";
+    currentLoggedInUser = sessionStorage.getItem("LOGGED_USER") || "";
     showAdminPanel();
   } else {
     document.getElementById("loginScreen").style.display = "flex";
